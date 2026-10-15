@@ -1,0 +1,7 @@
+
+namespace: scrappers
+
+resources:
+
+  - cronjob.yaml
+
