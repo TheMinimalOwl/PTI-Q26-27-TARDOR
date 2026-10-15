@@ -1,11 +1,14 @@
 from pathlib import Path
+import os
 import time
 from client import fetch_json
 from extractor import collect_raw
 from dump_txt import dump
+from publish import publish
 
 CATEGORIES_URL = "https://tienda.mercadona.es/api/categories/"
 SUB_URL = "https://tienda.mercadona.es/api/categories/{}/"
+WH = os.getenv("SCRAPER_WH", "default")
 
 if __name__ == "__main__":
     base = Path(__file__).resolve().parents[1]
@@ -30,4 +33,6 @@ if __name__ == "__main__":
     if errors:
         items.append({"_errors": errors})
     path = dump(label, status, items, base / "out")
+    n, info = publish(items, WH)
     print(f"{status} {len(items)} items subs={len(sub_ids)} -> {path}")
+    print(f"nats: {info}")

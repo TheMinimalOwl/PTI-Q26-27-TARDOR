@@ -1,0 +1,26 @@
+apiVersion: fission.io/v1
+kind: Function
+metadata:
+  name: normalizer
+  namespace: default
+spec:
+  environment:
+    name: python
+    namespace: default
+  package:
+    functionName: normalizer
+    functionSource: normalizer.py
+  entrypoint: normalizer.main
+  resources: {}
+---
+apiVersion: fission.io/v1
+kind: HTTPTrigger
+metadata:
+  name: normalizer-http
+  namespace: default
+spec:
+  functionref:
+    type: Function
+    name: normalizer
+  method: POST
+  relativeurl: /normalize
