@@ -1,0 +1,57 @@
+
+apiVersion: networking.k8s.io/v1
+
+kind: Ingress
+
+metadata:
+
+  name: scrappers-ingress
+
+  namespace: scrappers
+
+spec:
+
+  ingressClassName: nginx
+
+  rules:
+
+    - host: carrefour.local
+
+      http:
+
+        paths:
+
+          - path: /
+
+            pathType: Prefix
+
+            backend:
+
+              service:
+
+                name: scrapper-carrefour
+
+                port:
+
+                  number: 80
+
+    - host: mercadona.local
+
+      http:
+
+        paths:
+
+          - path: /
+
+            pathType: Prefix
+
+            backend:
+
+              service:
+
+                name: scrapper-mercadona
+
+                port:
+
+                  number: 80
+
