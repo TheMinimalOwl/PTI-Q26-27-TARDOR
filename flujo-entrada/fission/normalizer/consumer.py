@@ -57,18 +57,25 @@ async def run() -> None:
     async def handler(msg):
         try:
             buf.append((msg, json.loads(msg.data.decode("utf-8"))))
-        except Exception:
+        except Exception as e:
+            print(f"parse-error: {e}", flush=True)
             await msg.ack()
             return
         if len(buf) >= BATCH:
-            await flush()
+            try:
+                await flush()
+            except Exception as e:
+                print(f"flush-error: {e} (reintentara por AckWait)", flush=True)
 
     await nc.subscribe(DELIVER, cb=handler)
     print(f"listening {DELIVER} -> {NORMALIZE_URL or 'local'} -> {SUBJECT_OUT}", flush=True)
     try:
         while True:
             await asyncio.sleep(5)
-            await flush()
+            try:
+                await flush()
+            except Exception as e:
+                print(f"flush-error: {e} (reintentara por AckWait)", flush=True)
     finally:
         await nc.close()
 
