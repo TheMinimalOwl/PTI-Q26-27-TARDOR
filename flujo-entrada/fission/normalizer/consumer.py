@@ -63,7 +63,7 @@ async def run() -> None:
         if len(buf) >= BATCH:
             await flush()
 
-    await nc.subscribe(DELIVER, cb=handler, manual_ack=True)
+    await nc.subscribe(DELIVER, cb=handler)
     print(f"listening {DELIVER} -> {NORMALIZE_URL or 'local'} -> {SUBJECT_OUT}", flush=True)
     try:
         while True:
