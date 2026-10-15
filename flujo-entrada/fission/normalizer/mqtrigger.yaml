@@ -1,4 +1,6 @@
-# Validado contra Fission con kind KEDA + NATS JetStream del cluster.
+# BLOQUEADO 15/10: conector keda-nats-jetstream-http-connector:v0.12 no supera
+# la auth interna del router Fission v1.27 (401 en router-internal:8889).
+# Puente activo: Deployment normalizer-consumer (consumer.py) en su lugar.
 apiVersion: fission.io/v1
 kind: MessageQueueTrigger
 metadata:
