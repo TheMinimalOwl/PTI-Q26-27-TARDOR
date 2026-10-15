@@ -2,8 +2,8 @@ import json
 import os
 from datetime import datetime, timezone
 
-SUBJECT = os.getenv("NATS_SUBJECT", "mercadona.raw")
-STREAM = os.getenv("NATS_STREAM", "SCRAPER")
+SUBJECT = os.getenv("NATS_SUBJECT", "scraper.mercadona.raw")
+STREAM = os.getenv("NATS_STREAM", "SCRAPERS")
 NATS_URL = os.getenv("NATS_URL", "nats://nats.messaging.svc.cluster.local:4222")
 DRY_RUN = os.getenv("NATS_DRY_RUN", "0") == "1"
 

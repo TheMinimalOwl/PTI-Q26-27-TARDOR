@@ -1,6 +1,4 @@
-# BORRADOR: validar contra la version Fission del cluster.
-# Fission soporta nats-streaming historicamente; JetStream puro puede
-# requerir KEDA ScaledObject en vez de MessageQueueTrigger.
+# Validado contra Fission con kind KEDA + NATS JetStream del cluster.
 apiVersion: fission.io/v1
 kind: MessageQueueTrigger
 metadata:
@@ -10,10 +8,17 @@ spec:
   functionref:
     type: Function
     name: normalizer
-  messageQueueType: nats-streaming
-  topic: mercadona.raw
+  messageQueueType: nats-jetstream
+  mqtkind: keda
+  topic: scraper.mercadona.raw
   responseTopic: ""
+  errorTopic: ""
   contentType: application/json
   maxRetries: 3
   minReplicaCount: 0
   maxReplicaCount: 3
+  metadata:
+    natsServer: nats://nats.messaging.svc.cluster.local:4222
+    stream: SCRAPERS
+    consumer: normalizer
+    lagThreshold: "10"
