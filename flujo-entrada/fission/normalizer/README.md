@@ -69,7 +69,8 @@ El consumer ya instala pydantic desde `requirements.txt` (`Dockerfile.consumer`)
 | Paquete | `normalizer-<uuid>`, `build_status: none` (subido con `--code`) |
 | Trigger | `normalizer-http`, `[POST] /normalize`, ns `default` |
 | Router | `svc/router` (LoadBalancer, puerto 80; `port-forward` para probar) |
-| Consumer | `deployment/normalizer-consumer` en `default` (1/1) |
+| Consumer | `deployment/normalizer-consumer` en `default` (1/1), imagen `normalizer-consumer:v2` |
+| NATS | stream `SCRAPERS` (subjects `scraper.>`, `Maximum Age: 7d`) y consumidor durable `normalizer` (filtro `scraper.mercadona.raw`) |
 
 Por eso el despliegue del código va por CLI y no aplicando un YAML de `Function`: el CRD no
 tiene `entrypoint` ni `functionSource` (el entrypoint vive en `spec.package.functionName`) y
@@ -82,3 +83,32 @@ el paquete lo nombra el CLI con un uuid.
 | `Function.spec.package.functionName` | entrypoint (`normalizer.main`) | no existe `spec.entrypoint` |
 | `HTTPTrigger.spec.functionref.type` | `name` | `Unsupported value: "Function": supported values: "name", "function-weights"` |
 | `HTTPTrigger.spec.methods` | lista (`[POST]`) | `spec.method` está deprecado |
+
+## Limpieza (dejar la VM sin restos)
+
+Un despliegue o una prueba manual dejan cosas **fuera del repositorio**. Antes de dar algo por
+terminado (comprobado el 17/10/2026 tras el despliegue del contrato):
+
+- **Jobs manuales**: los creados a mano con `kubectl create job --from=cronjob/...` no los
+  recoge el CronJob. `kubectl -n scrappers delete job <nombre>` (el pod se va con él).
+- **Mensajes de prueba en NATS**: si inyectas un producto a mano para ver el `clean`, queda en
+  el stream. Localízalo por secuencia con `nats stream get SCRAPERS <seq>` y bórralo por la
+  API: `nats request '$JS.API.STREAM.MSG.DELETE.SCRAPERS' '{"seq":N}'` (desde `nats-box`, ver
+  `messaging/`). El `stream info` muestra `Deleted Messages`; deja constancia en el informe.
+- **Procesos colgados**: `nats sub ...` o `kubectl port-forward` lanzados para probar se quedan
+  vivos. `pgrep -af "nats sub|port-forward"` y `kill`. Si el `nats sub` corre dentro de
+  `nats-box`, `kubectl -n messaging rollout restart deploy/nats-box` lo recicla (es una caja de
+  herramientas sin estado).
+- **Código byte**: `find <repo> -name __pycache__ -type d -exec rm -rf {} +`. Ya está en
+  `.gitignore`, pero en checkouts antiguos pueden quedar restos (`.pyc` trackeados).
+- **Imágenes docker**: `docker image prune -f` para las *dangling*. Las etiquetadas se dejan
+  (`normalizer-consumer:v1` es la versión anterior, útil para volver atrás; `normalizer-env:v1`
+  y `scrapper-mercadona:v1` están en uso). El *build cache* (~900 MiB) se reutiliza entre
+  builds: no es basura, no lo purgues por costumbre.
+- **Ficheros temporales**: los `POST` de prueba (JSON crudos, salidas) van a `/tmp` de la VM;
+  bórralos al terminar.
+
+Tras limpiar, la comprobación rápida es: `kubectl -n scrappers get jobs,pods` (nada),
+`kubectl get pods -A` (solo `Running`/`Succeeded`), `pgrep -af "nats sub|port-forward"` (nada),
+`git status --short` en el checkout (limpio) y `nats stream info SCRAPERS` (solo cuenta
+`Deleted`).

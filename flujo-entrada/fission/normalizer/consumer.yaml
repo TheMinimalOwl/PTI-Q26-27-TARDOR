@@ -16,7 +16,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: consumer
-          image: normalizer-consumer:v1
+          image: normalizer-consumer:v2
           imagePullPolicy: IfNotPresent
           env:
             - name: NATS_URL

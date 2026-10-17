@@ -109,6 +109,13 @@ Disparo manual del CronJob con el normalizer ya con Pydantic:
 | Mensaje `clean` (inyectando 1 producto a mano) | `{"source":"normalizer","wh":"default","ts":...,"batch":1,"clean":"Items: 1\nUnitarios: 1 (fuente 1, calculado 0) | Incompletos: 0\n---\n4241 | Aceite de oliva Hacendado | 17.25EUR total | 3.45EUR/l | 5.0l | Aceite, especias y salsas | … | ref=3.450EUR/L src=fuente\n"}` |
 | Consumer JetStream | 0 ack pendientes, 0 sin procesar |
 
-> El stream `SCRAPERS` no tiene política de retención: el 17/10 acumulaba **28.080 mensajes /
-> 41 MiB** (≈ 6 scrapes). Conviene decidir límites (`max-msgs`/`max-age`) antes de que crezca
-> sin control.
+> **Stream `SCRAPERS`** (comprobado el 17/10/2026): los subjects son `scraper.>`, así que
+> guarda **también los lotes `clean`**, no solo los crudos. Retención `Limits` con
+> `Maximum Age: 7d` (mensajes y bytes ilimitados, `Discard Old`), `Duplicate Window: 2m` y
+> borrado por mensaje permitido. Con ~4,7 k mensajes por scrape (4592 crudos + 92 limpios) se
+> estabiliza en ~33 k mensajes (~48 MiB): **no crece sin control**, no hace falta tocar
+> límites. Efecto útil: los `clean` de los últimos 7 días se pueden reproducir (replay) para
+> cargarlos en BD cuando exista.
+>
+> El consumidor durable `normalizer` filtra solo `scraper.mercadona.raw` (`Max Ack Pending:
+> 1000`, 0 pendientes), por eso los `clean` no se reprocesan: no hay bucle.

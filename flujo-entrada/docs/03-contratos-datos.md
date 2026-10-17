@@ -19,7 +19,8 @@ flowchart LR
 | `scraper.mercadona.clean` | normalizer-consumer | **nadie todavía** | 1 mensaje por lote |
 
 Ambos viven en el stream `SCRAPERS` (subjects `scraper.>`), que se crea con
-`js.add_stream` de forma defensiva.
+`js.add_stream` de forma defensiva y retiene los mensajes **7 días** (`Maximum Age: 7d`,
+`Discard Old`): los `clean` de esa ventana se pueden reproducir para cargarlos en BD.
 
 ## Envelope de entrada (raw)
 
