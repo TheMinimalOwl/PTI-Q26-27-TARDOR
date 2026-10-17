@@ -112,3 +112,7 @@ Tras limpiar, la comprobación rápida es: `kubectl -n scrappers get jobs,pods` 
 `kubectl get pods -A` (solo `Running`/`Succeeded`), `pgrep -af "nats sub|port-forward"` (nada),
 `git status --short` en el checkout (limpio) y `nats stream info SCRAPERS` (solo cuenta
 `Deleted`).
+
+> **Ojo con las horas al comparar**: los logs de los contenedores van en **UTC** y la VM está en
+> **CEST (UTC+2)**. Un `ts` de las 18:58 en el log del consumer es un `ps`/`git` de las 20:58 en
+> la máquina. Mirar `date -u` antes de dar por hecho que algo es de otra persona.
