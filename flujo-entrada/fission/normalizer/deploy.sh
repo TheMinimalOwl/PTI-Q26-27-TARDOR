@@ -133,6 +133,9 @@ step_consumer() {
   docker build -t "$CONSUMER_IMAGE" -f "$HERE/Dockerfile.consumer" "$HERE"
   minikube image load "$CONSUMER_IMAGE"
   kubectl -n "$NS_FN" set image "deployment/$CONSUMER_DEPLOY" "$CONSUMER_CONTAINER=$CONSUMER_IMAGE"
+  # La etiqueta no cambia entre despliegues: sin restart, el pod seguiria con la
+  # imagen vieja (mismo nombre de imagen => el Deployment no cambia).
+  kubectl -n "$NS_FN" rollout restart "deployment/$CONSUMER_DEPLOY"
   kubectl -n "$NS_FN" rollout status "deployment/$CONSUMER_DEPLOY" --timeout=180s
 }
 

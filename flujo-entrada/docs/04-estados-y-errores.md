@@ -33,6 +33,7 @@ flowchart TB
 | `normalizer` | Item corrupto | `try/except` → línea `ERROR id=...` | Solo ese item |
 | `consumer` | JSON ilegible | Log `parse-error`, **ack** y descarta | Sí, ese mensaje |
 | `consumer` | Router Fission caído | Log `flush-error`, **sin ack** → reentrega por `AckWait` | No (pero duplica) |
+| `consumer` | Dos `flush()` a la vez (handler + bucle de 5 s) | *(arreglado 17/10)* antes publicaban el mismo lote dos veces y el segundo `ack` fallaba con `message was already acknowledged`; ahora hay `asyncio.Lock` | Ya no |
 
 ## Semántica de reintentos
 
@@ -46,7 +47,7 @@ stateDiagram-v2
   Confirmado --> [*]
 
   state SinAck {
-    note right of SinAck: El búfer NO se vacía en el fallo<br/>rebota entero en el siguiente flush
+    note right of SinAck: El búfer se drena antes de publicar<br/>sin ack -> reentrega por AckWait
   }
 ```
 
@@ -64,9 +65,13 @@ stateDiagram-v2
 1. **Fallo silencioso del scraper.** `main.py` nunca devuelve código de salida distinto de
    0. Si NATS está caído, el Job se marca como **exitoso** y los datos solo quedan en un
    `.txt` dentro de un Pod que se destruye. No hay alarma ni reingesta.
-2. **Búfer sin cota.** En `flush()`, `buf.clear()` va después del `publish`; si este falla,
-   el búfer conserva todo y sigue creciendo con cada reentrega. Un fallo prolongado de
-   Fission puede agotar la memoria del consumer.
+2. **Búfer y flushes solapados — resuelto el 17/10/2026.** `flush()` se llama desde el
+   handler (al llegar a `CONSUMER_BATCH`) y desde el bucle de 5 s; al no haber lock, dos
+   llamadas solapaban, publicaban **el mismo lote dos veces** y el segundo `ack` fallaba con
+   `message was already acknowledged` (visto en real durante el despliegue). Ahora `flush()`
+   toma un `asyncio.Lock` y **drena el búfer antes de los `await`**: lo que llega mientras se
+   publica forma otro lote y, si el publish falla, los mensajes sin ack los reentrega
+   `AckWait`. Esto también evita el crecimiento sin cota del punto anterior.
 3. **Sin idempotencia.** Nada deduplica por `product_id`. Una reentrega del mismo mensaje
    produce líneas repetidas en `scraper.mercadona.clean`.
 4. **`wh` a nivel de lote.** `consumer.flush()` toma el `wh` del **primer** producto del
@@ -84,8 +89,25 @@ stateDiagram-v2
 |---|---|
 | Mercadona cambia su JSON | Líneas con `-` en los campos que falten; el lote sigue |
 | Mercadona añade un `size_format`/`reference_format` nuevo | Ese producto queda con precio unitario incompleto (`- (formato_no_comparable:...)`); el resto sigue |
-| Mercadona bloquea temporalmente | `status` != 200 → 0 items → Job "exitoso" sin datos |
+| Mercadona bloquea temporalmente | `status` != 200 → 0 items → Job "exitoso" sin datos (visto el 17/10: un disparo manual dio `subs=0`) |
 | NATS caído durante el CronJob | Datos solo en el `.txt` efímero → se pierden con el Pod |
-| Fission caído un rato | Reentrega por `AckWait`; búfer creciendo; duplicados al recuperar |
+| Fission caído un rato | Reentrega por `AckWait` (el búfer ya no crece); duplicados al recuperar |
 | Llegan productos de dos tiendas | El lote entero se etiqueta con el `wh` del primero |
 | Un producto sin `id` | Se descarta en `publish` (no se publica); sí aparece en el `.txt` |
+
+## Verificación end-to-end (17/10/2026)
+
+Disparo manual del CronJob con el normalizer ya con Pydantic:
+
+| Métrica | Valor |
+|---|---|
+| Productos publicados por el scraper | 4592 (`nats: 4592 -> scraper.mercadona.raw`) |
+| Lotes normalizados por el consumer | 92 (`91 × 50 + 42`) |
+| Productos procesados | 4592 (los 92 lotes suman exactamente lo publicado) |
+| Errores | 1 (el `flush-error` de flushes solapados, ya arreglado) |
+| Mensaje `clean` (inyectando 1 producto a mano) | `{"source":"normalizer","wh":"default","ts":...,"batch":1,"clean":"Items: 1\nUnitarios: 1 (fuente 1, calculado 0) | Incompletos: 0\n---\n4241 | Aceite de oliva Hacendado | 17.25EUR total | 3.45EUR/l | 5.0l | Aceite, especias y salsas | … | ref=3.450EUR/L src=fuente\n"}` |
+| Consumer JetStream | 0 ack pendientes, 0 sin procesar |
+
+> El stream `SCRAPERS` no tiene política de retención: el 17/10 acumulaba **28.080 mensajes /
+> 41 MiB** (≈ 6 scrapes). Conviene decidir límites (`max-msgs`/`max-age`) antes de que crezca
+> sin control.

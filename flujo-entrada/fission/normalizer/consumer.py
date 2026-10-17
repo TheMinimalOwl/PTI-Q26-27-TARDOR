@@ -33,26 +33,31 @@ async def run() -> None:
     nc = await nats.connect(NATS_URL)
     js = nc.jetstream()
     buf: list[tuple] = []
+    lock = asyncio.Lock()  # flush() se llama desde el handler Y desde el bucle de 5 s: sin
+                           # el lock, dos flushes solapan y publican el mismo lote dos veces
 
     async def flush():
-        if not buf:
-            return
-        msgs, products = zip(*buf)
-        wh = (products[0].get("wh") if isinstance(products[0], dict) else "default") or "default"
-        raws = [p.get("product", p) for p in products]
-        txt = await asyncio.to_thread(clean, list(raws))
-        out = {
-            "source": "normalizer",
-            "wh": wh,
-            "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "batch": len(raws),
-            "clean": txt,
-        }
-        await js.publish(SUBJECT_OUT, json.dumps(out, ensure_ascii=False).encode("utf-8"))
-        for m in msgs:
-            await m.ack()
-        buf.clear()
-        print(f"batch {len(raws)} -> {SUBJECT_OUT}", flush=True)
+        async with lock:
+            if not buf:
+                return
+            msgs, products = zip(*buf)
+            # Se drena antes de los await: lo que llegue mientras se publica forma otro lote.
+            # Si el publish falla, esos mensajes se quedan sin ack -> los reentrega AckWait.
+            buf.clear()
+            wh = (products[0].get("wh") if isinstance(products[0], dict) else "default") or "default"
+            raws = [p.get("product", p) for p in products]
+            txt = await asyncio.to_thread(clean, list(raws))
+            out = {
+                "source": "normalizer",
+                "wh": wh,
+                "ts": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+                "batch": len(raws),
+                "clean": txt,
+            }
+            await js.publish(SUBJECT_OUT, json.dumps(out, ensure_ascii=False).encode("utf-8"))
+            for m in msgs:
+                await m.ack()
+            print(f"batch {len(raws)} -> {SUBJECT_OUT}", flush=True)
 
     async def handler(msg):
         try:

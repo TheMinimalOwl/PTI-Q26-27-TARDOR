@@ -300,7 +300,7 @@ Decisiones a acordar:
 | Hueco | Impacto | Nota |
 |---|---|---|
 | Fallo silencioso del scraper (exit 0 con NATS caído) | Alto | No hay alerta ni reingesta |
-| Búfer del consumer sin cota | Medio | Crece si Fission falla de forma sostenida |
+| ~~Búfer del consumer sin cota~~ | ~~Medio~~ | **Resuelto 17/10/2026**: `flush()` con `asyncio.Lock` y drena el búfer antes de publicar (ver [`04`](04-estados-y-errores.md)) |
 | Sin idempotencia / deduplicación | Medio | Duplicados en reentrega |
 | `wh` a nivel de lote | Medio | Bloquea multi-tienda correctamente etiquetada |
 | Ingress sin `Service` | Bajo | Resto de un diseño anterior; los CronJob no exponen puertos |

@@ -101,6 +101,11 @@ la parte intermedia:
 ❌ app       (de Fardin)
 ```
 
+Comprobado en el clúster el **17/10/2026** con el normalizer ya con el contrato Pydantic: un
+disparo manual publicó **4592 productos** y el consumer los normalizó en **92 lotes**
+(4592 sin perder ninguno). Detalle y mensaje `clean` de ejemplo:
+[`04-estados-y-errores.md`](04-estados-y-errores.md#verificación-end-to-end-17102026).
+
 El flujo actual es **byte-in / texto-out**: entra JSON crudo y sale texto formateado con el
 **precio unitario ya normalizado** a una unidad base (`€/kg`, `€/l`, `€/ud`, `€/m`,
 `€/lavado`). Mercadona ya trae el precio de referencia, así que se respeta el de la fuente;
