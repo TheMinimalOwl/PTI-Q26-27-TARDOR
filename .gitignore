@@ -1,0 +1,6 @@
+# Artefactos de Python: no se versionan.
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+venv/

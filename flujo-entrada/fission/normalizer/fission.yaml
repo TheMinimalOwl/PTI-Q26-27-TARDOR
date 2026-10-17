@@ -10,6 +10,10 @@
 #
 # El paquete se crea con el codigo fuente (`--code`), asi que `requirements.txt`
 # (pydantic) tiene que venir resuelto en la imagen del entorno: ver `Dockerfile.env`.
+#
+# `functionref.type` solo admite `name` o `function-weights` (lo dijo el API server
+# al rechazar `Function`), y `method` esta deprecado en favor de `methods`.
+# `deploy.sh` solo aplica este manifiesto si el trigger no existe todavia.
 apiVersion: fission.io/v1
 kind: HTTPTrigger
 metadata:
@@ -17,7 +21,7 @@ metadata:
   namespace: default
 spec:
   functionref:
-    type: Function
+    type: name
     name: normalizer
   methods:
     - POST

@@ -47,8 +47,9 @@ está en el docker local, prueba `docker pull` y, si no, sugiere `eval $(minikub
 o `FISSION_PY_ENV=<imagen>`.
 
 **Qué hace `fn`:** `fission fn update --code normalizer.py --entrypoint normalizer.main`
-(reutiliza el paquete existente `normalizer-<uuid>`) y aplica el `HTTPTrigger` de
-`fission.yaml`.
+(reutiliza el paquete existente `normalizer-<uuid>`) y crea el `HTTPTrigger` de
+`fission.yaml` **solo si no existe** (en este clúster lo creó el CLI, y aplicarlo encima
+solo genera avisos de propiedad).
 
 **Qué hace `smoke`:** `port-forward` al `svc/router`, un `POST /normalize` con un producto
 de ejemplo y la comprobación de que la línea limpia y el JSON salen **exactamente** como
@@ -73,3 +74,11 @@ El consumer ya instala pydantic desde `requirements.txt` (`Dockerfile.consumer`)
 Por eso el despliegue del código va por CLI y no aplicando un YAML de `Function`: el CRD no
 tiene `entrypoint` ni `functionSource` (el entrypoint vive en `spec.package.functionName`) y
 el paquete lo nombra el CLI con un uuid.
+
+### Gotchas del CRD (v1.27)
+
+| Campo | Correcto | Error que da si no |
+|---|---|---|
+| `Function.spec.package.functionName` | entrypoint (`normalizer.main`) | no existe `spec.entrypoint` |
+| `HTTPTrigger.spec.functionref.type` | `name` | `Unsupported value: "Function": supported values: "name", "function-weights"` |
+| `HTTPTrigger.spec.methods` | lista (`[POST]`) | `spec.method` está deprecado |

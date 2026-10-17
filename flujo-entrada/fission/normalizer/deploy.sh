@@ -28,6 +28,7 @@ FN_NAME="${FN_NAME:-normalizer}"
 ENTRYPOINT="${ENTRYPOINT:-normalizer.main}"
 NS_FN="${NS_FN:-default}"
 NS_ROUTER="${NS_ROUTER:-fission}"
+TRIGGER_NAME="${TRIGGER_NAME:-normalizer-http}"
 CONSUMER_DEPLOY="${CONSUMER_DEPLOY:-normalizer-consumer}"
 CONSUMER_CONTAINER="${CONSUMER_CONTAINER:-consumer}"
 
@@ -35,6 +36,7 @@ say()  { printf '\n== %s\n' "$*"; }
 need() { command -v "$1" >/dev/null 2>&1 || { printf "falta '%s' en el PATH\n" "$1" >&2; exit 1; }; }
 env_exists() { kubectl -n "$NS_FN" get environment "$ENV_NAME" >/dev/null 2>&1; }
 fn_exists()  { kubectl -n "$NS_FN" get function "$FN_NAME" >/dev/null 2>&1; }
+ht_exists()  { kubectl -n "$NS_FN" get httptrigger "$TRIGGER_NAME" >/dev/null 2>&1; }
 
 # Nombre del primer pod del pool del entorno (para comprobar pydantic dentro).
 # `grep -m1` + `|| true`: sin SIGPIPE y sin romper `set -e`/`pipefail`.
@@ -111,9 +113,18 @@ step_fn() {
     fission fn create --name "$FN_NAME" --env "$ENV_NAME" \
       --code "$HERE/normalizer.py" --entrypoint "$ENTRYPOINT"
   fi
-  kubectl apply -f "$HERE/fission.yaml"
+  # El trigger ya existe en el cluster (creado con el CLI): no se toca para no
+  # pelearse por el `last-applied-configuration`. Solo se aplica si falta.
+  if ht_exists; then
+    echo "   el trigger '$TRIGGER_NAME' ya existe; no se toca"
+  elif ! kubectl apply -f "$HERE/fission.yaml"; then
+    # Red de seguridad: si el manifiesto no valida, el CLI genera el mismo objeto.
+    fission httptrigger create --name "$TRIGGER_NAME" \
+      --function "$FN_NAME" --method POST --url /normalize
+  fi
   kubectl -n "$NS_FN" get function "$FN_NAME"
   kubectl -n "$NS_FN" get packages
+  kubectl -n "$NS_FN" get httptrigger "$TRIGGER_NAME"
 }
 
 step_consumer() {

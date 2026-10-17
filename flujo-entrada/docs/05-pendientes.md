@@ -2,7 +2,7 @@
 
 Lo que falta en la parte de ingesta, ordenado por valor de diseño. La prioridad abierta
 (3, contrato con API/BD) conviene cerrarla **antes** de escribir más código; la 2 (modelo
-Pydantic) ya está **implementada** y solo falta desplegarla.
+Pydantic) está **implementada y desplegada** en la VM.
 
 ## Prioridad 1 — Cálculo de precio unitario (€/L · €/kg) — ✅ HECHO (17/10/2026)
 
@@ -38,9 +38,9 @@ Formatos reales cubiertos (4591 productos, 15/10/2026): `kg`, `g`, `100 g`, `l`,
 
 ## Prioridad 2 — Modelo Pydantic
 
-> ✅ **Definido e implementado** el 17/10/2026. Código: `fission/normalizer/normalizer.py`;
-> pruebas: `fission/normalizer/test_models.py`. Despliegue scriptado y pendiente de ejecutar
-> en la VM del clúster: `fission/normalizer/deploy.sh` (ver *Despliegue*).
+> ✅ **Definido, implementado y desplegado** (17/10/2026). Código:
+> `fission/normalizer/normalizer.py`; pruebas: `fission/normalizer/test_models.py`;
+> despliegue: `fission/normalizer/deploy.sh` (ejecutado en la VM, ver *Despliegue*).
 
 El plan pide Pydantic explícitamente. El **contrato queda cerrado aquí**: el modelo
 envuelve `normalize_record()` con tipos y validación, **sin rehacer la lógica**. Se
@@ -272,7 +272,13 @@ Todo está scriptado en `fission/normalizer/deploy.sh`, que se ejecuta **en la V
 > `functionSource` dentro de la `Function`, **campos que no existen en el CRD** (el
 > entrypoint va en `spec.package.functionName`) y sin `packageref`. El manifiesto solo
 > versiona ahora el `HTTPTrigger`; la `Function` y su paquete los gestiona el CLI. Los flags
-> de namespace del CLI son `fnNamespace`/`envNamespace` (no `fnns`/`envns`).
+> de namespace del CLI son `fnNamespace`/`envNamespace` (no `fnns`/`envns`), y en el
+> `HTTPTrigger` el `functionref.type` válido es `name` (el API server rechaza `Function`:
+> *supported values: "name", "function-weights"*).
+
+**Verificado en la VM el 17/10/2026:** el entorno quedó con pydantic 2.14.1 (comprobado con
+`kubectl exec` en un pod del pool), la función y el consumer con el código nuevo, y la prueba
+de humo devuelve la línea limpia exacta y el `CleanBatch` en `?format=json`.
 
 Requiere **Pydantic v2** (`ConfigDict`, `field_validator`, `model_validator`).
 

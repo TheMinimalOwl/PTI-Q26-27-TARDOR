@@ -79,7 +79,7 @@ Referencia: hoja **Samuel** de `Plan_tareas_PTI.xlsx` (15 tareas).
 |---|---|---|
 | 1. Clúster K8s local, repo y Dockerfile base + scraper Mercadona | Hecha | [`01`](01-arquitectura.md), [`02`](02-flujo-datos.md) |
 | 2. Scraper publicando + router Fission + esqueleto del normalizador | Hecha (con cambio de diseño: NATS en vez de HTTP POST) | [`01`](01-arquitectura.md), [`03`](03-contratos-datos.md) |
-| 3. Normalizador con Pydantic + cálculo €/L·€/kg + escritura en BD + CronJob | Parcial (cálculo €/L·€/kg y contrato Pydantic **hechos**; falta ejecutar `deploy.sh` en la VM y conectar la BD) | [`03`](03-contratos-datos.md), [`05`](05-pendientes.md) |
+| 3. Normalizador con Pydantic + cálculo €/L·€/kg + escritura en BD + CronJob | Parcial (cálculo €/L·€/kg, contrato Pydantic y despliegue en la VM **hechos**; falta conectar la BD) | [`03`](03-contratos-datos.md), [`05`](05-pendientes.md) |
 | 4–15. Presentación de progreso, Alcampo/Ahorramás, calidad de datos, ingesta, demos, memoria | No iniciadas | [`05`](05-pendientes.md) |
 
 ## Convenciones
