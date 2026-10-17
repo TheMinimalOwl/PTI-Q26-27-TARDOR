@@ -1,5 +1,6 @@
 FROM python:3.13-slim
 WORKDIR /app
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt nats-py
 COPY consumer.py normalizer.py ./
-RUN pip install --no-cache-dir nats-py
 CMD ["python", "consumer.py"]
