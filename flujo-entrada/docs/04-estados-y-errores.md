@@ -104,7 +104,8 @@ Disparo manual del CronJob con el normalizer ya con Pydantic:
 | Productos publicados por el scraper | 4592 (`nats: 4592 -> scraper.mercadona.raw`) |
 | Lotes normalizados por el consumer | 92 (`91 × 50 + 42`) |
 | Productos procesados | 4592 (los 92 lotes suman exactamente lo publicado) |
-| Errores | 1 (el `flush-error` de flushes solapados, ya arreglado) |
+| Errores, 1er disparo (sin el fix) | 1: `flush-error: nats: message was already acknowledged` (flushes solapados) |
+| Errores, 2º disparo (con el fix) | 0 entre `flush-error` y `parse-error` |
 | Mensaje `clean` (inyectando 1 producto a mano) | `{"source":"normalizer","wh":"default","ts":...,"batch":1,"clean":"Items: 1\nUnitarios: 1 (fuente 1, calculado 0) | Incompletos: 0\n---\n4241 | Aceite de oliva Hacendado | 17.25EUR total | 3.45EUR/l | 5.0l | Aceite, especias y salsas | … | ref=3.450EUR/L src=fuente\n"}` |
 | Consumer JetStream | 0 ack pendientes, 0 sin procesar |
 
