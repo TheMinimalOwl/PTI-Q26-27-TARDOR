@@ -57,7 +57,7 @@ stateDiagram-v2
   EnBuffer --> EnBuffer: flush-error → sin ack → reentrega (AckWait)
   EnBuffer --> Normalizado: POST /normalize (lote de hasta 50)
   Normalizado --> Limpio: publish scraper.mercadona.clean
-  Limpio --> [*]: lo consume API/BD (frontera con Xavi)
+  Limpio --> [*]: lo consume API/BD (frontera con otro equipo)
 ```
 
 Estados y su significado:
@@ -96,9 +96,9 @@ la parte intermedia:
 
 ```
 ✅ 1 cadena (Mercadona) → ✅ NATS → ✅ normalizer → ✅ NATS clean
-❌ BD        (de Xavi, no existe todavía)
-❌ API       (de Xavi)
-❌ app       (de Fardin)
+❌ BD        (otro equipo, no existe todavía)
+❌ API       (otro equipo)
+❌ app       (otro equipo)
 ```
 
 Comprobado en el clúster el **17/10/2026** con el normalizer ya con el contrato Pydantic: un

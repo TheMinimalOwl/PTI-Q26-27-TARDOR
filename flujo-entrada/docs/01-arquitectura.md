@@ -79,7 +79,7 @@ flowchart TB
     end
   end
 
-  XBD["API / BD<br/>equipo de Xavi"]
+  XBD["API / BD<br/>(otro equipo)"]
 
   CJMD -->|"GET (JSON)"| MD
   SEC -.-> CJMD

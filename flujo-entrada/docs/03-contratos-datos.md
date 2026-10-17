@@ -9,7 +9,7 @@ flowchart LR
   P["scrapper_mercadona<br/>publish.py"] -->|"1 msg = 1 producto"| RAW["scraper.mercadona.raw"]
   RAW --> C["normalizer-consumer"]
   C -->|"1 msg = 1 lote"| CLEAN["scraper.mercadona.clean"]
-  CLEAN --> API["API/BD (Xavi)"]
+  CLEAN --> API["API/BD"]
   RAW -.->|stream| S[("SCRAPERS<br/>subjects scraper.&gt;")]
 ```
 
@@ -72,8 +72,8 @@ Publicado por `consumer.flush()`:
 **Decisión relevante:** `clean` viaja como **texto plano**, no como JSON estructurado. Es lo
 más rápido de producir y de leer, pero obliga al consumidor a parsear por ` | `. La variante
 estructurada existe ya como **opt-in** (`POST /normalize?format=json` → `CleanBatch` con
-`NormalizedProduct[]`); cambiar el mensaje de `clean` a JSON es decisión de Xavi (Prioridad 3
-de [`05-pendientes.md`](05-pendientes.md#prioridad-2--modelo-pydantic)).
+`NormalizedProduct[]`); cambiar el mensaje de `clean` a JSON es decisión del equipo de
+API/BD (Prioridad 3 de [`05-pendientes.md`](05-pendientes.md#prioridad-2--modelo-pydantic)).
 
 ## Contrato de entrada de `POST /normalize`
 
