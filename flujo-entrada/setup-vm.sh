@@ -130,8 +130,15 @@ step_nats() {
   else
     helm install "$NATS_RELEASE" nats/nats -n "$NS_MSG" -f "$HERE/messaging/nats-values.yaml"
   fi
-  kubectl -n "$NS_MSG" rollout status deploy/"$NATS_RELEASE" --timeout=180s \
-    || echo "   (no he podido confirmar el deployment del servidor NATS; sigo)"
+  # El chart de NATS levanta un StatefulSet (necesita volumen para JetStream); con otros
+  # valores del chart puede ser un Deployment, asi que miro cual de los dos existe.
+  if kubectl -n "$NS_MSG" get statefulset "$NATS_RELEASE" >/dev/null 2>&1; then
+    kubectl -n "$NS_MSG" rollout status statefulset/"$NATS_RELEASE" --timeout=180s
+  elif kubectl -n "$NS_MSG" get deployment "$NATS_RELEASE" >/dev/null 2>&1; then
+    kubectl -n "$NS_MSG" rollout status deployment/"$NATS_RELEASE" --timeout=180s
+  else
+    echo "   (no encuentro el StatefulSet ni el Deployment de NATS; sigo)"
+  fi
   # nats-box es la caja de herramientas con la CLI: la usan los pasos de abajo.
   kubectl -n "$NS_MSG" rollout status deploy/nats-box --timeout=180s \
     || echo "   (nats-box no llega a Ready; el CLI de NATS va dentro de ese pod)"
