@@ -38,6 +38,11 @@ bash deploy.sh smoke      # solo la prueba de humo contra el router
 
 > `bash deploy.sh` funciona aunque git no marque el script como ejecutable (en Windows el
 > bit `+x` no se aplica; si hace falta, `chmod +x deploy.sh`).
+>
+> `deploy.sh` da por hecho el resto del montaje. Si la VM está de cero (namespaces, NATS con
+> el stream y el consumidor durable, Fission y el entorno `python`), primero
+> `bash ../../setup-vm.sh` —o `bash setup-vm.sh all` desde `flujo-entrada/`—: es idempotente y
+> termina llamando a este `deploy.sh`.
 
 **Qué hace `env`:** construye `Dockerfile.env` heredando de la imagen que ya usa el entorno
 `python` (la detecta del CRD), la carga en minikube, parchea `spec.runtime.image` (conserva

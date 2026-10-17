@@ -209,6 +209,7 @@ Fission por HTTP.
 
 | Manifiesto | Kind | Namespace | Notas |
 |---|---|---|---|
+| `../setup-vm.sh` | Script | — | Montaje completo e idempotente en la VM (ver *Orden de despliegue*) |
 | `cluster/namespace.yaml` | Namespace ×3 | — | `scrappers`, `fission`, `messaging` |
 | `messaging/nats-values.yaml` | Helm values | messaging | JetStream + PVC 1 Gi |
 | `scrappers/k8s/secrets.yaml` | Secret | scrappers | `scraper-secrets` (`USER_AGENT`) |
@@ -277,9 +278,16 @@ Detalle y checklist: `fission/normalizer/README.md`.
 
 ## Orden de despliegue
 
-> La parte de la función + consumer está **scriptada e idempotente**:
-> `flujo-entrada/fission/normalizer/deploy.sh` (ejecutar en la VM del clúster). Los pasos
-> 1–3 y el lanzamiento del scraper siguen siendo manuales.
+> **Todo el montaje está scriptado e idempotente**: `flujo-entrada/setup-vm.sh`. `bash
+> setup-vm.sh all` deja la VM lista de cero (base, namespaces, NATS, Fission, normalizer y
+> scraper) y `bash setup-vm.sh verify` solo mira el estado. Los pasos de abajo son el detalle
+> de lo que hace, por si hay que depurar a mano; el lanzamiento del scraper (paso 7) sigue
+> siendo manual.
+>
+> Tres piezas no están en ningún manifiesto y las crea ese script: el stream `SCRAPERS`
+> (subjects `scraper.>`, Max Age 7d), el consumidor durable `normalizer` (filtro
+> `scraper.mercadona.raw` → `deliver.normalizer`, ack explícito, `MaxAckPending 1000`) y el
+> entorno `python` con `version: 3` / `poolsize: 3`.
 
 ```bash
 # 1. Namespaces
