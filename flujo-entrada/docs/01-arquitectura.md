@@ -218,6 +218,24 @@ Fission por HTTP.
 | `fission/normalizer/mqtrigger.yaml` | MessageQueueTrigger | default | bloqueado (401) |
 | `fission/normalizer/consumer.yaml` | Deployment | default | `normalizer-consumer` |
 
+## Clúster desplegado (VM, 17/10/2026)
+
+Estado real observado desde la VM (es lo que asume `fission/normalizer/deploy.sh`):
+
+| Qué | Valor |
+|---|---|
+| Clúster | minikube 1.39.0 · Kubernetes v1.37.0 · un nodo |
+| Fission | v1.27.0 (cliente y servidor) |
+| Entorno | `python` en `default` · `ghcr.io/fission/python-env` · `version: 3` · `poolsize: 3` |
+| Función | `normalizer` (env `python`, executor `poolmgr`) |
+| Paquete | `normalizer-<uuid>` con `build_status: none` → subido con `--code` |
+| Trigger | `normalizer-http` · `[POST] /normalize` · ns `default` |
+| Router | `svc/router` (LoadBalancer, puerto 80) |
+| Consumer | `deployment/normalizer-consumer` en `default` (1/1) |
+| CronJob | `scrapper-mercadona` en `scrappers` (`0 2 * * *`) |
+
+Detalle y checklist: `fission/normalizer/README.md`.
+
 ## Variables de entorno
 
 ### Scraper (`publish.py`, `main.py`)

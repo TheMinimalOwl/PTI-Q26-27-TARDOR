@@ -229,9 +229,9 @@ Hoy equivale al campo `clean` en texto plano; `items` es su versión tipada, sin
 
 ### Implementación
 
-Todo vive en `fission/normalizer/normalizer.py` (los modelos van en la misma fuente que la
-función de Fission para no romper el empaquetado `functionSource`), y el consumer reutiliza
-el módulo. Lo que se añadió:
+Todo vive en `fission/normalizer/normalizer.py` (los modelos van en la misma fuente porque la
+función de Fission se sube como un único fichero: `fission fn update --code normalizer.py`), y
+el consumer reutiliza el módulo. Lo que se añadió:
 
 | Pieza | Qué hace |
 |---|---|
@@ -255,20 +255,24 @@ Pydantic **no** está en la imagen `python` prebuilt de Fission, y la función l
 Todo está scriptado en `fission/normalizer/deploy.sh`, que se ejecuta **en la VM del clúster**
 (desde aquí no hay acceso) y es idempotente:
 
-1. **Entorno**: construye `Dockerfile.env` (hereda de la imagen actual del entorno `python` +
-   `requirements.txt` con `pydantic>=2`), la carga en minikube y parchea
-   `spec.runtime.image` del entorno (conserva version/builder). Borra los pods del pool
-   precalentado para que no sirvan la imagen vieja.
+1. **Entorno**: construye `Dockerfile.env` heredando de la imagen que ya usa el entorno
+   `python` (la detecta del CRD; en la VM es `ghcr.io/fission/python-env`, Fission v1.27.0,
+   `version: 3`, `poolsize: 3`), la carga en minikube, parchea `spec.runtime.image` (conserva
+   version/builder/poolsize) y borra los pods del pool precalentado. Después **comprueba
+   dentro de un pod del pool que `import pydantic` funciona**.
 2. **Función**: `fission fn create|update --code normalizer.py --entrypoint normalizer.main`
-   y aplica el `HTTPTrigger` (`fission.yaml`).
+   (reutiliza el paquete `normalizer-<uuid>` existente) y aplica el `HTTPTrigger`
+   (`fission.yaml`).
 3. **Consumer**: reconstruye la imagen (`Dockerfile.consumer`, que ya instala
    `requirements.txt`, así `clean_local` también valida) y hace el rollout.
-4. **Humo**: `port-forward` al router y `POST /normalize` en texto y en `?format=json`.
+4. **Humo**: `port-forward` al `svc/router` y `POST /normalize` en texto y en `?format=json`,
+   comprobando que la línea sale exacta (`3.45EUR/l … src=fuente`) y que el JSON valida.
 
 > Hallazgo al preparar el despliegue: el `fission.yaml` original declaraba `entrypoint` y
 > `functionSource` dentro de la `Function`, **campos que no existen en el CRD** (el
 > entrypoint va en `spec.package.functionName`) y sin `packageref`. El manifiesto solo
-> versiona ahora el `HTTPTrigger`; la `Function` y su paquete los gestiona el CLI.
+> versiona ahora el `HTTPTrigger`; la `Function` y su paquete los gestiona el CLI. Los flags
+> de namespace del CLI son `fnNamespace`/`envNamespace` (no `fnns`/`envns`).
 
 Requiere **Pydantic v2** (`ConfigDict`, `field_validator`, `model_validator`).
 
