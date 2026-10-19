@@ -3,7 +3,6 @@ import json
 import os
 from datetime import datetime, timezone
 
-SUBJECT_IN = os.getenv("NATS_SUBJECT_IN", "scraper.mercadona.raw")
 SUBJECT_OUT = os.getenv("NATS_SUBJECT_OUT", "scraper.mercadona.clean")
 NATS_URL = os.getenv("NATS_URL", "nats://nats.messaging.svc.cluster.local:4222")
 NORMALIZE_URL = os.getenv("NORMALIZE_URL", "http://router.fission/normalize")

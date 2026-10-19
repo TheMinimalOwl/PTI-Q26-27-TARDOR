@@ -25,7 +25,7 @@
 #   NATS_RELEASE (nats)  FISSION_RELEASE (fission)  NATS_URL_INCLUSTER (nats://nats:4222)
 #   STREAM (SCRAPERS)  DURABLE (normalizer)  SUBJECT_ALL (scraper.>)
 #   SUBJECT_RAW (scraper.mercadona.raw)  DELIVER (deliver.normalizer)
-#   STREAM_MAX_AGE (7d)  DUPE_WINDOW (2m)  MAX_ACK_PENDING (1000)  ACK_WAIT (30s)
+#   MAX_ACK_PENDING (1000)
 #   ENV_NAME (python)  ENV_VERSION (3)  ENV_POOLSIZE (3)
 #   ENV_BASE_IMAGE (ghcr.io/fission/python-env)  CONSUMER_DEPLOY (normalizer-consumer)
 #   SCRAPER_IMAGE (scrapper-mercadona:v1)  SCRAPER_CRONJOB (scrapper-mercadona)
@@ -47,10 +47,7 @@ DURABLE="${DURABLE:-normalizer}"
 SUBJECT_ALL="${SUBJECT_ALL:-scraper.>}"
 SUBJECT_RAW="${SUBJECT_RAW:-scraper.mercadona.raw}"
 DELIVER="${DELIVER:-deliver.normalizer}"
-STREAM_MAX_AGE="${STREAM_MAX_AGE:-7d}"
-DUPE_WINDOW="${DUPE_WINDOW:-2m}"
 MAX_ACK_PENDING="${MAX_ACK_PENDING:-1000}"
-ACK_WAIT="${ACK_WAIT:-30s}"
 
 ENV_NAME="${ENV_NAME:-python}"
 ENV_VERSION="${ENV_VERSION:-3}"
@@ -143,7 +140,7 @@ step_nats() {
   kubectl -n "$NS_MSG" rollout status deploy/nats-box --timeout=180s \
     || echo "   (nats-box no llega a Ready; el CLI de NATS va dentro de ese pod)"
 
-  say "stream '$STREAM' (subjects '$SUBJECT_ALL', Max Age $STREAM_MAX_AGE, Discard Old)"
+  say "stream '$STREAM' (subjects '$SUBJECT_ALL', Discard Old)"
   if stream_exists; then
     echo "   ya existe"
   else

@@ -172,11 +172,10 @@ flowchart TB
 
 | Fichero | Responsabilidad |
 |---|---|
-| `normalizer.py` | Limpieza, formateo **y contrato Pydantic** (`RawProduct`, `NormalizedProduct`, `CleanBatch`): `normalize_item`, `to_clean_txt`, `to_clean_json`, `_unwrap`, `main` |
+| `normalizer.py` | Limpieza, formateo **y contrato Pydantic** (`RawProduct`, `NormalizedProduct`, `CleanBatch`) |
 | `requirements.txt` | `pydantic>=2` — lo necesitan la función y el consumer |
 | `fission.yaml` | `HTTPTrigger` POST `/normalize` (la `Function` la crea `deploy.sh`: el CRD no tiene `entrypoint` ni `functionSource`) |
 | `deploy.sh` | Despliegue reproducible **en la VM del clúster**: entorno con pydantic + función + consumer + humo |
-| `mqtrigger.yaml` | `MessageQueueTrigger` (KEDA, `nats-jetstream`) — **bloqueado** |
 | `consumer.py` | Puente alternativo: NATS → HTTP Fission → NATS |
 | `consumer.yaml` | `Deployment normalizer-consumer` (replicas: 1) |
 | `Dockerfile.consumer` | Imagen del consumer (`nats-py` + `pydantic`) |
@@ -186,11 +185,9 @@ flowchart TB
 | `test_models.py` | Prueba del contrato Pydantic, la tolerancia por item y el endpoint |
 
 > [!IMPORTANT]
-> **Diseño defensivo.** `normalize_item` usa `.get()` con valores por defecto (`-`), así que
-> un campo que desaparezca del JSON de Mercadona degrada la línea pero no rompe el lote.
-> `to_clean_txt` envuelve cada item en `try/except` y salta los pseudo-items `_errors`.
-> Además, cada línea pasa por el contrato Pydantic (`NormalizedProduct`): si no cuadra se
-> emite `ERROR id=...: validacion: ...` en **una línea** y el lote sigue
+> **Diseño defensivo.** Si un campo desaparece del JSON de Mercadona, la línea se degrada
+> pero el lote no se rompe. Cada producto se procesa por separado y cada línea se valida
+> con Pydantic: si no cuadra, se emite un `ERROR id=...` y el lote continúa
 > (ver [`05-pendientes.md`](05-pendientes.md#prioridad-2--modelo-pydantic)).
 
 > [!NOTE]
@@ -225,7 +222,6 @@ Fission por HTTP.
 | `scrappers/k8s/secrets.yaml` | Secret | scrappers | `scraper-secrets` (`USER_AGENT`) |
 | `scrapper_mercadona/cronjob.yaml` | CronJob | scrappers | `0 2 * * *` |
 | `fission/normalizer/fission.yaml` | HTTPTrigger | default | POST `/normalize` (a `Function` `normalizer`) |
-| `fission/normalizer/mqtrigger.yaml` | MessageQueueTrigger | default | bloqueado (401) |
 | `fission/normalizer/consumer.yaml` | Deployment | default | `normalizer-consumer` |
 
 ## 🖥️ Clúster desplegado (VM, 17/10/2026)
@@ -268,7 +264,6 @@ Estado real observado desde la VM (es lo que asume `fission/normalizer/deploy.sh
 | `NATS_SUBJECT_OUT` | `scraper.mercadona.clean` | Subject de salida limpia |
 | `NORMALIZE_URL` | `http://router.fission/normalize` | Si vacío → normaliza en proceso |
 | `CONSUMER_BATCH` | `50` | Tamaño de lote antes de volcar |
-| `NATS_SUBJECT_IN` | `scraper.mercadona.raw` | **Declarada pero sin uso** (la suscripción usa `NATS_DELIVER`) |
 
 ## 🧭 Decisiones de diseño
 
@@ -277,10 +272,9 @@ Estado real observado desde la VM (es lo que asume `fission/normalizer/deploy.sh
    scraper no conoce al normalizador ni tiene que esperar a que responda.
 2. **El scraper no normaliza.** Cada cadena tiene su propio formato; normalizar en un
    único sitio evita duplicar lógica y facilita añadir cadenas.
-3. **Consumer propio en vez de `MessageQueueTrigger`.** El conector
-   `keda-nats-jetstream-http-connector:v0.12` no supera la auth interna del router de
-   Fission v1.27 (devuelve 401 en `router-internal:8889`). El MQTrigger queda en el repo
-   como referencia, y `normalizer-consumer` hace las veces de puente.
+3. **Consumer propio en vez de `MessageQueueTrigger`.** El conector de KEDA no pasa la
+   autenticación interna del router de Fission v1.27 (devuelve 401), así que se descartó.
+   `normalizer-consumer` hace las veces de puente.
 4. **Fission para la normalización.** Encaja con el requisito de la asignatura y permite
    escalar la función por separado del recolector.
 5. **Doble salida del scraper (txt + NATS).** El `.txt` es un respaldo de depuración

@@ -336,10 +336,6 @@ def format_record(r: dict) -> str:
     )
 
 
-def normalize_item(p: dict) -> str:
-    return format_record(normalize_record(p))
-
-
 def to_clean_txt(items: list[dict]) -> str:
     rows = []
     fuentes = calculados = incompletos = 0

@@ -98,7 +98,7 @@ si un crudo no valida responde `422` (el formato de texto sigue siendo el tolera
 
 ## Formato de línea limpia
 
-`normalize_item()` produce exactamente:
+La línea limpia tiene exactamente este formato:
 
 ```
 {pid} | {nombre} | {total}EUR total | {up}EUR/{unidad} | {size}{size_fmt} | {cat} | {url} | ref={ref}EUR/{ref_fmt} src={origen}
