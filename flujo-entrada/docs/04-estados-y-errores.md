@@ -77,10 +77,7 @@ stateDiagram-v2
 4. **`wh` a nivel de lote.** `consumer.flush()` toma el `wh` del **primer** producto del
    lote y lo aplica a todo. Hoy todos los productos son `default`, pero al introducir
    multi-tienda el etiquetado sería incorrecto.
-5. **Sin `Service` para los scrapers.** El `Ingress` del repo apunta a Services
-   inexistentes. Además, los scrapers son CronJobs (batch), no exponen puertos: el Ingress
-   parece un resto de una idea anterior.
-6. **Sin observabilidad.** No hay métricas ni logs estructurados; solo `print()` en el
+5. **Sin observabilidad.** No hay métricas ni logs estructurados; solo `print()` en el
    consumer y en el scraper. Los fallos del punto 1 son invisibles.
 
 ## Escenarios límite

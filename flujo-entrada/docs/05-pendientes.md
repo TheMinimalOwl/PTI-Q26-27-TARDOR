@@ -303,7 +303,6 @@ Decisiones a acordar:
 | ~~Búfer del consumer sin cota~~ | ~~Medio~~ | **Resuelto 17/10/2026**: `flush()` con `asyncio.Lock` y drena el búfer antes de publicar (ver [`04`](04-estados-y-errores.md)) |
 | Sin idempotencia / deduplicación | Medio | Duplicados en reentrega |
 | `wh` a nivel de lote | Medio | Bloquea multi-tienda correctamente etiquetada |
-| Ingress sin `Service` | Bajo | Resto de un diseño anterior; los CronJob no exponen puertos |
 | Sin `Service`/PVC para los `.txt` | Bajo | El volcado es solo para depurar |
 | Sin monitorización ni logs estructurados | Alto | Tarea 8 del plan |
 | Sin `schema_version` en el envelope | Bajo | Necesario si el formato evoluciona |
