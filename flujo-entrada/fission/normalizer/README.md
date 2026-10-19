@@ -11,7 +11,7 @@ POST JSON crudo Mercadona -> txt limpio. Sin guardar nada.
   `normalizer.py` a propósito: el consumer reutiliza el módulo y la función de Fission se
   sube como una única fuente (`fission fn create|update --code normalizer.py`, ver
   `deploy.sh`). Cada línea se valida; si no cuadra sale `ERROR id=...` y el lote continúa.
-  Contrato: `docs/05-pendientes.md`.
+  Contrato: `docs/03-contratos-datos.md`.
 - Variante estructurada **opt-in**: `POST /normalize?format=json` devuelve un `CleanBatch`
   (`{source, wh, ts, batch, items[]}`). Es estricta: valida también la entrada y responde
   `422` si un crudo no valida.

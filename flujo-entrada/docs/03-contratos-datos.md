@@ -95,7 +95,7 @@ Variante estructurada (**opt-in**): `POST /normalize?format=json` valida la entr
 `RawProduct` y responde `application/json` con un `CleanBatch`
 (`{source, wh, ts, batch, items[]}`; `wh`/`ts` se toman del cuerpo si vienen). Es estricta:
 si un crudo no valida responde `422` (el formato de texto sigue siendo el tolerante, con
-`ERROR id=...` por item). Contrato: [`05-pendientes.md`](05-pendientes.md#prioridad-2--modelo-pydantic).
+`ERROR id=...` por item). Contrato: [Contrato Pydantic](#contrato-pydantic).
 
 ## Formato de línea limpia
 
@@ -228,14 +228,209 @@ flowchart LR
 | `size` / `size_fmt` | `unit_size` / `size_format` | `0.5` / `l` |
 | `ref` / `ref_fmt` / `src` | `reference_price` / `reference_format` / `fuente`·`calculado` | `8.200` / `L` / `fuente` |
 
-### Estado del «cálculo de €/L o €/kg»
+## Contrato Pydantic
 
-El plan (tarea 3) pide **"cálculo de €/L o €/kg con Pydantic"**. Hoy:
+El plan (tarea 3) pide Pydantic explícitamente. El contrato vive en
+`fission/normalizer/normalizer.py`, en el mismo fichero que la función (Fission se sube como
+una única fuente con `fission fn create|update --code normalizer.py`, y el consumer reutiliza
+el módulo). Los modelos **envuelven** `normalize_record()` con tipos y validación, **sin
+rehacer la lógica**: separan la entrada (crudo de la cadena, tolerante) de la salida (línea
+ya normalizada, estricta).
 
-- **El cálculo está hecho** (`normalizer.unit_price`), y desde el 17/10 también el
-  **contrato Pydantic** (`RawProduct`/`NormalizedProduct`/`CleanBatch` en `normalizer.py`).
-  El precio unitario se **normaliza a unidad base**, no solo se copia.
-- En Mercadona el respaldo rara vez se usa (la fuente siempre trae `reference_price`),
-  pero es lo que cubrirá a las cadenas que **no** den ese campo (Alcampo, Ahorramás).
-- Pydantic ya está **desplegado** en el entorno de Fission (imagen del entorno con pydantic)
-  → ver [`05-pendientes.md`](05-pendientes.md#prioridad-2--modelo-pydantic).
+```mermaid
+classDiagram
+  class RawProduct {
+    +str id
+    +str display_name
+    +PriceInstructions price_instructions
+    +str share_url
+    +list~Category~ categories
+  }
+  class PriceInstructions {
+    +Decimal unit_price
+    +Decimal reference_price
+    +str reference_format
+    +Decimal unit_size
+    +str size_format
+    +Decimal drained_weight
+  }
+  class Category {
+    +str name
+  }
+  class NormalizedProduct {
+    +str id
+    +str name
+    +Decimal total
+    +Decimal unit_price
+    +str unit
+    +str unit_src
+    +str unit_reason
+    +Any ref
+    +str ref_format
+    +Any size
+    +str size_format
+    +str category
+    +str url
+  }
+  class CleanBatch {
+    +str source
+    +str wh
+    +str ts
+    +int batch
+    +list~NormalizedProduct~ items
+  }
+  RawProduct --> PriceInstructions
+  RawProduct --> Category
+  NormalizedProduct ..> RawProduct : normalize_record()
+  CleanBatch --> NormalizedProduct
+```
+
+### Entrada (cruda, tolerante)
+
+Mercadona manda muchos más campos de los que se usan. El modelo declara **solo** los que
+consume el normalizador y **ignora el resto** (`extra="ignore"`): un campo nuevo en la
+fuente no rompe la ingesta.
+
+```python
+from decimal import Decimal
+from typing import Annotated, Any, Literal
+from pydantic import (
+    BaseModel, BeforeValidator, ConfigDict, Field, field_validator, model_validator,
+)
+
+# Reutiliza _dec() de normalizer.py: admite coma decimal y rechaza NaN/Inf/''.
+Dec = Annotated[Decimal, BeforeValidator(_dec)]
+# Mercadona manda `id` como numero: se coacciona a str (mismo criterio que str(...)).
+Id = Annotated[str, BeforeValidator(lambda v: v if isinstance(v, str) else str(v))]
+
+
+class Category(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    name: str = ""
+
+
+class PriceInstructions(BaseModel):
+    """Solo los campos que usa unit_price(); el resto (bulk_price, pack_size,
+    approx_size, total_units...) se ignora a proposito."""
+    model_config = ConfigDict(extra="ignore")
+
+    unit_price: Dec | None = None        # precio del envase (total)
+    reference_price: Dec | None = None   # base de la fuente, si la trae
+    reference_format: str = ""
+    unit_size: Dec | None = None
+    size_format: str = ""
+    drained_weight: Dec | None = None    # peso escurrido (pesables)
+
+
+class RawProduct(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+
+    id: Id
+    display_name: str = ""
+    price_instructions: PriceInstructions = Field(default_factory=PriceInstructions)
+    share_url: str = ""
+    categories: list[Category] = Field(default_factory=list)
+```
+
+### Salida (normalizada, estricta)
+
+Refleja **exactamente** los campos que devuelve `normalize_record()` con tipos y validación:
+
+```python
+UnitBase = Literal["kg", "l", "ud", "m", "lavado"]  # debe seguir a UNITS en normalizer.py
+UnitSrc = Literal["fuente", "calculado", "-"]
+
+
+class NormalizedProduct(BaseModel):
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    id: Id
+    name: str
+    total: Dec | None
+    unit_price: Dec | None
+    unit: UnitBase | None
+    unit_src: UnitSrc
+    unit_reason: str = ""            # "", sin_precio, sin_tamano, formato_no_comparable:<fmt>
+    ref: Any = None                  # crudo de la fuente ("-", numero o texto) -> trazabilidad
+    ref_format: str = ""
+    size: Any = None                 # crudo de la fuente
+    size_format: str = ""
+    category: str = ""
+    url: str = ""
+
+    @field_validator("name", mode="before")
+    @classmethod
+    def _collapse(cls, v: Any) -> str:
+        return " ".join(str(v or "").split())
+
+    @model_validator(mode="after")
+    def _coherente(self) -> "NormalizedProduct":
+        if self.unit_price is None:
+            if not self.unit_reason:
+                raise ValueError("sin unit_price hace falta unit_reason")
+            if self.unit is not None or self.unit_src != "-":
+                raise ValueError("linea incompleta no puede traer unidad ni origen")
+        else:
+            if self.unit is None or self.unit_src == "-":
+                raise ValueError("con unit_price la unidad y el origen son obligatorios")
+            if self.unit_reason:
+                raise ValueError("unit_reason debe estar vacio cuando hay unit_price")
+        return self
+```
+
+`unit_reason` conserva la cadena dinámica `formato_no_comparable:<fmt>`, así que se tipa
+como `str` con valores documentados en vez de un `Literal` cerrado. `ref` y `size` se
+dejan **sin tipar a propósito**: son el dato crudo de la fuente (número, texto o `-`) y se
+conservan solo para trazabilidad; la comparación usa siempre `unit_price` + `unit`.
+
+### Lote limpio (variante estructurada de `clean`)
+
+Si el destino deja de ser texto plano y pasa a JSON (decisión abierta con API/BD, Prioridad 3
+de [`05-pendientes.md`](05-pendientes.md#prioridad-3--contrato-con-apibd)), el mensaje de
+`scraper.mercadona.clean` sería:
+
+```python
+class CleanBatch(BaseModel):
+    source: Literal["normalizer"] = "normalizer"
+    wh: str = "default"
+    ts: str                                  # ISO-8601 UTC, igual que el envelope
+    batch: int                               # nº de productos crudos del lote
+    items: list[NormalizedProduct]
+```
+
+Hoy equivale al campo `clean` en texto plano; `items` es su versión tipada, sin parseo por
+` | ` (ver [Mensaje de salida (clean)](#mensaje-de-salida-clean)).
+
+### Reglas de validación
+
+1. **Nada se inventa.** Sin precio, sin tamaño o con formato no comparable, la línea queda
+   incompleta: `unit_price = None`, `unit = None`, `unit_src = "-"` y `unit_reason` con el
+   motivo. El validador de coherencia **exige** esa combinación (`_coherente`).
+2. **La fuente manda.** Con `reference_price` convertible → `unit_src = "fuente"`; si no,
+   `"calculado"`. Nunca `"fuente"` con un valor del respaldo.
+3. **Tolerancia en la frontera, rigor en la salida.** La entrada ignora campos nuevos
+   (`extra="ignore"`); la salida los prohíbe (`extra="forbid"`) para que el contrato no
+   derive en silencio.
+4. **Error por item, no `-` silencioso.** Un `ValidationError` se emite como
+   `ERROR id=...` y el lote continúa (como en `to_clean_txt`), pero **deja rastro** en
+   vez de degradar el campo a `-`.
+5. **Decimal para dinero.** Los importes son `Decimal` (nunca `float`), con la cuantización
+   a 4 decimales (`_q`) que ya aplica `unit_price()`.
+
+### Implementación
+
+Lo que se añadió sobre `normalize_record()`:
+
+| Pieza | Qué hace |
+|---|---|
+| `RawProduct` / `PriceInstructions` / `Category` | Validan la entrada en el camino estructurado |
+| `NormalizedProduct` | Valida cada línea normalizada (`normalize_model`) |
+| `CleanBatch` | Lote limpio serializable (`to_clean_json`) |
+| `POST /normalize?format=json` | Devuelve un `CleanBatch`; `422` si un crudo no valida (**opt-in**) |
+| `to_clean_txt` | Sigue igual, pero valida cada item: `ERROR id=...: validacion: ...` en una línea |
+
+`_dec`, `_unit`, `UNITS`, `unit_price()` y `format_record()` se mantienen tal cual: el modelo
+es un **envoltorio** sobre `normalize_record()`, que sigue siendo la única fuente de la
+lógica. La línea limpia de texto (contrato actual de `clean`) no se altera.
+
+Requiere **Pydantic v2** (`ConfigDict`, `field_validator`, `model_validator`).

@@ -67,7 +67,7 @@ flowchart LR
 |---|---|
 | [`01-arquitectura.md`](01-arquitectura.md) | Componentes, despliegue en K8s, decisiones de diseño y variables de entorno |
 | [`02-flujo-datos.md`](02-flujo-datos.md) | Secuencia end-to-end, ciclo de vida de un producto y cadencia temporal |
-| [`03-contratos-datos.md`](03-contratos-datos.md) | Subjects, envelopes, formato de línea limpia con precio unitario canónico y mapeo de Mercadona |
+| [`03-contratos-datos.md`](03-contratos-datos.md) | Subjects, envelopes, formato de línea limpia con precio unitario canónico, mapeo de Mercadona y contrato Pydantic |
 | [`04-estados-y-errores.md`](04-estados-y-errores.md) | Estados, tipos de fallo, reintentos y escenarios límite |
 | [`05-pendientes.md`](05-pendientes.md) | Huecos detectados y siguiente trabajo previsto en el plan |
 

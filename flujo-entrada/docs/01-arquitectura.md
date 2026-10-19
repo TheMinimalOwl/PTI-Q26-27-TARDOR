@@ -188,7 +188,7 @@ flowchart TB
 > **Diseño defensivo.** Si un campo desaparece del JSON de Mercadona, la línea se degrada
 > pero el lote no se rompe. Cada producto se procesa por separado y cada línea se valida
 > con Pydantic: si no cuadra, se emite un `ERROR id=...` y el lote continúa
-> (ver [`05-pendientes.md`](05-pendientes.md#prioridad-2--modelo-pydantic)).
+> (ver [`03-contratos-datos.md`](03-contratos-datos.md#contrato-pydantic)).
 
 > [!NOTE]
 > **Dependencia pydantic.** La imagen `python` prebuilt de Fission no la trae.

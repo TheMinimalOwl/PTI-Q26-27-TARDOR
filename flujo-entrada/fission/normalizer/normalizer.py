@@ -10,7 +10,7 @@ comparable entre cadenas: kg, l, ud, m o lavado. Si la fuente ya trae
 `unit_price` y el tamano. Si la unidad es ambigua no se inventa nada: la linea
 queda marcada como incompleta con el motivo.
 
-Contrato Pydantic (ver docs/05-pendientes.md): `RawProduct` describe la entrada
+Contrato Pydantic (ver docs/03-contratos-datos.md): `RawProduct` describe la entrada
 tolerante, `NormalizedProduct` valida cada linea normalizada y `CleanBatch` es la
 variante estructurada (JSON) del mensaje `clean`. Los modelos son un envoltorio
 sobre `normalize_record()`: no rehacen la logica, solo la validan.
@@ -35,7 +35,7 @@ from pydantic import (
 )
 
 # Formatos de medida -> (unidad base canonica, unidades base por 1 unidad del formato).
-# Cubre los formatos reales observados en Mercadona (ver docs/05-pendientes.md):
+# Cubre los formatos reales observados en Mercadona (ver docs/03-contratos-datos.md):
 # kg/g/100 g, l/ml/cl/100 ml, ud/dc/dz, m y lv (lavado).
 UNITS: dict[str, tuple[str, Decimal]] = {
     # masa (base: kg)
@@ -117,7 +117,7 @@ def _fmt(v: Decimal | None) -> str:
 
 
 # ---------------------------------------------------------------------------
-# Contrato Pydantic (ver docs/05-pendientes.md)
+# Contrato Pydantic (ver docs/03-contratos-datos.md)
 # ---------------------------------------------------------------------------
 
 # Reutiliza _dec(): admite coma decimal y rechaza NaN/Inf/cadena vacia.
