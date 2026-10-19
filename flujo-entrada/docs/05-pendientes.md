@@ -306,6 +306,7 @@ Decisiones a acordar:
 | Sin `Service`/PVC para los `.txt` | Bajo | El volcado es solo para depurar |
 | Sin monitorización ni logs estructurados | Alto | Tarea 8 del plan |
 | Sin `schema_version` en el envelope | Bajo | Necesario si el formato evoluciona |
+| 2ª cadena (Carrefour) **bloqueada** | Medio | Challenge JS de Cloudflare desde el 15/10/2026; requiere navegador real. Código en `scrappers/scrapper_carrefour/` (no lo despliega `setup-vm.sh`) |
 | Embeddings (coordinado con el equipo de IA) | Alto | Tarea 5; no existe nada |
 
 ## Roadmap alineado con el plan
@@ -314,7 +315,7 @@ Decisiones a acordar:
 |---|---|---|
 | 3 (cierre) | 22–26 oct | Modelo Pydantic **hecho** (17 oct, ver Prioridad 2) + conectar con la BD del equipo de API/BD (cálculo €/L·€/kg **hecho** 17 oct) |
 | 4 | 26 oct | **Presentación de progreso** — estos documentos son la base |
-| 5 | 29 oct – 9 nov | Segundo scraper + `publish` + embeddings con el equipo de IA |
+| 5 | 29 oct – 9 nov | Segundo scraper + `publish` + embeddings con el equipo de IA (Carrefour, intentado el 15 oct, quedó bloqueado por Cloudflare) |
 | 6 | 10–11 nov | 3º y 4º scraper (Alcampo, Ahorramás) + equivalencia de productos |
 | 7 | 12–16 nov | Calidad de datos + multi-tienda (`wh` real) |
 | 8 | 17–18 nov | Estabilizar ingesta + monitorización y logs |

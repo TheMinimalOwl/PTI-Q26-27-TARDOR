@@ -23,7 +23,7 @@ sequenceDiagram
     MD-->>CJ: { categories: [ { products: [ ...crudos... ] } ] }
   end
 
-  CJ->>CJ: collect_raw() → items[] + errores[]
+  CJ->>CJ: collect_raw() → items[] (+ errors[] de subcategorías)
   CJ->>FS: dump(mercadona_<ts>.txt)
   loop 1 mensaje por producto con "id"
     CJ->>NATS: publish scraper.mercadona.raw (envelope)
@@ -54,7 +54,7 @@ stateDiagram-v2
   Descartado --> [*]
 
   Publicado --> EnBuffer: deliver.normalizer
-  EnBuffer --> EnBuffer: flush-error → sin ack → reentrega (AckWait)
+  EnBuffer --> EnBuffer: publish falla → sin ack → reentrega (AckWait)
   EnBuffer --> Normalizado: POST /normalize (lote de hasta 50)
   Normalizado --> Limpio: publish scraper.mercadona.clean
   Limpio --> [*]: lo consume API/BD (frontera con otro equipo)
@@ -88,26 +88,3 @@ gantt
 - **Mercadona**: una ejecución diaria a las 02:00, en serie (`Forbid`).
 - **normalizer-consumer**: Deployment siempre arriba; no depende del CronJob, solo consume
   lo que llegue a NATS.
-
-## Flujo mínimo de punta a punta
-
-El plan (tarea 4) define como hito: **1 cadena → BD → API → app**. Hoy está cubierto hasta
-la parte intermedia:
-
-```
-✅ 1 cadena (Mercadona) → ✅ NATS → ✅ normalizer → ✅ NATS clean
-❌ BD        (otro equipo, no existe todavía)
-❌ API       (otro equipo)
-❌ app       (otro equipo)
-```
-
-Comprobado en el clúster el **17/10/2026** con el normalizer ya con el contrato Pydantic: un
-disparo manual publicó **4592 productos** y el consumer los normalizó en **92 lotes**
-(4592 sin perder ninguno). Detalle y mensaje `clean` de ejemplo:
-[`04-estados-y-errores.md`](04-estados-y-errores.md#verificación-end-to-end-17102026).
-
-El flujo actual es **byte-in / texto-out**: entra JSON crudo y sale texto formateado con el
-**precio unitario ya normalizado** a una unidad base (`€/kg`, `€/l`, `€/ud`, `€/m`,
-`€/lavado`). Mercadona ya trae el precio de referencia, así que se respeta el de la fuente;
-cuando no lo traiga, el normalizador lo calcula (ver
-[`03-contratos-datos.md`](03-contratos-datos.md#precio-unitario-canónico-€kg--€l--€ud--€m--€lavado)).

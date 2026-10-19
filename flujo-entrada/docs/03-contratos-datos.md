@@ -18,9 +18,10 @@ flowchart LR
 | `scraper.mercadona.raw` | scraper | normalizer-consumer | 1 mensaje por producto |
 | `scraper.mercadona.clean` | normalizer-consumer | **nadie todavía** | 1 mensaje por lote |
 
-Ambos viven en el stream `SCRAPERS` (subjects `scraper.>`), que se crea con
-`js.add_stream` de forma defensiva y retiene los mensajes **7 días** (`Maximum Age: 7d`,
-`Discard Old`): los `clean` de esa ventana se pueden reproducir para cargarlos en BD.
+Ambos viven en el stream `SCRAPERS` (subjects `scraper.>`). `publish.py` lo crea de forma
+defensiva si falta (`js.add_stream`) y `setup-vm.sh` garantiza la configuración buena:
+retiene los mensajes **7 días** (`Maximum Age: 7d`, `Discard Old`) con
+`Duplicate Window: 2m`. Los `clean` de esa ventana se pueden reproducir para cargarlos en BD.
 
 ## Envelope de entrada (raw)
 
@@ -73,7 +74,7 @@ Publicado por `consumer.flush()`:
 más rápido de producir y de leer, pero obliga al consumidor a parsear por ` | `. La variante
 estructurada existe ya como **opt-in** (`POST /normalize?format=json` → `CleanBatch` con
 `NormalizedProduct[]`); cambiar el mensaje de `clean` a JSON es decisión del equipo de
-API/BD (Prioridad 3 de [`05-pendientes.md`](05-pendientes.md#prioridad-2--modelo-pydantic)).
+API/BD (Prioridad 3 de [`05-pendientes.md`](05-pendientes.md#prioridad-3--contrato-con-apibd)).
 
 ## Contrato de entrada de `POST /normalize`
 
@@ -236,5 +237,5 @@ El plan (tarea 3) pide **"cálculo de €/L o €/kg con Pydantic"**. Hoy:
   El precio unitario se **normaliza a unidad base**, no solo se copia.
 - En Mercadona el respaldo rara vez se usa (la fuente siempre trae `reference_price`),
   pero es lo que cubrirá a las cadenas que **no** den ese campo (Alcampo, Ahorramás).
-- Falta desplegar pydantic en el entorno de Fission (imagen con pydantic) → ver
-  [`05-pendientes.md`](05-pendientes.md#prioridad-2--modelo-pydantic).
+- Pydantic ya está **desplegado** en el entorno de Fission (imagen del entorno con pydantic)
+  → ver [`05-pendientes.md`](05-pendientes.md#prioridad-2--modelo-pydantic).

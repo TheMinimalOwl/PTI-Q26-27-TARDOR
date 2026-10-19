@@ -5,7 +5,7 @@
 ```mermaid
 flowchart TB
   START(["Ejecución del scraper"]) --> NET{"¿Falla la red<br/>o timeout?"}
-  NET -->|"sí (RequestException)"| F1["status = None<br/>→ 0 items"]
+  NET -->|"sí (RequestException)"| F1["status = None<br/>→ 0 items de esa subcategoría"]
   NET -->|"no"| HTTP{"¿status != 200?"}
   HTTP -->|"sí (403/404/500)"| F2["se acumula en errors[]<br/>→ 0 items de esa subcategoría"]
   HTTP -->|"200"| OK["items[] extraídos"]
@@ -24,7 +24,7 @@ flowchart TB
 | `client.fetch_json` | Timeout / error de red | Devuelve `(None, {})`; se cuenta como error | Sí, esa subcategoría |
 | `client.fetch_json` | HTTP != 200 | Devuelve `(status, {})` | Sí, esa subcategoría |
 | `main` | Alguna subcategoría falla | Acumula en `errors[]` y añade un pseudo-item `{"_errors": [...]}` | Solo lo fallado |
-| `main` | Todas fallan | `status != 200`, se vuelca `ERROR status=...` | Todo |
+| `main` | Todas las subcategorías fallan | El `status` final sigue al del catálogo raíz: si el raíz respondió 200, el Job acaba **exitoso sin items ni `ERROR`**; si el raíz falló, se vuelca `ERROR status=...` | Todo lo no descargado |
 | `dump_txt` | — | Escribe siempre; es el respaldo | No |
 | `publish` | NATS caído | `try/except` → devuelve `0` y log `ERROR NATS (...), txt intacto` | **Sí, silenciosamente** |
 | `normalizer` | Campo ausente | `.get()` con defecto `-` | Degrada la línea, no rompe |
@@ -53,7 +53,7 @@ stateDiagram-v2
 
 | Mecanismo | Configuración | Efecto |
 |---|---|---|
-| NATS JetStream | `AckWait` por defecto | Redelivery de lotes no confirmados |
+| NATS JetStream | `AckWait` de 30 s (`setup-vm.sh`) | Redelivery de lotes no confirmados |
 | `consumer` | `CONSUMER_BATCH=50`, flush cada 5 s | Cotas del búfer en condiciones normales |
 | `consumer` | `ack` tras publicar | Entrega **at-least-once** → posibles duplicados |
 | CronJob | `concurrencyPolicy: Forbid` | Sin solape de ejecuciones |

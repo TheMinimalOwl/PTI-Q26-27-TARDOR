@@ -219,29 +219,15 @@ Fission por HTTP.
 | `../setup-vm.sh` | Script | — | Montaje completo e idempotente en la VM (ver *Orden de despliegue*) |
 | `cluster/namespace.yaml` | Namespace ×3 | — | `scrappers`, `fission`, `messaging` |
 | `messaging/nats-values.yaml` | Helm values | messaging | JetStream + PVC 1 Gi |
-| `scrappers/k8s/secrets.yaml` | Secret | scrappers | `scraper-secrets` (`USER_AGENT`) |
+| `scrappers/k8s/secrets.yaml` | Secret | scrappers | `scraper-secrets` (`USER_AGENT`; hoy solo lo lee el scraper de Carrefour) |
 | `scrapper_mercadona/cronjob.yaml` | CronJob | scrappers | `0 2 * * *` |
 | `fission/normalizer/fission.yaml` | HTTPTrigger | default | POST `/normalize` (a `Function` `normalizer`) |
 | `fission/normalizer/consumer.yaml` | Deployment | default | `normalizer-consumer` |
 
-## 🖥️ Clúster desplegado (VM, 17/10/2026)
-
-Estado real observado desde la VM (es lo que asume `fission/normalizer/deploy.sh`):
-
-| Qué | Valor |
-|---|---|
-| Clúster | minikube 1.39.0 · Kubernetes v1.37.0 · un nodo |
-| Fission | v1.27.0 (cliente y servidor) |
-| Entorno | `python` en `default` · `ghcr.io/fission/python-env` · `version: 3` · `poolsize: 3` |
-| Función | `normalizer` (env `python`, executor `poolmgr`) |
-| Paquete | `normalizer-<uuid>` con `build_status: none` → subido con `--code` |
-| Trigger | `normalizer-http` · `[POST] /normalize` · ns `default` |
-| Router | `svc/router` (LoadBalancer, puerto 80) |
-| Consumer | `deployment/normalizer-consumer` en `default` (1/1) |
-| CronJob | `scrapper-mercadona` en `scrappers` (`0 2 * * *`) |
-
-> [!TIP]
-> Detalle y checklist: `fission/normalizer/README.md`.
+> [!NOTE]
+> `scrappers/scrapper_carrefour/` (CronJob `*/30 * * * *`) está en el repo pero
+> **bloqueado** por el challenge de Cloudflare (15/10/2026): `setup-vm.sh` solo despliega
+> Mercadona. Detalle en `scrappers/scrapper_carrefour/README.md`.
 
 ## 🔧 Variables de entorno
 
