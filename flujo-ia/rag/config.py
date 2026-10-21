@@ -31,7 +31,9 @@ RAW_DIR = DATA_DIR / "raw"
 GOLD_DIR = DATA_DIR / "gold"
 CACHE_DIR = Path(os.environ.get("RAG_CACHE_DIR") or (RAIZ / ".cache"))
 INDEX_DIR = CACHE_DIR / "index"
-HF_CACHE_DIR = Path(os.environ.get("HF_HOME") or (CACHE_DIR / "huggingface"))
+# Los modelos van a la ubicacion estandar de HuggingFace (fuera del repo):
+# asi el proyecto no arrastra 2 GB de pesos y el cache se comparte entre clones.
+HF_CACHE_DIR = Path(os.environ.get("HF_HOME") or (Path.home() / ".cache" / "huggingface"))
 
 # `HF_HOME` se fija **antes** de que se importe transformers: si no, la
 # libreria decide el directorio de cache al importarse y el modelo se baja a

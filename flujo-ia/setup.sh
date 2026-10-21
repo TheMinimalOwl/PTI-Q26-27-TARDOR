@@ -8,7 +8,7 @@
 # Es idempotente: se puede volver a ejecutar sin romper nada.
 #
 # Variables de entorno que honra:
-#   HF_HOME          cache de HuggingFace (por defecto $RAIZ/.cache/huggingface)
+#   HF_HOME          cache de HuggingFace (por defecto ~/.cache/huggingface)
 #   RAG_EMBED_MODEL  modelo de embeddings (bge-m3 | e5-small | id de HF)
 #   RAG_OLLAMA_MODEL modelo de Ollama (por defecto qwen3:4b)
 #   RAG_LLM          backend de LLM (ollama | gemini | none)
@@ -25,7 +25,7 @@ CACHE="$RAIZ/.cache"
 EMBED_MODEL="${RAG_EMBED_MODEL:-e5-small}"
 OLLAMA_MODEL="${RAG_OLLAMA_MODEL:-qwen3:4b}"
 
-export HF_HOME="${HF_HOME:-$CACHE/huggingface}"
+export HF_HOME="${HF_HOME:-$HOME/.cache/huggingface}"
 export RAG_CACHE_DIR="${RAG_CACHE_DIR:-$CACHE}"
 # pip descarga a /tmp, que en algunas maquinas esta en la particion del
 # sistema (sin espacio). Se lleva el temporal a la cache del proyecto.
