@@ -48,6 +48,15 @@ class BaseLLM:
     def chat(self, system: str, user: str) -> LLMResponse:  # pragma: no cover - interfaz
         raise NotImplementedError
 
+    def chat_stream(self, system: str, user: str):
+        """Genera la respuesta por trozos (para SSE).
+
+        La implementacion por defecto cae a `chat` y emite un unico trozo: es
+        lo que hace un cliente que no soporta streaming.
+        """
+        r = self.chat(system, user)
+        yield r.text
+
     def describe(self) -> dict:
         return {"provider": self.provider, "model": self.model}
 
@@ -129,6 +138,41 @@ class OllamaLLM(BaseLLM):
         )
 
 
+    def chat_stream(self, system: str, user: str):
+        """Genera la respuesta token a token (NDJSON de Ollama)."""
+        payload = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            "stream": True,
+            "options": {"temperature": config.TEMPERATURE, "num_ctx": 4096},
+        }
+        think = self._think()
+        if think is not None:
+            payload["think"] = think
+        url = f"{self.host}/api/chat"
+        try:
+            with requests.post(url, json=payload, timeout=self.timeout, stream=True) as resp:
+                if resp.status_code != 200:
+                    raise LLMError(f"Ollama {resp.status_code}: {resp.text[:300]}")
+                for linea in resp.iter_lines(decode_unicode=True):
+                    if not linea:
+                        continue
+                    try:
+                        dato = json.loads(linea)
+                    except json.JSONDecodeError:
+                        continue
+                    trozo = (dato.get("message") or {}).get("content", "")
+                    if trozo:
+                        yield trozo
+                    if dato.get("done"):
+                        break
+        except requests.RequestException as e:
+            raise LLMError(f"Ollama no responde en {url}: {e}") from e
+
+
 class GeminiLLM(BaseLLM):
     """LLM remoto con la API de Gemini (AI Studio).
 
@@ -185,6 +229,40 @@ class GeminiLLM(BaseLLM):
             tokens=usage.get("totalTokenCount"),
             raw={"finishReason": (data.get("candidates") or [{}])[0].get("finishReason")},
         )
+
+    def chat_stream(self, system: str, user: str):
+        """Genera la respuesta token a token (SSE de la API de Gemini)."""
+        body = {
+            "contents": [{"role": "user", "parts": [{"text": user}]}],
+            "systemInstruction": {"parts": [{"text": system}]},
+            "generationConfig": {"temperature": config.TEMPERATURE, "maxOutputTokens": 1024},
+        }
+        think = _thinking_budget()
+        if think is not None:
+            body["generationConfig"]["thinkingConfig"] = {"thinkingBudget": think}
+        url = f"{config.GEMINI_API_BASE}/models/{self.model}:streamGenerateContent?alt=sse"
+        headers = {"x-goog-api-key": self.api_key, "Content-Type": "application/json"}
+        try:
+            with requests.post(url, json=body, headers=headers, timeout=self.timeout, stream=True) as resp:
+                if resp.status_code != 200:
+                    raise LLMError(f"Gemini {resp.status_code}: {resp.text[:300]}")
+                for linea in resp.iter_lines(decode_unicode=True):
+                    if not linea or not linea.startswith("data:"):
+                        continue
+                    carga = linea[5:].strip()
+                    if not carga or carga == "[DONE]":
+                        continue
+                    try:
+                        dato = json.loads(carga)
+                    except json.JSONDecodeError:
+                        continue
+                    for candidato in dato.get("candidates", []):
+                        for parte in (candidato.get("content", {}).get("parts", [])):
+                            texto = parte.get("text", "")
+                            if texto:
+                                yield texto
+        except requests.RequestException as e:
+            raise LLMError(f"Gemini no responde: {e}") from e
 
     def _post(self, body: dict) -> requests.Response:
         try:

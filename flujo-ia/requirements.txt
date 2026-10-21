@@ -7,4 +7,6 @@ sentence-transformers>=3.0
 numpy>=1.26
 requests>=2.31
 flask>=3.0
+langchain-core>=1.0
+jsonschema>=4.20
 pytest>=8.0

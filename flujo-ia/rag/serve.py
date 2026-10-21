@@ -24,13 +24,16 @@ cambia entre peticiones, asi que **no** se recalcula en caliente.
 from __future__ import annotations
 
 import argparse
+import json
 import os
 from decimal import Decimal, InvalidOperation
 
 from flask import Flask, jsonify, request
 
 from . import config
+from .chain import flujo_qa
 from .embeddings import Embedder
+from .guardrails import aplicar_guardrails, construir_respuesta, validar
 from .indexer import load_index
 from .ingest import Product
 from .llm import build_llm
@@ -177,40 +180,75 @@ def equiv():
 
 @app.post("/ask")
 def ask():
+    """Respuesta del asistente: JSON validado contra el esquema del repo.
+
+    Antes de devolverla pasa por los guardrails (citas validas, cifras del
+    contexto, abstension). En modo estricto la respuesta se corrige: se
+    quitan las citas a productos que no estan en el contexto.
+    """
     payload = request.get_json(silent=True) or {}
     question = (payload.get("question") or "").strip()
     if not question:
         return jsonify({"error": "falta 'question'"}), 400
     k = int(payload.get("k") or config.TOP_K)
     filtros = _filtros(payload)
-    res = qa(_retriever(), _llm(), question, k=k, filters=filtros)
-    return jsonify(
-        {
-            "question": question,
-            "contexto": _hits_json(res.hits),
-            "respuesta": res.respuesta,
-            "fuentes": res.fuentes,
-            "proveedor": res.proveedor,
-            "error": res.error,
-        }
+    res = qa(_retriever(), _llm(), question, k=k, filtros=filtros)
+
+    g = aplicar_guardrails(
+        res.respuesta or "",
+        res.hits,
+        estricto=bool(payload.get("estricto", True)),
+    )
+    respuesta = construir_respuesta(
+        question=question,
+        respuesta=g.respuesta_corregida or res.respuesta or "",
+        hits=res.hits,
+        fuentes=res.fuentes,
+        confianza=0.8 if (not g.abstention and g.ok) else (0.3 if g.abstention else 0.0),
+        abstained=g.abstention,
+        guardrails=g,
+        provider=res.proveedor or "none",
+        model=getattr(_llm(), "model", None),
+        latencia_s=res.latencia_s,
+    )
+    errores = validar(respuesta)
+    if errores:
+        respuesta["guardrails"]["warnings"].append(
+            "La respuesta no cumple el JSON Schema: " + "; ".join(errores[:3])
+        )
+        respuesta["guardrails"]["ok"] = False
+    return jsonify(respuesta)
+
+
+@app.post("/ask/stream")
+def ask_stream():
+    """Respuesta en streaming por SSE (Server-Sent Events).
+
+    Eventos: `fuentes` (los ids del contexto), `token` (trozo de texto) y
+    `fin` (respuesta completa). Es lo que consume la app movil para pintar la
+    respuesta a medida que se genera.
+    """
+    payload = request.get_json(silent=True) or {}
+    question = (payload.get("question") or "").strip()
+    if not question:
+        return jsonify({"error": "falta 'question'"}), 400
+    k = int(payload.get("k") or config.TOP_K)
+    filtros = _filtros(payload)
+    llm = _llm()
+    if llm is None:
+        return jsonify({"error": "streaming necesita un LLM configurado"}), 400
+
+    def generar():
+        try:
+            for tipo, dato in flujo_qa(_retriever(), llm, question, k=k, filtros=filtros):
+                yield "event: " + tipo + "\ndata: " + json.dumps(dato, ensure_ascii=False, default=str) + "\n\n"
+        except Exception as e:  # noqa: BLE001 - el error viaja como evento
+            yield "event: error\ndata: " + json.dumps({"error": str(e)}, ensure_ascii=False) + "\n\n"
+
+    return Response(
+        generar(),
+        mimetype="text/event-stream",
+        headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
 
 
-def main(argv: list[str] | None = None) -> int:
-    p = argparse.ArgumentParser(prog="rag.serve", description="Servicio HTTP del RAG")
-    p.add_argument("--host", default=os.environ.get("RAG_HOST", "0.0.0.0"))
-    p.add_argument("--port", type=int, default=int(os.environ.get("RAG_PORT", "8080")))
-    p.add_argument("--embed", default=config.DEFAULT_EMBEDDING)
-    p.add_argument("--llm", default=config.DEFAULT_LLM, choices=config.LLM_PROVIDERS)
-    args = p.parse_args(argv)
-
-    inicializar(args.embed, args.llm)
-    print(f"embeddings: {_ESTADO.get('embeddings')}")
-    print(f"llm: {_ESTADO['llm'].describe() if _ESTADO.get('llm') else 'ninguno'}")
-    print(f"productos indexados: {len(_ESTADO['retriever'].store)}")
-    app.run(host=args.host, port=args.port, threaded=True)
-    return 0
-
-
-if __name__ == "__main__":
-    raise SystemExit(main())

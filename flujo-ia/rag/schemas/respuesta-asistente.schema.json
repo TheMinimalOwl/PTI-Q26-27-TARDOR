@@ -1,0 +1,56 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://tardor.upc.edu/schemas/respuesta-asistente.json",
+  "title": "Respuesta del asistente de precios",
+  "description": "Contrato de salida del endpoint /ask. Lo consume el equipo de API y la app movil: por eso la salida es JSON validado y no texto libre.",
+  "type": "object",
+  "required": ["question", "answer", "sources", "confidence", "abstained", "guardrails", "provider"],
+  "properties": {
+    "question": { "type": "string", "description": "Pregunta tal y como la recibe el servicio" },
+    "answer": { "type": "string", "minLength": 1 },
+    "sources": {
+      "type": "array",
+      "description": "Productos citados. Solo ids que estan en el contexto recuperado.",
+      "items": {
+        "type": "object",
+        "required": ["id", "name", "chain", "price_total", "price_unit", "unit", "url", "reason"],
+        "properties": {
+          "id": { "type": "string" },
+          "name": { "type": "string" },
+          "chain": { "type": "string" },
+          "price_total": { "type": ["number", "null"] },
+          "price_unit": { "type": ["number", "null"] },
+          "unit": { "type": ["string", "null"] },
+          "url": { "type": ["string", "null"] },
+          "reason": { "type": "string" }
+        },
+        "additionalProperties": false
+      }
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "Confianza estimada. 0 cuando la respuesta se abstiene."
+    },
+    "abstained": {
+      "type": "boolean",
+      "description": "true si el asistente no ha encontrado respuesta en los datos."
+    },
+    "guardrails": {
+      "type": "object",
+      "required": ["ok", "warnings", "citations_valid", "numbers_valid"],
+      "properties": {
+        "ok": { "type": "boolean", "description": "true si la respuesta pasa todos los controles" },
+        "warnings": { "type": "array", "items": { "type": "string" } },
+        "citations_valid": { "type": "boolean" },
+        "numbers_valid": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "provider": { "type": "string", "description": "ollama | gemini | none" },
+    "model": { "type": ["string", "null"] },
+    "latency_s": { "type": "number", "minimum": 0 }
+  },
+  "additionalProperties": false
+}

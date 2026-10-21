@@ -1,76 +1,51 @@
 """Los tres pipelines del prototipo: catalogo, equivalencia y QA.
 
-Todos comparten la misma retrieval (densa + filtros) y, en el caso del LLM, el
-mismo prompt base. La diferencia esta en **que se le pide** al modelo:
+La orquestacion vive en `chain.py`, que compone las cadenas con **LangChain
+(LCEL)**; aqui solo se adaptan al formato de resultado que usan el resto del
+prototipo (la CLI, la evaluacion y el servicio HTTP).
 
 | Pipeline | Que recupera | Que hace el LLM |
 |---|---|---|
-| `catalogo` | productos que encajan con una descripcion | redacta la respuesta con los datos |
+| `catalogo` | productos que encajan con una descripcion | redacta la respuesta con los ids citados |
 | `equivalencia` | candidatos de otra cadena | elige el equivalente (o dice que no hay) |
-| `qa` | productos relevantes para una pregunta | responde usando solo el contexto |
+| `qa` | productos relevantes para una pregunta | responde **solo** con el contexto y cita `[id]` |
 
 Con `--llm none` los tres funcionan en modo solo-recuperacion: es la linea base
-para medir cuanto aporta el LLM (ver `docs/03-evaluacion.md`).
+para medir la calidad del retrieval (que es lo que decide el modelo de
+embeddings) sin depender de ninguna API.
 """
 
 from __future__ import annotations
 
-import json
 from dataclasses import dataclass, field
 
+from .chain import (
+    cadena_catalogo,
+    cadena_equivalencia,
+    cadena_qa,
+    format_context,
+    ids_citados,
+    separar_respuesta,
+)
 from .ingest import Product
-from .llm import BaseLLM, LLMError, extract_json
+from .llm import BaseLLM, LLMError
 from .retriever import Filters, Retriever
 from .store import Hit
 
-# ---------------------------------------------------------------------------
-# Contexto
-# ---------------------------------------------------------------------------
-
-
-def format_context(hits: list[Hit], max_items: int | None = None) -> str:
-    """Contexto para el LLM: una linea por producto, con todo lo que hace falta.
-
-    Se incluye el `pid` para que el modelo pueda citar (`[12345]`) y para que
-    la evaluacion pueda comprobar que no inventa identificadores.
-    """
-    if max_items is not None:
-        hits = hits[:max_items]
-    lineas = []
-    for h in hits:
-        d = h.doc
-        total = d.get("total") or "-"
-        unit_price = d.get("unit_price")
-        unit = d.get("unit") or ""
-        up = f"{unit_price} EUR/{unit}" if unit_price else "-"
-        size = f"{d.get('size', '-')} {d.get('size_format', '')}".strip()
-        lineas.append(
-            f"[{d.get('id')}] {d.get('name')} | cadena: {d.get('chain')} | "
-            f"precio total: {total} EUR | precio unitario: {up} | "
-            f"tamano: {size} | categoria: {d.get('category')} | url: {d.get('url')}"
-        )
-    return "\n".join(lineas)
+__all__ = [
+    "CatalogoResult",
+    "EquivalenciaResult",
+    "QAResult",
+    "catalogo",
+    "equivalencia",
+    "format_context",
+    "qa",
+]
 
 
 # ---------------------------------------------------------------------------
 # Catalogo
 # ---------------------------------------------------------------------------
-
-SISTEMA_CATALOGO = (
-    "Eres un buscador de supermercado. Respondes en español, en frases cortas, "
-    "usando SOLO los productos del contexto. Cita cada producto con su "
-    "identificador entre corchetes, por ejemplo [12345]. Si el contexto no "
-    "contiene lo que se pide, dilo claramente y no inventes precios."
-)
-
-PEDIDO_CATALOGO = (
-    "Dime que producto es el que mas encaja con la siguiente peticion y por que.\n\n"
-    "Peticion: {query}\n\n"
-    "Contexto:\n{context}\n\n"
-    "Responde en este formato:\n"
-    "MEJOR: [id] nombre - precio total X EUR (unitario Y EUR/unidad) - motivo en una frase\n"
-    "ALTERNATIVAS: [id] nombre - precio total X EUR; [id] nombre - precio total X EUR"
-)
 
 
 @dataclass
@@ -91,55 +66,28 @@ def catalogo(
     filters: Filters | None = None,
 ) -> CatalogoResult:
     """Busqueda de catalogo: 'aceite de oliva virgen extra de 1 l'."""
-    hits = retriever.search(query, k=k, filters=filters)
-    res = CatalogoResult(query=query, hits=hits)
-    if llm is None or not hits:
-        return res
+    if llm is None:
+        hits = retriever.search(query, k=k, filters=filters)
+        return CatalogoResult(query=query, hits=hits)
+
+    cadena = cadena_catalogo(retriever, llm, k=k, filters=filters)
     try:
-        r = llm.chat(
-            SISTEMA_CATALOGO,
-            PEDIDO_CATALOGO.format(query=query, context=format_context(hits)),
-        )
-        res.respuesta = r.text.strip()
-        res.proveedor = r.provider
-        res.latencia_s = r.latency_s
+        estado = dict(cadena.invoke({"query": query}))
     except LLMError as e:
-        res.error = str(e)
-    return res
+        # Si el LLM falla, se conserva la recuperacion.
+        hits = retriever.search(query, k=k, filters=filters)
+        return CatalogoResult(query=query, hits=hits, error=str(e))
+    return CatalogoResult(
+        query=query,
+        hits=list(estado.get("hits", [])),
+        respuesta=str(estado.get("respuesta", "")).strip() or None,
+        proveedor=estado.get("proveedor"),
+    )
 
 
 # ---------------------------------------------------------------------------
 # Equivalencia
 # ---------------------------------------------------------------------------
-
-SISTEMA_EQUIVALENCIA = (
-    "Eres un comparador de supermercado. Tu trabajo es decidir si un producto "
-    "candidato es el MISMO producto que el original (otra marca, otro "
-    "envase, presentacion parecida) o si es un producto distinto. La marca puede "
-    "cambiar, pero el tipo de producto, el formato y el tamano deben "
-    "corresponder. Respondes en español y solo con JSON."
-)
-
-PEDIDO_EQUIVALENCIA = """\
-Producto original:
-  id: {src_id}
-  nombre: {src_name}
-  categoria: {src_category}
-  tamano: {src_size}
-  precio: {src_total} EUR
-
-Candidatos (otra cadena):
-{candidates}
-
-¿Cual de los candidatos es el mismo producto que el original?
-Responde SOLO con este JSON (sin texto alrededor):
-{{"pid": "<id del equivalente o null>", "confianza": <0.0-1.0>, "motivo": "<una frase>"}}
-
-Criterios:
-- "Aceite de oliva virgen extra 1 l" y "Aceite de oliva 1 l" NO son el mismo producto.
-- Un formato distinto (pack de 2 ud frente a 1 ud) NO es el mismo producto.
-- Si ninguno encaja, responde con "pid": null.
-"""
 
 
 @dataclass
@@ -171,63 +119,41 @@ def equivalencia(
     Sin LLM devuelve el primer candidato recuperado (baseline de solo retrieval).
     `vector` permite pasar el embedding ya calculado (evaluacion por lotes).
     """
-    if isinstance(producto, Product):
-        src = producto.to_dict()
-    else:
-        src = dict(producto)
+    src = producto.to_dict() if isinstance(producto, Product) else dict(producto)
 
-    origen_chain = src.get("chain")
-    filtros = Filters(chain=chain_destino) if chain_destino else Filters()
-    if not chain_destino and origen_chain:
-        filtros = Filters(chains=[c for c in _cadenas(retriever) if c != origen_chain])
-
-    # La consulta es el producto origen, no su nombre pelado: el texto de
-    # embedding incluye categoria y tamano, que es justo lo que hay que
-    # comparar.
-    if vector is None:
-        q = Product.from_dict(src).embed_text
-        vector = retriever.embedder.encode_one(q, is_query=True)
-    hits = retriever.store.search(vector, k=k, where=filtros.matches)
-
-    res = EquivalenciaResult(origen=src, candidatos=hits)
-    if llm is None or not hits:
+    if llm is None:
+        origen = Product.from_dict(src)
+        filtros = (
+            Filters(chain=chain_destino)
+            if chain_destino
+            else Filters(chains=[c for c in _cadenas(retriever) if c != src.get("chain")])
+        )
+        if vector is None:
+            vector = retriever.embedder.encode_one(origen.embed_text, is_query=True)
+        hits = retriever.store.search(vector, k=k, where=filtros.matches)
+        res = EquivalenciaResult(origen=src, candidatos=hits)
         if hits:
             res.pid_elegido = hits[0].doc.get("id")
         return res
 
-    candidatos = "\n".join(
-        f"  id={h.doc.get('id')} | {h.doc.get('name')} | cadena: {h.doc.get('chain')} | "
-        f"tamano: {h.doc.get('size')} {h.doc.get('size_format')} | "
-        f"precio: {h.doc.get('total')} EUR"
-        for h in hits
-    )
-    tam = f"{src.get('size')} {src.get('size_format')}".strip()
+    cadena = cadena_equivalencia(retriever, llm, k=k, chain_destino=chain_destino)
+    entrada = {
+        "src": src,
+        "embed_text": Product.from_dict(src).embed_text,
+        "vector": vector,
+    }
     try:
-        r = llm.chat(
-            SISTEMA_EQUIVALENCIA,
-            PEDIDO_EQUIVALENCIA.format(
-                src_id=src.get("id"),
-                src_name=src.get("name"),
-                src_category=src.get("category"),
-                src_size=tam or "-",
-                src_total=src.get("total") or "-",
-                candidates=candidatos,
-            ),
-        )
-        res.proveedor = r.provider
-        res.latencia_s = r.latency_s
-        data = extract_json(r.text)
-        if isinstance(data, dict):
-            pid = data.get("pid")
-            res.pid_elegido = None if pid in (None, "", "null") else str(pid)
-            conf = data.get("confianza")
-            res.confianza = float(conf) if isinstance(conf, (int, float)) else None
-            res.motivo = str(data.get("motivo") or "")
-        else:
-            res.error = "El LLM no devolvio JSON utilizable"
+        estado = dict(cadena.invoke(entrada))
     except LLMError as e:
-        res.error = str(e)
-    return res
+        return EquivalenciaResult(origen=src, error=str(e))
+    return EquivalenciaResult(
+        origen=src,
+        candidatos=list(estado.get("hits", [])),
+        pid_elegido=estado.get("pid_elegido"),
+        confianza=estado.get("confianza"),
+        motivo=estado.get("motivo") or None,
+        proveedor=estado.get("proveedor"),
+    )
 
 
 def _cadenas(retriever: Retriever) -> list[str]:
@@ -237,33 +163,6 @@ def _cadenas(retriever: Retriever) -> list[str]:
 # ---------------------------------------------------------------------------
 # QA
 # ---------------------------------------------------------------------------
-
-SISTEMA_QA = (
-    "Eres un asistente de un comparador de precios de supermercado. Respondes "
-    "en español usando SOLO los datos del contexto. Cita los productos que "
-    "usas con su identificador entre corchetes, por ejemplo [12345]. Si la "
-    "respuesta no esta en el contexto, dilo: no inventes precios ni productos."
-)
-
-PEDIDO_QA = """\
-Pregunta: {question}
-
-Contexto (productos disponibles):
-{context}
-
-Responde a la pregunta con los datos del contexto.
-Reglas:
-- Compara solo productos equivalentes (mismo tipo y mismo formato y tamaño). Si en el
-  contexto hay formatos distintos del mismo producto (por ejemplo 1 l y 0,5 l), compara
-  solo los del mismo formato y no los presentes como si fueran el mismo producto.
-- Da siempre las cifras: precio total y precio unitario, con su unidad (EUR, EUR/l,
-  EUR/kg, EUR/ud...). No digas "el mas barato" sin decir cuanto cuesta.
-- Si hay empate, di que hay empate y nombra las opciones.
-
-Formato de la respuesta:
-RESPUESTA: <respuesta directa, 1-3 frases, con las cifras>
-FUENTES: [id] nombre - <motivo>; [id] nombre - <motivo>
-"""
 
 
 @dataclass
@@ -289,45 +188,30 @@ def qa(
 
     `vector` permite pasar el embedding ya calculado (evaluacion por lotes).
     """
-    if vector is None:
-        vector = retriever.embedder.encode_one(question, is_query=True)
-    hits = retriever.store.search(
-        vector, k=k, where=filters.matches if filters else None
-    )
-    res = QAResult(question=question, hits=hits)
-    if llm is None or not hits:
-        return res
-    try:
-        r = llm.chat(
-            SISTEMA_QA,
-            PEDIDO_QA.format(question=question, context=format_context(hits)),
-        )
-        res.proveedor = r.provider
-        res.latencia_s = r.latency_s
-        texto = r.text.strip()
-        # El prompt pide "RESPUESTA:" / "FUENTES:"; si el modelo no lo
-        # respeta, la respuesta entera es la respuesta.
-        if "RESPUESTA:" in texto:
-            cuerpo, _, resto = texto.partition("RESPUESTA:")
-            _ = cuerpo
-            respuesta, _, fuentes = resto.partition("FUENTES:")
-            res.respuesta = respuesta.strip().split("\n\n")[0].strip()
-            res.fuentes = _ids_de_fuentes(fuentes)
+    if llm is None:
+        if vector is None:
+            hits = retriever.search(question, k=k, filters=filters)
         else:
-            res.respuesta = texto
-            res.fuentes = _ids_de_fuentes(texto)
+            hits = retriever.store.search(
+                vector, k=k, where=filters.matches if filters else None
+            )
+        return QAResult(question=question, hits=hits)
+
+    cadena = cadena_qa(retriever, llm, k=k, filters=filters)
+    try:
+        estado = dict(cadena.invoke({"question": question, "vector": vector}))
     except LLMError as e:
-        res.error = str(e)
-    return res
-
-
-def _ids_de_fuentes(texto: str) -> list[str]:
-    """Extrae los identificadores citados `[12345]` de un texto."""
-    import re
-
-    return [m for m in re.findall(r"\[([^\[\]]+)\]", texto or "")]
-
-
-def dumps(obj) -> str:
-    """Serializa un resultado para imprimirlo por CLI."""
-    return json.dumps(obj, ensure_ascii=False, indent=2, default=str)
+        if vector is None:
+            hits = retriever.search(question, k=k, filters=filters)
+        else:
+            hits = retriever.store.search(
+                vector, k=k, where=filters.matches if filters else None
+            )
+        return QAResult(question=question, hits=hits, error=str(e))
+    return QAResult(
+        question=question,
+        hits=list(estado.get("hits", [])),
+        respuesta=estado.get("respuesta"),
+        fuentes=list(estado.get("fuentes", [])),
+        proveedor=estado.get("proveedor"),
+    )
