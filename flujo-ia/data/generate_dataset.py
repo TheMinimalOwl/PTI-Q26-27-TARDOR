@@ -518,17 +518,24 @@ def escribir_gold(productos: list[dict]) -> None:
         def _pregunta(titulo: str, campo: str, nota: str) -> dict:
             """Genera la pregunta de minimo con su ground truth.
 
-            Ojo con los empates: el **precio unitario** viene del precio de
-            referencia de la fuente, que es el mismo en las tres cadenas, asi
-            que "el mas barato por unidad" suele ser un empate de tres. El
-            ground truth tiene que aceptar **todas** las cadenas empatadas:
-            si no, se marca como fallo una respuesta que es correcta.
+            Dos detalles que importan:
+
+            - **El formato va en la pregunta.** Sin el, "el aceite de oliva
+              virgen extra mas barato" aparece dos veces en el gold (el de 1 l
+              y el de 0,5 l) con respuestas distintas, y una respuesta
+              correcta se puntua como fallo por la ambiguedad.
+            - **Los empates se aceptan.** El precio unitario viene del precio
+              de referencia de la fuente, que es el mismo en las tres
+              cadenas, asi que "el mas barato por unidad" suele ser un empate
+              de tres. El ground truth tiene que aceptar todas las cadenas
+              empatadas.
             """
             minimo = min(Decimal(p[campo]) for p in completos)
             empatados = [p for p in completos if Decimal(p[campo]) == minimo]
             valor = f"{minimo:.2f}"
+            etiqueta = f"{canonico.nombre.lower()} de {canonico.size} {canonico.size_fmt}"
             return {
-                "question": f"¿Cuál es el {canonico.nombre.lower()} {titulo}?",
+                "question": f"¿Cuál es el {etiqueta} {titulo}?",
                 "expected_pids": [p["pid"] for p in empatados],
                 "expected_contains": [
                     [valor, valor.replace(".", ",")],
@@ -564,6 +571,15 @@ def escribir_gold(productos: list[dict]) -> None:
     (GOLD_DIR / "qa.json").write_text(
         json.dumps(preguntas, ensure_ascii=False, indent=2), encoding="utf-8"
     )
+
+    # Control: dos preguntas con el mismo texto y ground truth distinto
+    # puntuan como fallo una respuesta correcta. No puede pasar.
+    vistas: dict[str, list] = {}
+    for p in preguntas:
+        vistas.setdefault(p["question"], []).append(p["expected_contains"])
+    duplicadas = {q: v for q, v in vistas.items() if len(v) > 1}
+    if duplicadas:
+        raise AssertionError(f"preguntas de QA duplicadas: {list(duplicadas)[:3]}")
 
 
 def main() -> None:

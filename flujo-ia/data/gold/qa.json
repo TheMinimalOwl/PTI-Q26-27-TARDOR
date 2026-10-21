@@ -1,6 +1,6 @@
 [
   {
-    "question": "¿Cuál es el aceite de girasol más barato por unidad?",
+    "question": "¿Cuál es el aceite de girasol de 1 l más barato por unidad?",
     "expected_pids": [
       "10010",
       "10011",
@@ -20,7 +20,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el aceite de girasol más barato en total?",
+    "question": "¿Cuál es el aceite de girasol de 1 l más barato en total?",
     "expected_pids": [
       "10011"
     ],
@@ -36,7 +36,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el aceite de oliva suave más barato por unidad?",
+    "question": "¿Cuál es el aceite de oliva suave de 1 l más barato por unidad?",
     "expected_pids": [
       "10007",
       "10008",
@@ -56,7 +56,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el aceite de oliva suave más barato en total?",
+    "question": "¿Cuál es el aceite de oliva suave de 1 l más barato en total?",
     "expected_pids": [
       "10008"
     ],
@@ -72,7 +72,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el aceite de oliva virgen extra más barato por unidad?",
+    "question": "¿Cuál es el aceite de oliva virgen extra de 0.5 l más barato por unidad?",
     "expected_pids": [
       "10004",
       "10005",
@@ -92,7 +92,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el aceite de oliva virgen extra más barato en total?",
+    "question": "¿Cuál es el aceite de oliva virgen extra de 0.5 l más barato en total?",
     "expected_pids": [
       "10005"
     ],
@@ -108,7 +108,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el aceite de oliva virgen extra más barato por unidad?",
+    "question": "¿Cuál es el aceite de oliva virgen extra de 1 l más barato por unidad?",
     "expected_pids": [
       "10001",
       "10002",
@@ -128,7 +128,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el aceite de oliva virgen extra más barato en total?",
+    "question": "¿Cuál es el aceite de oliva virgen extra de 1 l más barato en total?",
     "expected_pids": [
       "10002"
     ],
@@ -144,7 +144,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el aceitunas verdes rellenas más barato por unidad?",
+    "question": "¿Cuál es el aceitunas verdes rellenas de 250 g más barato por unidad?",
     "expected_pids": [
       "10124",
       "10125",
@@ -164,7 +164,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el aceitunas verdes rellenas más barato en total?",
+    "question": "¿Cuál es el aceitunas verdes rellenas de 250 g más barato en total?",
     "expected_pids": [
       "10125"
     ],
@@ -180,7 +180,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el agua con gas más barato por unidad?",
+    "question": "¿Cuál es el agua con gas de 1.5 l más barato por unidad?",
     "expected_pids": [
       "10130",
       "10131",
@@ -200,7 +200,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el agua con gas más barato en total?",
+    "question": "¿Cuál es el agua con gas de 1.5 l más barato en total?",
     "expected_pids": [
       "10131",
       "10132"
@@ -218,7 +218,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el agua mineral más barato por unidad?",
+    "question": "¿Cuál es el agua mineral de 1.5 l más barato por unidad?",
     "expected_pids": [
       "10127",
       "10128",
@@ -238,7 +238,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el agua mineral más barato en total?",
+    "question": "¿Cuál es el agua mineral de 1.5 l más barato en total?",
     "expected_pids": [
       "10128"
     ],
@@ -254,7 +254,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el aguacates más barato por unidad?",
+    "question": "¿Cuál es el aguacates de 4 ud más barato por unidad?",
     "expected_pids": [
       "10226",
       "10227",
@@ -274,7 +274,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el aguacates más barato en total?",
+    "question": "¿Cuál es el aguacates de 4 ud más barato en total?",
     "expected_pids": [
       "10227"
     ],
@@ -290,7 +290,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el alubias cocidas más barato por unidad?",
+    "question": "¿Cuál es el alubias cocidas de 570 g más barato por unidad?",
     "expected_pids": [
       "10112",
       "10113",
@@ -310,7 +310,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el alubias cocidas más barato en total?",
+    "question": "¿Cuál es el alubias cocidas de 570 g más barato en total?",
     "expected_pids": [
       "10113"
     ],
@@ -326,7 +326,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el atún claro en aceite de oliva más barato por unidad?",
+    "question": "¿Cuál es el atún claro en aceite de oliva de 3 ud más barato por unidad?",
     "expected_pids": [
       "10103",
       "10104",
@@ -346,7 +346,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el atún claro en aceite de oliva más barato en total?",
+    "question": "¿Cuál es el atún claro en aceite de oliva de 3 ud más barato en total?",
     "expected_pids": [
       "10104"
     ],
@@ -362,7 +362,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el atún en salmuera más barato por unidad?",
+    "question": "¿Cuál es el atún en salmuera de 3 ud más barato por unidad?",
     "expected_pids": [
       "10115",
       "10116",
@@ -382,7 +382,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el atún en salmuera más barato en total?",
+    "question": "¿Cuál es el atún en salmuera de 3 ud más barato en total?",
     "expected_pids": [
       "10116"
     ],
@@ -398,7 +398,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el azúcar blanco más barato por unidad?",
+    "question": "¿Cuál es el azúcar blanco de 1 kg más barato por unidad?",
     "expected_pids": [
       "10028",
       "10029",
@@ -418,7 +418,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el azúcar blanco más barato en total?",
+    "question": "¿Cuál es el azúcar blanco de 1 kg más barato en total?",
     "expected_pids": [
       "10029"
     ],
@@ -434,7 +434,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el barra de pan rústica más barato por unidad?",
+    "question": "¿Cuál es el barra de pan rústica de 250 g más barato por unidad?",
     "expected_pids": [
       "10073",
       "10074",
@@ -454,7 +454,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el barra de pan rústica más barato en total?",
+    "question": "¿Cuál es el barra de pan rústica de 250 g más barato en total?",
     "expected_pids": [
       "10074"
     ],
@@ -470,7 +470,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el batido de chocolate más barato por unidad?",
+    "question": "¿Cuál es el batido de chocolate de 1 l más barato por unidad?",
     "expected_pids": [
       "10064",
       "10065",
@@ -490,7 +490,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el batido de chocolate más barato en total?",
+    "question": "¿Cuál es el batido de chocolate de 1 l más barato en total?",
     "expected_pids": [
       "10065"
     ],
@@ -506,7 +506,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el bayeta de microfibra más barato por unidad?",
+    "question": "¿Cuál es el bayeta de microfibra de 5 ud más barato por unidad?",
     "expected_pids": [
       "10196",
       "10197",
@@ -526,7 +526,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el bayeta de microfibra más barato en total?",
+    "question": "¿Cuál es el bayeta de microfibra de 5 ud más barato en total?",
     "expected_pids": [
       "10197"
     ],
@@ -542,7 +542,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el bolsas de basura más barato por unidad?",
+    "question": "¿Cuál es el bolsas de basura de 20 ud más barato por unidad?",
     "expected_pids": [
       "10200"
     ],
@@ -558,7 +558,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el bolsas de basura más barato en total?",
+    "question": "¿Cuál es el bolsas de basura de 20 ud más barato en total?",
     "expected_pids": [
       "10200"
     ],
@@ -574,7 +574,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el cacahuetes salados más barato por unidad?",
+    "question": "¿Cuál es el cacahuetes salados de 200 g más barato por unidad?",
     "expected_pids": [
       "10154",
       "10155",
@@ -594,7 +594,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el cacahuetes salados más barato en total?",
+    "question": "¿Cuál es el cacahuetes salados de 200 g más barato en total?",
     "expected_pids": [
       "10155"
     ],
@@ -610,7 +610,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el café molido natural más barato por unidad?",
+    "question": "¿Cuál es el café molido natural de 250 g más barato por unidad?",
     "expected_pids": [
       "10034",
       "10035",
@@ -630,7 +630,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el café molido natural más barato en total?",
+    "question": "¿Cuál es el café molido natural de 250 g más barato en total?",
     "expected_pids": [
       "10035"
     ],
@@ -646,7 +646,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el cebollas más barato por unidad?",
+    "question": "¿Cuál es el cebollas de 1 kg más barato por unidad?",
     "expected_pids": [
       "10229",
       "10230",
@@ -666,7 +666,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el cebollas más barato en total?",
+    "question": "¿Cuál es el cebollas de 1 kg más barato en total?",
     "expected_pids": [
       "10230"
     ],
@@ -682,7 +682,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el cereales con chocolate más barato por unidad?",
+    "question": "¿Cuál es el cereales con chocolate de 500 g más barato por unidad?",
     "expected_pids": [
       "10091",
       "10092",
@@ -702,7 +702,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el cereales con chocolate más barato en total?",
+    "question": "¿Cuál es el cereales con chocolate de 500 g más barato en total?",
     "expected_pids": [
       "10092"
     ],
@@ -718,7 +718,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el cerveza rubia más barato por unidad?",
+    "question": "¿Cuál es el cerveza rubia de 0.33 l más barato por unidad?",
     "expected_pids": [
       "10142",
       "10143",
@@ -738,7 +738,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el cerveza rubia más barato en total?",
+    "question": "¿Cuál es el cerveza rubia de 0.33 l más barato en total?",
     "expected_pids": [
       "10143"
     ],
@@ -754,7 +754,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el chocolate con leche más barato por unidad?",
+    "question": "¿Cuál es el chocolate con leche de 125 g más barato por unidad?",
     "expected_pids": [
       "10157",
       "10158",
@@ -774,7 +774,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el chocolate con leche más barato en total?",
+    "question": "¿Cuál es el chocolate con leche de 125 g más barato en total?",
     "expected_pids": [
       "10158"
     ],
@@ -790,7 +790,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el chucherías surtidas más barato por unidad?",
+    "question": "¿Cuál es el chucherías surtidas de 150 g más barato por unidad?",
     "expected_pids": [
       "10163",
       "10164",
@@ -810,7 +810,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el chucherías surtidas más barato en total?",
+    "question": "¿Cuál es el chucherías surtidas de 150 g más barato en total?",
     "expected_pids": [
       "10164"
     ],
@@ -826,7 +826,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el comida para gatos más barato por unidad?",
+    "question": "¿Cuál es el comida para gatos de 1.5 kg más barato por unidad?",
     "expected_pids": [
       "10247",
       "10248",
@@ -846,7 +846,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el comida para gatos más barato en total?",
+    "question": "¿Cuál es el comida para gatos de 1.5 kg más barato en total?",
     "expected_pids": [
       "10248"
     ],
@@ -862,7 +862,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el comida para perros más barato por unidad?",
+    "question": "¿Cuál es el comida para perros de 3 kg más barato por unidad?",
     "expected_pids": [
       "10244",
       "10245",
@@ -882,7 +882,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el comida para perros más barato en total?",
+    "question": "¿Cuál es el comida para perros de 3 kg más barato en total?",
     "expected_pids": [
       "10245"
     ],
@@ -898,7 +898,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el copos de avena más barato por unidad?",
+    "question": "¿Cuál es el copos de avena de 500 g más barato por unidad?",
     "expected_pids": [
       "10088",
       "10089",
@@ -918,7 +918,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el copos de avena más barato en total?",
+    "question": "¿Cuál es el copos de avena de 500 g más barato en total?",
     "expected_pids": [
       "10089"
     ],
@@ -934,7 +934,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el corn flakes más barato por unidad?",
+    "question": "¿Cuál es el corn flakes de 500 g más barato por unidad?",
     "expected_pids": [
       "10094",
       "10095",
@@ -954,7 +954,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el corn flakes más barato en total?",
+    "question": "¿Cuál es el corn flakes de 500 g más barato en total?",
     "expected_pids": [
       "10095"
     ],
@@ -970,7 +970,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el croissant de mantequilla más barato por unidad?",
+    "question": "¿Cuál es el croissant de mantequilla de 55 g más barato por unidad?",
     "expected_pids": [
       "10082",
       "10083",
@@ -990,7 +990,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el croissant de mantequilla más barato en total?",
+    "question": "¿Cuál es el croissant de mantequilla de 55 g más barato en total?",
     "expected_pids": [
       "10083"
     ],
@@ -1006,7 +1006,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el detergente líquido más barato por unidad?",
+    "question": "¿Cuál es el detergente líquido de 40 lv más barato por unidad?",
     "expected_pids": [
       "10173"
     ],
@@ -1022,7 +1022,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el detergente líquido más barato en total?",
+    "question": "¿Cuál es el detergente líquido de 40 lv más barato en total?",
     "expected_pids": [
       "10173"
     ],
@@ -1038,7 +1038,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el donut de chocolate más barato por unidad?",
+    "question": "¿Cuál es el donut de chocolate de 1 ud más barato por unidad?",
     "expected_pids": [
       "10085",
       "10086",
@@ -1058,7 +1058,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el donut de chocolate más barato en total?",
+    "question": "¿Cuál es el donut de chocolate de 1 ud más barato en total?",
     "expected_pids": [
       "10086"
     ],
@@ -1074,7 +1074,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el flan de vainilla más barato por unidad?",
+    "question": "¿Cuál es el flan de vainilla de 4 ud más barato por unidad?",
     "expected_pids": [
       "10067",
       "10068",
@@ -1094,7 +1094,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el flan de vainilla más barato en total?",
+    "question": "¿Cuál es el flan de vainilla de 4 ud más barato en total?",
     "expected_pids": [
       "10068"
     ],
@@ -1110,7 +1110,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el galletas de chocolate más barato por unidad?",
+    "question": "¿Cuál es el galletas de chocolate de 300 g más barato por unidad?",
     "expected_pids": [
       "10160",
       "10161",
@@ -1130,7 +1130,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el galletas de chocolate más barato en total?",
+    "question": "¿Cuál es el galletas de chocolate de 300 g más barato en total?",
     "expected_pids": [
       "10161"
     ],
@@ -1146,7 +1146,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el guisantes congelados más barato por unidad?",
+    "question": "¿Cuál es el guisantes congelados de 1 kg más barato por unidad?",
     "expected_pids": [
       "10232",
       "10233",
@@ -1166,7 +1166,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el guisantes congelados más barato en total?",
+    "question": "¿Cuál es el guisantes congelados de 1 kg más barato en total?",
     "expected_pids": [
       "10233"
     ],
@@ -1182,7 +1182,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el gulas caseras más barato por unidad?",
+    "question": "¿Cuál es el gulas caseras de 400 g más barato por unidad?",
     "expected_pids": [
       "10106",
       "10107",
@@ -1202,7 +1202,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el gulas caseras más barato en total?",
+    "question": "¿Cuál es el gulas caseras de 400 g más barato en total?",
     "expected_pids": [
       "10107"
     ],
@@ -1218,7 +1218,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el harina de trigo más barato por unidad?",
+    "question": "¿Cuál es el harina de trigo de 1 kg más barato por unidad?",
     "expected_pids": [
       "10031",
       "10032",
@@ -1238,7 +1238,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el harina de trigo más barato en total?",
+    "question": "¿Cuál es el harina de trigo de 1 kg más barato en total?",
     "expected_pids": [
       "10032"
     ],
@@ -1254,7 +1254,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el jabón de manos más barato por unidad?",
+    "question": "¿Cuál es el jabón de manos de 500 ml más barato por unidad?",
     "expected_pids": [
       "10184",
       "10185",
@@ -1274,7 +1274,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el jabón de manos más barato en total?",
+    "question": "¿Cuál es el jabón de manos de 500 ml más barato en total?",
     "expected_pids": [
       "10185"
     ],
@@ -1290,7 +1290,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el kikos más barato por unidad?",
+    "question": "¿Cuál es el kikos de 70 g más barato por unidad?",
     "expected_pids": [
       "10167"
     ],
@@ -1306,7 +1306,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el kikos más barato en total?",
+    "question": "¿Cuál es el kikos de 70 g más barato en total?",
     "expected_pids": [
       "10167"
     ],
@@ -1322,7 +1322,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el lavavajillas concentrado más barato por unidad?",
+    "question": "¿Cuál es el lavavajillas concentrado de 750 ml más barato por unidad?",
     "expected_pids": [
       "10187",
       "10188",
@@ -1342,7 +1342,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el lavavajillas concentrado más barato en total?",
+    "question": "¿Cuál es el lavavajillas concentrado de 750 ml más barato en total?",
     "expected_pids": [
       "10188"
     ],
@@ -1358,7 +1358,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el leche desnatada más barato por unidad?",
+    "question": "¿Cuál es el leche desnatada de 1 l más barato por unidad?",
     "expected_pids": [
       "10043",
       "10044",
@@ -1378,7 +1378,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el leche desnatada más barato en total?",
+    "question": "¿Cuál es el leche desnatada de 1 l más barato en total?",
     "expected_pids": [
       "10044"
     ],
@@ -1394,7 +1394,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el leche entera más barato por unidad?",
+    "question": "¿Cuál es el leche entera de 1 l más barato por unidad?",
     "expected_pids": [
       "10037",
       "10038",
@@ -1414,7 +1414,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el leche entera más barato en total?",
+    "question": "¿Cuál es el leche entera de 1 l más barato en total?",
     "expected_pids": [
       "10038"
     ],
@@ -1430,7 +1430,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el leche semidesnatada más barato por unidad?",
+    "question": "¿Cuál es el leche semidesnatada de 1 l más barato por unidad?",
     "expected_pids": [
       "10040",
       "10041",
@@ -1450,7 +1450,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el leche semidesnatada más barato en total?",
+    "question": "¿Cuál es el leche semidesnatada de 1 l más barato en total?",
     "expected_pids": [
       "10041"
     ],
@@ -1466,7 +1466,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el lechuga iceberg más barato por unidad?",
+    "question": "¿Cuál es el lechuga iceberg de 1 ud más barato por unidad?",
     "expected_pids": [
       "10214",
       "10215",
@@ -1486,7 +1486,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el lechuga iceberg más barato en total?",
+    "question": "¿Cuál es el lechuga iceberg de 1 ud más barato en total?",
     "expected_pids": [
       "10215"
     ],
@@ -1502,7 +1502,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el lejía perfumada más barato por unidad?",
+    "question": "¿Cuál es el lejía perfumada de 2 l más barato por unidad?",
     "expected_pids": [
       "10175",
       "10176",
@@ -1522,7 +1522,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el lejía perfumada más barato en total?",
+    "question": "¿Cuál es el lejía perfumada de 2 l más barato en total?",
     "expected_pids": [
       "10176"
     ],
@@ -1538,7 +1538,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el limones más barato por unidad?",
+    "question": "¿Cuál es el limones de 1 kg más barato por unidad?",
     "expected_pids": [
       "10223",
       "10224",
@@ -1558,7 +1558,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el limones más barato en total?",
+    "question": "¿Cuál es el limones de 1 kg más barato en total?",
     "expected_pids": [
       "10224"
     ],
@@ -1574,7 +1574,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el limpiacristales más barato por unidad?",
+    "question": "¿Cuál es el limpiacristales de 750 ml más barato por unidad?",
     "expected_pids": [
       "10178",
       "10179",
@@ -1594,7 +1594,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el limpiacristales más barato en total?",
+    "question": "¿Cuál es el limpiacristales de 750 ml más barato en total?",
     "expected_pids": [
       "10179"
     ],
@@ -1610,7 +1610,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el limpiador multiusos más barato por unidad?",
+    "question": "¿Cuál es el limpiador multiusos de 1 l más barato por unidad?",
     "expected_pids": [
       "10202",
       "10203",
@@ -1630,7 +1630,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el limpiador multiusos más barato en total?",
+    "question": "¿Cuál es el limpiador multiusos de 1 l más barato en total?",
     "expected_pids": [
       "10203"
     ],
@@ -1646,7 +1646,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el magdalenas más barato por unidad?",
+    "question": "¿Cuál es el magdalenas de 12 ud más barato por unidad?",
     "expected_pids": [
       "10079",
       "10080",
@@ -1666,7 +1666,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el magdalenas más barato en total?",
+    "question": "¿Cuál es el magdalenas de 12 ud más barato en total?",
     "expected_pids": [
       "10080"
     ],
@@ -1682,7 +1682,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el maíz dulce más barato por unidad?",
+    "question": "¿Cuál es el maíz dulce de 300 g más barato por unidad?",
     "expected_pids": [
       "10121",
       "10122",
@@ -1702,7 +1702,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el maíz dulce más barato en total?",
+    "question": "¿Cuál es el maíz dulce de 300 g más barato en total?",
     "expected_pids": [
       "10122"
     ],
@@ -1718,7 +1718,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el mantequilla más barato por unidad?",
+    "question": "¿Cuál es el mantequilla de 250 g más barato por unidad?",
     "expected_pids": [
       "10058",
       "10059",
@@ -1738,7 +1738,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el mantequilla más barato en total?",
+    "question": "¿Cuál es el mantequilla de 250 g más barato en total?",
     "expected_pids": [
       "10060"
     ],
@@ -1754,7 +1754,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el manzana golden más barato por unidad?",
+    "question": "¿Cuál es el manzana golden de 1 kg más barato por unidad?",
     "expected_pids": [
       "10208",
       "10209",
@@ -1774,7 +1774,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el manzana golden más barato en total?",
+    "question": "¿Cuál es el manzana golden de 1 kg más barato en total?",
     "expected_pids": [
       "10209"
     ],
@@ -1790,7 +1790,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el mayonesa más barato por unidad?",
+    "question": "¿Cuál es el mayonesa de 0.4 l más barato por unidad?",
     "expected_pids": [
       "10019",
       "10020",
@@ -1810,7 +1810,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el mayonesa más barato en total?",
+    "question": "¿Cuál es el mayonesa de 0.4 l más barato en total?",
     "expected_pids": [
       "10020"
     ],
@@ -1826,7 +1826,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el merluza en filetes más barato por unidad?",
+    "question": "¿Cuál es el merluza en filetes de 400 g más barato por unidad?",
     "expected_pids": [
       "10235",
       "10236",
@@ -1846,7 +1846,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el merluza en filetes más barato en total?",
+    "question": "¿Cuál es el merluza en filetes de 400 g más barato en total?",
     "expected_pids": [
       "10237"
     ],
@@ -1862,7 +1862,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el mermelada de fresa más barato por unidad?",
+    "question": "¿Cuál es el mermelada de fresa de 300 g más barato por unidad?",
     "expected_pids": [
       "10097",
       "10098",
@@ -1882,7 +1882,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el mermelada de fresa más barato en total?",
+    "question": "¿Cuál es el mermelada de fresa de 300 g más barato en total?",
     "expected_pids": [
       "10098"
     ],
@@ -1898,7 +1898,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el miel más barato por unidad?",
+    "question": "¿Cuál es el miel de 1 kg más barato por unidad?",
     "expected_pids": [
       "10100",
       "10101",
@@ -1918,7 +1918,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el miel más barato en total?",
+    "question": "¿Cuál es el miel de 1 kg más barato en total?",
     "expected_pids": [
       "10101"
     ],
@@ -1934,7 +1934,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el mostaza más barato por unidad?",
+    "question": "¿Cuál es el mostaza de 0.25 l más barato por unidad?",
     "expected_pids": [
       "10022",
       "10023",
@@ -1954,7 +1954,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el mostaza más barato en total?",
+    "question": "¿Cuál es el mostaza de 0.25 l más barato en total?",
     "expected_pids": [
       "10023"
     ],
@@ -1970,7 +1970,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el queso mozzarella más barato por unidad?",
+    "question": "¿Cuál es el queso mozzarella de 125 g más barato por unidad?",
     "expected_pids": [
       "10055",
       "10056",
@@ -1990,7 +1990,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el queso mozzarella más barato en total?",
+    "question": "¿Cuál es el queso mozzarella de 125 g más barato en total?",
     "expected_pids": [
       "10056"
     ],
@@ -2006,7 +2006,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el nata para cocinar más barato por unidad?",
+    "question": "¿Cuál es el nata para cocinar de 500 ml más barato por unidad?",
     "expected_pids": [
       "10061",
       "10062",
@@ -2026,7 +2026,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el nata para cocinar más barato en total?",
+    "question": "¿Cuál es el nata para cocinar de 500 ml más barato en total?",
     "expected_pids": [
       "10062"
     ],
@@ -2042,7 +2042,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el pan de molde blanco más barato por unidad?",
+    "question": "¿Cuál es el pan de molde blanco de 600 g más barato por unidad?",
     "expected_pids": [
       "10076",
       "10077",
@@ -2062,7 +2062,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el pan de molde blanco más barato en total?",
+    "question": "¿Cuál es el pan de molde blanco de 600 g más barato en total?",
     "expected_pids": [
       "10077"
     ],
@@ -2078,7 +2078,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el pan de molde integral más barato por unidad?",
+    "question": "¿Cuál es el pan de molde integral de 600 g más barato por unidad?",
     "expected_pids": [
       "10070",
       "10071",
@@ -2098,7 +2098,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el pan de molde integral más barato en total?",
+    "question": "¿Cuál es el pan de molde integral de 600 g más barato en total?",
     "expected_pids": [
       "10071"
     ],
@@ -2114,7 +2114,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el papel higiénico más barato por unidad?",
+    "question": "¿Cuál es el papel higiénico de 12 ud más barato por unidad?",
     "expected_pids": [
       "10190",
       "10191",
@@ -2134,7 +2134,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el papel higiénico más barato en total?",
+    "question": "¿Cuál es el papel higiénico de 12 ud más barato en total?",
     "expected_pids": [
       "10191"
     ],
@@ -2150,7 +2150,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el patatas más barato por unidad?",
+    "question": "¿Cuál es el patatas de 2.5 kg más barato por unidad?",
     "expected_pids": [
       "10217",
       "10218",
@@ -2170,7 +2170,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el patatas más barato en total?",
+    "question": "¿Cuál es el patatas de 2.5 kg más barato en total?",
     "expected_pids": [
       "10218"
     ],
@@ -2186,7 +2186,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el patatas fritas más barato por unidad?",
+    "question": "¿Cuál es el patatas fritas de 150 g más barato por unidad?",
     "expected_pids": [
       "10151",
       "10152",
@@ -2206,7 +2206,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el patatas fritas más barato en total?",
+    "question": "¿Cuál es el patatas fritas de 150 g más barato en total?",
     "expected_pids": [
       "10152"
     ],
@@ -2222,7 +2222,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el patatas prefritas congeladas más barato por unidad?",
+    "question": "¿Cuál es el patatas prefritas congeladas de 1 kg más barato por unidad?",
     "expected_pids": [
       "10241",
       "10242",
@@ -2242,7 +2242,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el patatas prefritas congeladas más barato en total?",
+    "question": "¿Cuál es el patatas prefritas congeladas de 1 kg más barato en total?",
     "expected_pids": [
       "10242"
     ],
@@ -2258,7 +2258,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el pizza cuatro quesos más barato por unidad?",
+    "question": "¿Cuál es el pizza cuatro quesos de 350 g más barato por unidad?",
     "expected_pids": [
       "10238",
       "10239",
@@ -2278,7 +2278,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el pizza cuatro quesos más barato en total?",
+    "question": "¿Cuál es el pizza cuatro quesos de 350 g más barato en total?",
     "expected_pids": [
       "10239"
     ],
@@ -2294,7 +2294,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el plátano de canarias más barato por unidad?",
+    "question": "¿Cuál es el plátano de canarias de 1 kg más barato por unidad?",
     "expected_pids": [
       "10205",
       "10206",
@@ -2314,7 +2314,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el plátano de canarias más barato en total?",
+    "question": "¿Cuál es el plátano de canarias de 1 kg más barato en total?",
     "expected_pids": [
       "10206"
     ],
@@ -2330,7 +2330,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el queso curado semicurado más barato por unidad?",
+    "question": "¿Cuál es el queso curado semicurado de 250 g más barato por unidad?",
     "expected_pids": [
       "10052",
       "10053",
@@ -2350,7 +2350,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el queso curado semicurado más barato en total?",
+    "question": "¿Cuál es el queso curado semicurado de 250 g más barato en total?",
     "expected_pids": [
       "10053"
     ],
@@ -2366,7 +2366,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el refresco de cola más barato por unidad?",
+    "question": "¿Cuál es el refresco de cola de 2 l más barato por unidad?",
     "expected_pids": [
       "10139",
       "10140",
@@ -2386,7 +2386,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el refresco de cola más barato en total?",
+    "question": "¿Cuál es el refresco de cola de 2 l más barato en total?",
     "expected_pids": [
       "10140"
     ],
@@ -2402,7 +2402,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el rollo de cocina más barato por unidad?",
+    "question": "¿Cuál es el rollo de cocina de 2 ud más barato por unidad?",
     "expected_pids": [
       "10193",
       "10194",
@@ -2422,7 +2422,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el rollo de cocina más barato en total?",
+    "question": "¿Cuál es el rollo de cocina de 2 ud más barato en total?",
     "expected_pids": [
       "10194"
     ],
@@ -2438,7 +2438,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el sal marina fina más barato por unidad?",
+    "question": "¿Cuál es el sal marina fina de 1 kg más barato por unidad?",
     "expected_pids": [
       "10025",
       "10026",
@@ -2458,7 +2458,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el sal marina fina más barato en total?",
+    "question": "¿Cuál es el sal marina fina de 1 kg más barato en total?",
     "expected_pids": [
       "10026",
       "10027"
@@ -2476,7 +2476,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el salsa de soja más barato por unidad?",
+    "question": "¿Cuál es el salsa de soja de 0.25 l más barato por unidad?",
     "expected_pids": [
       "10016",
       "10017",
@@ -2496,7 +2496,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el salsa de soja más barato en total?",
+    "question": "¿Cuál es el salsa de soja de 0.25 l más barato en total?",
     "expected_pids": [
       "10017"
     ],
@@ -2512,7 +2512,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el sardinas en aceite de oliva más barato por unidad?",
+    "question": "¿Cuál es el sardinas en aceite de oliva de 120 g más barato por unidad?",
     "expected_pids": [
       "10118",
       "10119",
@@ -2532,7 +2532,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el sardinas en aceite de oliva más barato en total?",
+    "question": "¿Cuál es el sardinas en aceite de oliva de 120 g más barato en total?",
     "expected_pids": [
       "10119"
     ],
@@ -2548,7 +2548,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el suavizante concentrado más barato por unidad?",
+    "question": "¿Cuál es el suavizante concentrado de 1 l más barato por unidad?",
     "expected_pids": [
       "10181",
       "10182",
@@ -2568,7 +2568,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el suavizante concentrado más barato en total?",
+    "question": "¿Cuál es el suavizante concentrado de 1 l más barato en total?",
     "expected_pids": [
       "10182"
     ],
@@ -2584,7 +2584,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el tomate pera más barato por unidad?",
+    "question": "¿Cuál es el tomate pera de 1 kg más barato por unidad?",
     "expected_pids": [
       "10211",
       "10212",
@@ -2604,7 +2604,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el tomate pera más barato en total?",
+    "question": "¿Cuál es el tomate pera de 1 kg más barato en total?",
     "expected_pids": [
       "10212"
     ],
@@ -2620,7 +2620,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el tomate triturado más barato por unidad?",
+    "question": "¿Cuál es el tomate triturado de 400 g más barato por unidad?",
     "expected_pids": [
       "10109",
       "10110",
@@ -2640,7 +2640,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el tomate triturado más barato en total?",
+    "question": "¿Cuál es el tomate triturado de 400 g más barato en total?",
     "expected_pids": [
       "10110"
     ],
@@ -2656,7 +2656,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el tónica más barato por unidad?",
+    "question": "¿Cuál es el tónica de 1 l más barato por unidad?",
     "expected_pids": [
       "10148",
       "10149",
@@ -2676,7 +2676,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el tónica más barato en total?",
+    "question": "¿Cuál es el tónica de 1 l más barato en total?",
     "expected_pids": [
       "10149"
     ],
@@ -2692,7 +2692,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el vinagre de vino blanco más barato por unidad?",
+    "question": "¿Cuál es el vinagre de vino blanco de 1 l más barato por unidad?",
     "expected_pids": [
       "10013",
       "10014",
@@ -2712,7 +2712,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el vinagre de vino blanco más barato en total?",
+    "question": "¿Cuál es el vinagre de vino blanco de 1 l más barato en total?",
     "expected_pids": [
       "10014"
     ],
@@ -2728,7 +2728,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el vino tinto d.o. más barato por unidad?",
+    "question": "¿Cuál es el vino tinto d.o. de 1 l más barato por unidad?",
     "expected_pids": [
       "10145",
       "10146",
@@ -2748,7 +2748,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el vino tinto d.o. más barato en total?",
+    "question": "¿Cuál es el vino tinto d.o. de 1 l más barato en total?",
     "expected_pids": [
       "10146"
     ],
@@ -2764,7 +2764,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el yogur de fresa más barato por unidad?",
+    "question": "¿Cuál es el yogur de fresa de 125 g más barato por unidad?",
     "expected_pids": [
       "10049",
       "10050",
@@ -2784,7 +2784,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el yogur de fresa más barato en total?",
+    "question": "¿Cuál es el yogur de fresa de 125 g más barato en total?",
     "expected_pids": [
       "10050"
     ],
@@ -2800,7 +2800,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el yogur natural más barato por unidad?",
+    "question": "¿Cuál es el yogur natural de 500 g más barato por unidad?",
     "expected_pids": [
       "10046",
       "10047",
@@ -2820,7 +2820,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el yogur natural más barato en total?",
+    "question": "¿Cuál es el yogur natural de 500 g más barato en total?",
     "expected_pids": [
       "10047"
     ],
@@ -2836,7 +2836,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el zanahoria más barato por unidad?",
+    "question": "¿Cuál es el zanahoria de 1 kg más barato por unidad?",
     "expected_pids": [
       "10220",
       "10221",
@@ -2856,7 +2856,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el zanahoria más barato en total?",
+    "question": "¿Cuál es el zanahoria de 1 kg más barato en total?",
     "expected_pids": [
       "10221"
     ],
@@ -2872,7 +2872,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el zumo de manzana más barato por unidad?",
+    "question": "¿Cuál es el zumo de manzana de 1 l más barato por unidad?",
     "expected_pids": [
       "10136",
       "10137",
@@ -2892,7 +2892,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el zumo de manzana más barato en total?",
+    "question": "¿Cuál es el zumo de manzana de 1 l más barato en total?",
     "expected_pids": [
       "10137"
     ],
@@ -2908,7 +2908,7 @@
     "note": "precio total minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el zumo de naranja 100% más barato por unidad?",
+    "question": "¿Cuál es el zumo de naranja 100% de 1 l más barato por unidad?",
     "expected_pids": [
       "10133",
       "10134",
@@ -2928,7 +2928,7 @@
     "note": "precio unitario minimo entre cadenas"
   },
   {
-    "question": "¿Cuál es el zumo de naranja 100% más barato en total?",
+    "question": "¿Cuál es el zumo de naranja 100% de 1 l más barato en total?",
     "expected_pids": [
       "10134"
     ],
