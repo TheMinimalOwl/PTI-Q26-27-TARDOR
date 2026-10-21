@@ -41,10 +41,14 @@ El prototipo no necesita GPU. Lo que decide es el **LLM**:
 | `qwen3:30b-a3b` | 18 GB + 2 GB | 24 GB | 20-60 s (3B activos) |
 | Gemini (API) | 2 GB | 4 GB | 2-6 s (depende de la red) |
 
-Disco: **8 GB** como minimo (modelo de embeddings 2.2 GB + modelo de Ollama
-2.5-18 GB + indice). Si el sistema de la VM tiene la particion raiz llena,
-`ollama pull` falla con *no space left on device*: hay que mover `OLLAMA_MODELS`
-a una particion con espacio (ver mas abajo).
+Disco: **8 GB** como minimo (modelo de embeddings 0,5 GB con `e5-small` + modelo
+de Ollama 2.5-18 GB + indice). Si el sistema de la VM tiene la particion raiz
+llena, `ollama pull` falla con *no space left on device*: hay que mover
+`OLLAMA_MODELS` a una particion con espacio (ver mas abajo).
+
+> Los pesos de los embeddings van a `~/.cache/huggingface` (la ubicacion
+> estandar de HuggingFace), **no** dentro del repo: asi el clon del proyecto
+> no arrastra medio gigabyte y la cache se comparte entre clones.
 
 ## 2. Instalacion en la VM
 
