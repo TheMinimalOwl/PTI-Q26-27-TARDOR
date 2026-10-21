@@ -66,7 +66,17 @@ class NoLLM(BaseLLM):
 
 
 class OllamaLLM(BaseLLM):
-    """LLM local con Ollama (http://localhost:11434 por defecto)."""
+    """LLM local con Ollama (http://localhost:11434 por defecto).
+
+    `RAG_OLLAMA_THINK` decide si el modelo razona antes de responder:
+
+    - `false` (por defecto): manda `"think": false` a la API. En un modelo
+      razonador (Qwen3) esto es la diferencia entre **0,7 s y 15 s** por
+      respuesta en CPU: sin el, el modelo se gasta cientos de tokens
+      pensando y la demo se arrastra.
+    - `true`: deja razonar al modelo. Mejor para tareas que lo necesiten
+      (elegir el equivalente entre candidatos), pero varias veces mas lento.
+    """
 
     provider = "ollama"
 
@@ -74,6 +84,16 @@ class OllamaLLM(BaseLLM):
         self.model = model or config.OLLAMA_MODEL
         self.host = (host or config.OLLAMA_HOST).rstrip("/")
         self.timeout = timeout or config.OLLAMA_TIMEOUT
+
+    def _think(self) -> bool | None:
+        import os
+
+        raw = os.environ.get("RAG_OLLAMA_THINK", "false").strip().lower()
+        if raw in ("0", "false", "no", "off"):
+            return False
+        if raw in ("1", "true", "yes", "on"):
+            return True
+        return None
 
     def chat(self, system: str, user: str) -> LLMResponse:
         payload = {
@@ -88,6 +108,9 @@ class OllamaLLM(BaseLLM):
                 "num_ctx": 4096,
             },
         }
+        think = self._think()
+        if think is not None:
+            payload["think"] = think
         url = f"{self.host}/api/chat"
         try:
             resp = requests.post(url, json=payload, timeout=self.timeout)

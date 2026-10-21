@@ -119,7 +119,9 @@ DEFAULT_LLM = os.environ.get("RAG_LLM", "ollama")
 
 OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 OLLAMA_MODEL = os.environ.get("RAG_OLLAMA_MODEL", "qwen3:4b")
-OLLAMA_TIMEOUT = float(os.environ.get("RAG_OLLAMA_TIMEOUT", "120"))
+# Timeout holgado: en CPU un modelo de 8B puede tardar mas de un minuto en la
+# primera respuesta (carga el modelo en RAM) y si el modelo razora, mas.
+OLLAMA_TIMEOUT = float(os.environ.get("RAG_OLLAMA_TIMEOUT", "300"))
 
 GEMINI_MODEL = os.environ.get("RAG_GEMINI_MODEL", "gemini-2.5-flash")
 GEMINI_API_BASE = os.environ.get(
