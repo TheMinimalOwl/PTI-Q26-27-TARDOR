@@ -179,6 +179,32 @@ def eval_equivalencia(
 # ---------------------------------------------------------------------------
 
 
+def _menciona_valor(texto: str, valor: str, tolerancia: float = 0.011) -> bool:
+    """Comprueba si el texto menciona un dato, comparando **numeros como numeros**.
+
+    Comparar por subcadena ("0.87" dentro de "0.867") marca como fallo
+    respuestas correctas: el precio unitario del atun es 0.767 EUR/ud y el
+    ground truth lo guarda redondeado a 0.87. Con la comparacion numerica y
+    una tolerancia pequena, "0.867" y "0.87" son la misma cifra.
+
+    Para valores no numericos (nombres de cadena) se cae al comparador de
+    subcadena.
+    """
+    texto = texto or ""
+    try:
+        objetivo = float(str(valor).replace(",", "."))
+    except ValueError:
+        return str(valor).lower() in texto.lower()
+    for coincidencia in re.finditer(r"\d+(?:[.,]\d+)?", texto):
+        try:
+            numero = float(coincidencia.group(0).replace(",", "."))
+        except ValueError:
+            continue
+        if abs(numero - objetivo) <= tolerancia:
+            return True
+    return False
+
+
 def eval_qa(retriever: Retriever, gold: list[dict], llm: BaseLLM | None = None, k: int = 6) -> dict:
     """QA: la respuesta debe contener el dato esperado y citar solo lo recuperado."""
     if llm is None:
@@ -196,7 +222,8 @@ def eval_qa(retriever: Retriever, gold: list[dict], llm: BaseLLM | None = None, 
         latencia = time.perf_counter() - t0
         respuesta = (res.respuesta or "").lower()
         contenido = all(
-            any(alt.lower() in respuesta for alt in grupo) for grupo in caso.get("expected_contains", [])
+            any(_menciona_valor(respuesta, alt) for alt in grupo)
+            for grupo in caso.get("expected_contains", [])
         )
         esperado_pids = set(caso.get("expected_pids", []))
         citados = set(res.fuentes)

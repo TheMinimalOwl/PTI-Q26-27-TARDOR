@@ -4,6 +4,30 @@ Como llevar el prototipo a la VM y (opcionalmente) al clúster. Hay dos caminos:
 **systemd en la VM** (simple, el de la demo) y **Deployment en Kubernetes**
 (cuando el servicio se una al resto del sistema).
 
+## 0. Estado del despliegue verificado
+
+Desplegado y probado en la VM `gastly` (Ubuntu 24.04.4, 4 cores, 15 GB RAM,
+29 GB disco, **sin GPU**):
+
+| Paso | Comando | Resultado |
+|---|---|---|
+| Clonar | `git clone -b ai <repo>` | 40 ficheros, 2 commits de la parte de IA |
+| Montar | `bash setup.sh` | venv (Python 3.12) + torch CPU + sentence-transformers + dataset + indice (19 s) |
+| LLM | `ollama pull qwen3:8b` (instalacion por usuario) | 5.2 GB, 25 s de descarga |
+| Probar | `python -m rag.cli ask "..." --llm ollama` | respuesta correcta con cita `[id]` |
+| Servicio | `python -m rag.serve` | `/health`, `/search`, `/ask`, `/equiv` respondiendo |
+| Evaluar | `python -m rag.cli eval --llm ollama --max-casos 25` | 13 min (66 llamadas al LLM) |
+
+Notas del entorno real:
+
+- La VM **no tiene sudo sin contraseña**, asi que Ollama va instalado por
+  usuario (`~/ollama/`) con unidad systemd de usuario. El servicio de RAG
+  tambien (`~/.config/systemd/user/flujo-ia.service`).
+- `python3 -m venv` falla (`ensurepip` no esta): `setup.sh` lo detecta y
+  arranca pip con `get-pip.py`.
+- El repo es **privado**: la VM necesita credenciales para `git pull`. Se
+  dejaron en `~/.git-credentials` (permisos 600) usando el credential store.
+
 ## 1. Requisitos de la VM
 
 El prototipo no necesita GPU. Lo que decide es el **LLM**:

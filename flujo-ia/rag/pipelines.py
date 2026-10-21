@@ -252,8 +252,16 @@ Contexto (productos disponibles):
 {context}
 
 Responde a la pregunta con los datos del contexto.
+Reglas:
+- Compara solo productos equivalentes (mismo tipo y mismo formato y tamaño). Si en el
+  contexto hay formatos distintos del mismo producto (por ejemplo 1 l y 0,5 l), compara
+  solo los del mismo formato y no los presentes como si fueran el mismo producto.
+- Da siempre las cifras: precio total y precio unitario, con su unidad (EUR, EUR/l,
+  EUR/kg, EUR/ud...). No digas "el mas barato" sin decir cuanto cuesta.
+- Si hay empate, di que hay empate y nombra las opciones.
+
 Formato de la respuesta:
-RESPUESTA: <respuesta directa, 1-3 frases>
+RESPUESTA: <respuesta directa, 1-3 frases, con las cifras>
 FUENTES: [id] nombre - <motivo>; [id] nombre - <motivo>
 """
 
