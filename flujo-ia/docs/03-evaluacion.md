@@ -68,24 +68,49 @@ recall@1 y 0.13 mejor en MRR; en equivalencia pierde un caso de 498. Y pesa
 cinco veces menos, lo que en una VM con RAM limitada es lo que decide (ver
 [`01-decision-modelos.md`](01-decision-modelos.md)).
 
-### Con LLM
-
-Las metricas con LLM (`precision@1` de equivalencia, trampas y QA) **no estan
-medidas todavia**: el LLM local necesita una maquina con mas RAM (ver
-[`01-decision-modelos.md`](01-decision-modelos.md)) y la API de Gemini
-necesita la clave. En la VM:
+### Con LLM (VM `gastly`, `qwen3:8b` local, muestra de 25 casos)
 
 ```bash
-# Muestra acotada (el LLM local va a ~10 tok/s: la evaluacion completa son
-# ~500 llamadas)
+# En la VM: 4 cores, 15 GB, sin GPU
 python -m rag.cli eval --llm ollama --max-casos 25 --json docs/resultados-qa-ollama.json
-
-# Con Gemini (rapido y con la cuota de la cuenta de la uni)
-GEMINI_API_KEY=... python -m rag.cli eval --llm gemini --json docs/resultados-qa-gemini.json
 ```
 
-Los dos informes salen con la misma estructura, asi que se pueden comparar
-numero a numero.
+| Metrica | Valor | Lectura |
+|---|---|---|
+| Equivalencia · `precision@1` **con LLM** | **1.000** | El LLM elige el equivalente correcto en los 25 casos |
+| Equivalencia · `precision@1` solo retrieval (top-1) | 0.920 | El primer candidato recuperado falla en 2 de 25 |
+| Equivalencia · casos trampa descartados | **1.000** (8/8) | No confunde un pack de 2 ud con 1 ud |
+| QA · contenido correcto | **0.880** (22/25) | La respuesta trae el dato esperado |
+| QA · citas sin inventar | **1.000** (25/25) | Ninguna respuesta cita un producto que no estaba en el contexto |
+| QA · cubre el producto esperado | 0.920 | 23 de 25 citas el producto correcto |
+| QA · latencia media | 9-16 s | Por respuesta, con el modelo ya cargado en RAM |
+
+> La muestra es de 25 casos (el gold completo son 173 preguntas de QA y 498
+> pares de equivalencia). La evaluacion completa con LLM local son ~670
+> llamadas a 10-20 s: unas 3 horas. Con `--max-casos` se acota.
+
+**Los 3 fallos que quedan son fallos reales, no de la metrica:**
+
+1. *Aguacates de 4 ud* · el modelo responde `0.875 EUR/ud` (la cifra correcta,
+   el gold la tiene redondeada a 0.88) pero **no dice de que cadena es**: la
+   metrica exige precio *y* cadena.
+2. *Atun claro en aceite de 3 ud* · idem: `0.767 EUR/ud` correcto, sin
+   nombrar la cadena.
+3. *Alubias cocidas de 570 g* · **respuesta vacia**: Ollama devolvio un error
+   transitorio (`unexpected EOF`). El pipeline lo capturo, lo conto como fallo
+   y **siguio con el resto** (degradacion elegante, sin tumbar la evaluacion).
+
+### Lo que la evaluacion con LLM cambio en el prototipo
+
+Medir con LLM no solo dio numeros: destapo tres fallos reales del prototipo
+que se corrigieron y subieron las metricas.
+
+| Cambio | Por que | Efecto |
+|---|---|---|
+| Ground truth con **empates** | El precio unitario viene de la fuente y es el mismo en las tres cadenas: "el mas barato por unidad" es un empate de tres y el ground truth exigia una sola cadena | contenido 0.40 -> 0.60 |
+| Metrica que compara **numeros como numeros** | Se comparaba por subcadena: el atun cuesta 0.767 y el gold lo guardaba a 0.87, asi que una respuesta correcta se marcaba como fallo | (parte del 0.60 -> 0.84) |
+| Preguntas de QA **con el formato** y sin duplicados | "El aceite de oliva virgen extra mas barato" salia dos veces con gold distinto (1 l y 0,5 l) y puntuaba como fallo una respuesta correcta | 0.84 -> 0.88 |
+| Prompt de QA que **exige las cifras** y que compare solo formatos equivalentes | El modelo respondia "el mas barato es el de X" sin decir cuanto cuesta, y comparaba 1 l contra 0,5 l como si fueran el mismo producto | (parte del 0.60 -> 0.84) |
 
 ## Por que no se mide con un "LLM judge"
 

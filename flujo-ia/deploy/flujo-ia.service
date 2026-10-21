@@ -1,27 +1,39 @@
 [Unit]
-# Servicio del prototipo de RAG en la VM (fuera del clúster).
-# Es la via mas simple para la demo: no necesita imagen ni manifiesto.
+# Servicio del prototipo de RAG (unidad de USUARIO).
+#
+# Es la via mas simple para la demo: no necesita imagen ni manifiesto, y el
+# servicio corre con las permisos del usuario que despliega (en la VM, `alumne`).
+#
+#   mkdir -p ~/.config/systemd/user
+#   cp deploy/flujo-ia.service ~/.config/systemd/user/
+#   systemctl --user daemon-reload && systemctl --user enable --now flujo-ia
+#
+# Para que arranque sin sesion abierta (por ejemplo tras un reinicio por SSH):
+#   sudo loginctl enable-linger $USER
+#
+# La unidad de Ollama (el LLM local) va aparte: deploy/ollama.service.
 Description=TARDOR flujo-ia (servicio RAG)
-After=network-online.target
+After=network-online.target ollama.service
 Wants=network-online.target
 
 [Service]
 Type=simple
-User=joelfurca
-WorkingDirectory=/home/joelfurca/Documents/PTI-Q26-27-TARDOR/flujo-ia
-Environment=HF_HOME=/home/joelfurca/.cache/huggingface
-Environment=RAG_CACHE_DIR=/home/joelfurca/.cache/tardor-rag
+WorkingDirectory=%h/TARDOR-test/flujo-ia
+Environment=HF_HOME=%h/.cache/huggingface
+Environment=RAG_CACHE_DIR=%h/TARDOR-test/flujo-ia/.cache
 Environment=RAG_EMBED_MODEL=e5-small
 Environment=RAG_LLM=ollama
-Environment=RAG_OLLAMA_MODEL=qwen3:4b
+Environment=RAG_OLLAMA_MODEL=qwen3:8b
+Environment=RAG_OLLAMA_THINK=false
 Environment=OLLAMA_HOST=http://127.0.0.1:11434
-Environment=GEMINI_API_KEY=
-ExecStart=/home/joelfurca/Documents/PTI-Q26-27-TARDOR/flujo-ia/.venv/bin/python -m rag.serve --host 0.0.0.0 --port 8080
+# Para usar Gemini en vez del LLM local:
+#   RAG_LLM=gemini  y  GEMINI_API_KEY=... (mejor en un EnvironmentFile)
+ExecStart=%h/TARDOR-test/flujo-ia/.venv/bin/python -m rag.serve --host 0.0.0.0 --port 8080
 Restart=on-failure
 RestartSec=5
-# El servicio carga el indice al arrancar: la primera vez tarda (carga del
-# modelo de embeddings), asi que el arranque es lento a proposito.
+# El servicio carga el indice y el modelo de embeddings al arrancar: la
+# primera vez tarda, asi que el arranque es lento a proposito.
 TimeoutStartSec=300
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target

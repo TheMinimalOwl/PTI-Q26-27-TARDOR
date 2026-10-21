@@ -117,5 +117,6 @@ formato de la linea limpia cambie en el equipo de ingesta.
 - [x] Prototipo de RAG con los tres pipelines
 - [x] Dataset de prueba con ground truth exacto
 - [x] Evaluacion de retrieval reproducible
-- [ ] Evaluacion con LLM (pendiente: se ejecuta en la VM, no en un portatil sin GPU)
+- [x] Evaluacion con LLM en la VM (`qwen3:8b` local): precision@1 de equivalencia 1.000,
+      trampas 8/8, QA 0.880 de contenido y 1.000 de citas sin inventar
 - [ ] Integracion con el subject `scraper.<cadena>.clean` (pendiente de que ingesta lo exponga)

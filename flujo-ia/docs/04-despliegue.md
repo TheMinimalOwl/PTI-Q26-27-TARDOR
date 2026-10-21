@@ -102,26 +102,14 @@ $HOME/ollama/bin/ollama pull qwen3:8b
 
 ### Como servicio (usuario), para que sobreviva a un reinicio
 
-```ini
-# ~/.config/systemd/user/ollama.service
-[Unit]
-Description=Ollama (LLM local del prototipo de RAG)
-After=network-online.target
-
-[Service]
-ExecStart=%h/ollama/bin/ollama serve
-Environment=OLLAMA_MODELS=%h/.ollama/models
-Environment=OLLAMA_HOST=127.0.0.1:11434
-Restart=always
-RestartSec=5
-
-[Install]
-WantedBy=default.target
-```
+Las dos unidades estan en el repo: `deploy/ollama.service` y
+`deploy/flujo-ia.service` (son unidades **de usuario**, con `%h`):
 
 ```bash
+mkdir -p ~/.config/systemd/user
+cp deploy/ollama.service deploy/flujo-ia.service ~/.config/systemd/user/
 systemctl --user daemon-reload
-systemctl --user enable --now ollama
+systemctl --user enable --now ollama flujo-ia
 ```
 
 Para que arranque sin sesion abierta (por ejemplo, tras un reinicio por SSH):
