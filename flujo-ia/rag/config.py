@@ -63,12 +63,6 @@ class EmbeddingSpec:
 
 
 EMBEDDINGS: dict[str, EmbeddingSpec] = {
-    "bge-m3": EmbeddingSpec(
-        key="bge-m3",
-        hf_id="BAAI/bge-m3",
-        dim=1024,
-        note="XLM-RoBERTa-large, 100+ idiomas, denso+esparso+ColBERT, sin prefijos",
-    ),
     "e5-small": EmbeddingSpec(
         key="e5-small",
         hf_id="intfloat/multilingual-e5-small",
@@ -76,6 +70,12 @@ EMBEDDINGS: dict[str, EmbeddingSpec] = {
         query_prefix="query: ",
         passage_prefix="passage: ",
         note="12 capas, 384 dim, ~470 MB: el que entra en un portatil modesto",
+    ),
+    "bge-m3": EmbeddingSpec(
+        key="bge-m3",
+        hf_id="BAAI/bge-m3",
+        dim=1024,
+        note="XLM-RoBERTa-large, 100+ idiomas, denso+esparso+ColBERT, sin prefijos",
     ),
     "nomic-embed": EmbeddingSpec(
         key="nomic-embed",
@@ -93,7 +93,12 @@ EMBEDDINGS: dict[str, EmbeddingSpec] = {
     ),
 }
 
-DEFAULT_EMBEDDING = os.environ.get("RAG_EMBED_MODEL", "bge-m3")
+# Por defecto `e5-small`: en la medicion propia iguala o supera a bge-m3 en el
+# catalogo (recall@1 0.837 vs 0.584) y pesa 5 veces menos (471 MB vs 2.3 GB),
+# que es justo lo que manda en una VM con RAM limitada. `bge-m3` sigue
+# configurado: es el que gana (por poco) en equivalencia y el que se prueba
+# con los datos reales. Ver docs/01-decision-modelos.md.
+DEFAULT_EMBEDDING = os.environ.get("RAG_EMBED_MODEL", "e5-small")
 
 
 def embedding_spec(model: str | None = None) -> EmbeddingSpec:

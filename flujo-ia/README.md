@@ -57,7 +57,7 @@ Todo se cambia por variable de entorno, sin tocar codigo:
 
 | Variable | Por defecto | Para que sirve |
 |---|---|---|
-| `RAG_EMBED_MODEL` | `bge-m3` | Modelo de embeddings (`bge-m3`, `e5-small`, `qwen3-embed-0.6b` o un id de HF) |
+| `RAG_EMBED_MODEL` | `e5-small` | Modelo de embeddings (`e5-small`, `bge-m3`, `qwen3-embed-0.6b` o un id de HF) |
 | `RAG_LLM` | `ollama` | Backend de LLM: `ollama`, `gemini` o `none` |
 | `RAG_OLLAMA_MODEL` | `qwen3:4b` | Modelo local de Ollama |
 | `RAG_OLLAMA_HOST` | `http://localhost:11434` | Endpoint de Ollama |
@@ -112,7 +112,7 @@ formato de la linea limpia cambie en el equipo de ingesta.
 
 ## Estado
 
-- [x] Decision de modelo de embeddings (medida sobre el dataset, no de opinion)
+- [x] Decision de modelo de embeddings (medida sobre el dataset, no de opinion): `e5-small` por defecto, `bge-m3` como alternativa
 - [x] Prototipo de RAG con los tres pipelines
 - [x] Dataset de prueba con ground truth exacto
 - [x] Evaluacion de retrieval reproducible

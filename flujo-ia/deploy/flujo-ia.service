@@ -11,7 +11,7 @@ User=joelfurca
 WorkingDirectory=/home/joelfurca/Documents/PTI-Q26-27-TARDOR/flujo-ia
 Environment=HF_HOME=/home/joelfurca/.cache/huggingface
 Environment=RAG_CACHE_DIR=/home/joelfurca/.cache/tardor-rag
-Environment=RAG_EMBED_MODEL=bge-m3
+Environment=RAG_EMBED_MODEL=e5-small
 Environment=RAG_LLM=ollama
 Environment=RAG_OLLAMA_MODEL=qwen3:4b
 Environment=OLLAMA_HOST=http://127.0.0.1:11434

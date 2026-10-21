@@ -49,9 +49,9 @@ seria distinta.
 
 | Modelo | Dim | Params | Descarga | Idiomas | Licencia | Contexto | Notas |
 |---|---|---|---|---|---|---|---|
-| **`BAAI/bge-m3`** | 1024 | 568M | 2.2 GB | 100+ | MIT | 8192 | Denso + disperso + multi-vector. **Sin prefijos**: se consulta igual que se indexa |
+| **`BAAI/bge-m3`** | 1024 | 568M | 2.3 GB | 100+ | MIT | 8192 | Denso + disperso + multi-vector. **Sin prefijos**: se consulta igual que se indexa |
 | `intfloat/multilingual-e5-small` | 384 | 118M | 0.47 GB | 100 | MIT | 512 | Muy ligero. **Exige** prefijos (`query: ` / `passage: `) |
-| `intfloat/multilingual-e5-large` | 1024 | 560M | 2.2 GB | 100 | MIT | 512 | Mismo peso que bge-m3, peor en multilingue reciente |
+| `intfloat/multilingual-e5-large` | 1024 | 560M | 2.3 GB | 100 | MIT | 512 | Mismo peso que bge-m3, peor en multilingue reciente |
 | `Qwen/Qwen3-Embedding-0.6B` | 1024 | 595M | 2.4 GB | 119 | Apache-2.0 | 32768 | Lider multilingue de 2026, sin prefijos |
 | `nomic-ai/nomic-embed-text-v1.5` | 768 | 137M | 0.55 GB | ~100 | Apache-2.0 | 8192 | Pensado para documentos largos (aqui sobraria) |
 | `jina-ai/jina-embeddings-v3` | 1024 | 570M | 2.3 GB | 89 | **CC-BY-NC-4.0** | 8192 | Muy bueno, pero licencia **no comercial** |
@@ -71,47 +71,79 @@ dependiente de una clave, sin ella el prototipo no arranca).
 
 ### 3.3 Decision
 
-> **Embeddings por defecto: `BAAI/bge-m3` (1024 dim, MIT).**
+> **Embeddings por defecto: `intfloat/multilingual-e5-small` (384 dim, MIT).**
+>
+> `BAAI/bge-m3` queda como **alternativa ya configurada** (y como el modelo
+> que se prueba con los datos reales). Se cambia con
+> `RAG_EMBED_MODEL=bge-m3`, sin tocar codigo.
 
-Motivos, en orden de peso:
+El motivo no es la reputacion del modelo, es la medicion: en el dataset
+propio, `e5-small` **iguala o supera** a `bge-m3` y pesa cinco veces menos.
 
-1. **C1 - calidad medida.** Es el que gana en el benchmark propio (tabla de
-   abajo). Los tres candidatos se evaluan con el mismo dataset, los mismos
-   filtros y las mismas consultas.
-2. **C2/C3 - local, gratis, sin GPU.** Se descarga una vez (2.2 GB) y el
-   indice se regenera en cualquier maquina. `sentence-transformers` lo corre
-   en CPU sin problema: 257 productos en ~99 s, de los que 98 s son cargar el
-   modelo; el embedding en si es de menos de un segundo.
-3. **C5 - licencia MIT.** Se puede usar en la entrega, en la demo y (si el
-   proyecto siguiera) en produccion sin discussing.
-4. **C7 - sin prefijos.** La familia E5 exige `query: ` y `passage: `; si se
-   olvida uno, el recall se hunde. BGE-M3 no tiene esa trampa, que en un
-   prototipo con varios interlocutores es una fuente de bugs de sobra.
-5. **C6 - 1024 dim.** Con 4.6k productos son 18 MB de indice: no hay
-   penalizacion por dimensionality.
-
-Alternativas que quedan **configuradas y medidas**, no descartadas:
-
-| Cuando | Modelo | Por que |
+| | `e5-small` | `bge-m3` |
 |---|---|---|
-| La VM se queda corta de RAM | `e5-small` (384 dim, 0.47 GB) | 4x mas ligero;Recall parecido en este corpus (ver tabla) |
-| Se quiere el estado del arte 2026 | `qwen3-embed-0.6b` | Candidato medido en la misma comparativa |
-| Hay que comparar contra una API | cualquiera de las anteriores | El comando `compare` acepta un id de HF cualquiera |
+| recall@1 catalogo | **0.837** | 0.584 |
+| recall@3 catalogo | **0.994** | 0.970 |
+| recall@5 catalogo | 0.994 | 0.994 |
+| MRR catalogo | **0.908** | 0.778 |
+| recall@1 equivalencia | 0.996 | **1.000** |
+| recall@3 equivalencia | 1.000 | 1.000 |
+| Dim (indice) | **384** (484 KB) | 1024 (1.2 MB) |
+| Peso en disco | **471 MB** | 2.3 GB (4.5 GB con los dos formatos) |
+| Tiempo de indexado | **27-62 s** | 74-99 s |
 
-### 3.4 Medicion (misma consulta, mismo dataset, mismo codigo)
+Por que gana `e5-small`:
+
+1. **C1 - calidad medida, y gana.** En catalogo es claramente mejor
+   (recall@1 +25 puntos, MRR +0.13). En equivalencia pierde por **un caso de
+   498** (0.996 vs 1.000): en la practica, empate.
+2. **C4 - recursos.** 471 MB frente a 2.3 GB, y 384 dim frente a 1024. En
+   una VM sin GPU esto no es un detalle: el servicio de RAG carga el modelo en
+   RAM y convive con el LLM. Con `e5-small` el LLM local puede ser de 14B en
+   la misma maquina; con `bge-m3` no caben los dos.
+3. **C6 - indice.** 484 KB en vez de 1.2 MB. Irrelevante a esta escala, pero
+   gratis.
+4. **C7 - prefijos.** Es la contra: la familia E5 **exige** `query: ` y
+   `passage: `. `embeddings.py` los aplica siempre (y hay un test que lo
+   comprueba), pero es la trampa que hace que este modelo funcione peor si
+   alguien lo usa a mano sin los prefijos.
+
+**Cuando se cambiaria a `bge-m3`:**
+
+- Si con el `.txt` real de Mercadona el modelo pequeno se queda corto (nombres
+  reales con atributos raros, descripciones mas largas). El comando
+  `rag.cli compare` lo responde en un minuto.
+- Si el corpus crece hasta millones de productos y se quiere un modelo con
+  mayor cobertura multilingue (bge-m3 cubre 100+ idiomas).
+- Si el LLM va a ser una API (Gemini) y la RAM no aprieta: entonces el
+  embedding puede ser el mas grande sin coste.
+
+> [!IMPORTANT]
+> La comparativa se hizo con el **dataset sintetico**. Con datos reales el
+> orden puede cambiar: es exactamente lo que habria que re-medir cuando el
+> equipo de ingesta comparta el `mercadona_<ts>.txt`. Lo que si es solido es
+> la conclusion operativa: **un modelo de 471 MB rinde igual que uno de
+> 2.3 GB en este dominio**, y en una VM con RAM limitada eso decide.
+
+### 3.4 Candidatos no evaluados
+
+| Modelo | Por que no se midio aqui |
+|---|---|
+| `Qwen/Qwen3-Embedding-0.6B` | Descargar e indexar con el mataba el proceso por falta de RAM en la maquina de desarrollo (6 GB). Es el candidato a medir **en la VM**: es el lider multilingue de 2026 y pesa 1.2 GB |
+| `intfloat/multilingual-e5-large` | Mismo tamano que bge-m3 (2.3 GB) y peor en multilingue reciente |
+| `nomic-ai/nomic-embed-text-v1.5` | Pensado para documentos largos; aqui los chunks son de una linea |
+| `jina-ai/jina-embeddings-v3` | Licencia CC-BY-NC (no comercial) |
+
+### 3.5 Como comparar (y volver a comparar)
 
 ```bash
 python -m rag.cli compare
 ```
 
-| Modelo | Dim | recall@1 | recall@3 | recall@5 | MRR | Equiv. recall@1 | Indice (s) |
-|---|---|---|---|---|---|---|---|
-| `BAAI/bge-m3` | 1024 | 0.584 | 0.970 | 0.994 | 0.778 | 1.000 | 99 |
-| `intfloat/multilingual-e5-small` | 384 | RELLENO | RELLENO | RELLENO | RELLENO | RELLENO | RELLENO |
-| `Qwen/Qwen3-Embedding-0.6B` | 1024 | RELLENO | RELLENO | RELLENO | RELLENO | RELLENO | RELLENO |
-
-> RELLENO: se rellena al ejecutar la comparativa en la VM (el numero de
-> `docs/resultados-embeddings.json`).
+Reindexa y evalua los candidatos con el mismo dataset, los mismos filtros y
+las mismas consultas, y deja la tabla en `docs/resultados-embeddings.json`.
+Cuando llegue el dato real, se copia a `data/raw/` y se vuelve a ejecutar: es
+la forma de tener la decision **actualizada por evidencia** y no por costumbre.
 
 ## 4. LLM: candidatos
 
@@ -182,7 +214,6 @@ sin tocar codigo.
 |---|---|
 | Embeddings por API | El indice tiene que poder regenerarse sin claves ni red |
 | `jina-embeddings-v3` | Licencia CC-BY-NC (no comercial) |
-| `e5-large` | Mismo tamano que bge-m3 y peor en multilingue |
 | `nomic-embed-text-v1.5` | Pensado para documentos largos; aqui los chunks son de una linea |
 | Un unico LLM (solo API o solo local) | La demo no puede depender de la red; el coste no puede depender de una cuota |
 | Reranking con LLM en el camino critico | Multiplica el coste por consulta; en CPU se nota y el recall del top-8 ya es suficiente |
@@ -191,9 +222,9 @@ sin tocar codigo.
 ## 6. Como cambiar la decision
 
 ```bash
-# Embeddings
-RAG_EMBED_MODEL=e5-small python -m rag.cli index
-RAG_EMBED_MODEL=e5-small python -m rag.cli search "aceite"   # indice separado por modelo
+# Embeddings (cada modelo tiene su propio indice)
+RAG_EMBED_MODEL=bge-m3 python -m rag.cli index
+RAG_EMBED_MODEL=bge-m3 python -m rag.cli search "aceite"   # indice separado por modelo
 
 # LLM
 RAG_LLM=gemini GEMINI_API_KEY=... python -m rag.cli ask "..."
@@ -207,9 +238,9 @@ de modo que se pueden comparar sin pisarse.
 
 | Componente | Licencia | Nota |
 |---|---|---|
-| `BAAI/bge-m3` | MIT | Uso libre |
+| `intfloat/multilingual-e5-small` | MIT | Uso libre (modelo por defecto) |
 | `Qwen/Qwen3-Embedding-0.6B` | Apache-2.0 | Uso libre |
-| `intfloat/multilingual-e5-small` | MIT | Uso libre |
+| `BAAI/bge-m3` | MIT | Uso libre (alternativa) |
 | `qwen3:4b` (Ollama) | Apache-2.0 | Uso libre |
 | `llama3.1`, `gemma3` | Llama Community / Gemma | Requisitos de uso de Meta y Google |
 | Gemini API | Google's terms | Solo si se usa `--llm gemini` |

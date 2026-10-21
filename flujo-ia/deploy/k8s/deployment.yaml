@@ -21,7 +21,7 @@ spec:
             - containerPort: 8080
           env:
             - name: RAG_EMBED_MODEL
-              value: bge-m3
+              value: e5-small
             # none = solo retrieval. Para usar el LLM local, el servicio
             # necesita la URL de Ollama (que corre en la VM, fuera del
             # clúster): ver docs/04-despliegue.md.

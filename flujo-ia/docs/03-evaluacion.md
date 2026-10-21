@@ -19,7 +19,7 @@ recuperado tiene que estar en la cadena correcta, no solo ser parecido.
 
 ## Resultados medidos
 
-### Retrieval (embeddings `BAAI/bge-m3`, 257 productos, 3 cadenas)
+### Retrieval (embeddings `intfloat/multilingual-e5-small`, 257 productos, 3 cadenas)
 
 ```bash
 python -m rag.cli eval --llm none
@@ -27,41 +27,46 @@ python -m rag.cli eval --llm none
 
 | Tarea | n | recall@1 | recall@3 | recall@5 | recall@10 | MRR |
 |---|---|---|---|---|---|---|
-| Catalogo | 166 consultas | 0.584 | 0.970 | 0.994 | 1.000 | 0.778 |
-| Equivalencia | 498 pares | 1.000 | 1.000 | 1.000 | 1.000 | — |
+| Catalogo | 166 consultas | 0.837 | 0.994 | 0.994 | 1.000 | 0.908 |
+| Equivalencia | 498 pares | 0.996 | 1.000 | 1.000 | 1.000 | — |
 
 **Como se leen estos numeros.**
 
-- *Catalogo*: el 97% de las consultas traen el producto esperado en el top-3
-  y el 100% en el top-10. El `recall@1` de 0.584 es **correcto para este
+- *Catalogo*: el 99% de las consultas traen el producto esperado en el top-3 y
+  el 100% en el top-10. El `recall@1` de 0.837 es **correcto para este
   dataset**, y conviene explicarlo: la mitad de las consultas son "el mismo
   producto en las tres cadenas", asi que hay **tres** respuestas validas (una
   por cadena) y acertar una sola no basta para que el primer resultado sea "el"
   correcto. Por eso la metrica que hay que mirar es `recall_full@k` (fraccion
-  de los tres esperados presentes en el top-k): **0.251 en top-1, 0.970 en
-  top-3, 0.994 en top-5, 1.000 en top-10**. O sea: en 3 de cada 4 consultas
+  de los tres esperados presentes en el top-k): **0.504 en top-1, 0.994 en
+  top-3, 0.994 en top-5, 1.000 en top-10**. O sea: en la mayoria de consultas
   aparecen **las tres** cadenas del producto entre los tres primeros
   resultados.
-- *Equivalencia*: recall@1 = 1.000. El embedding denso con el nombre, la
-  marca, la categoria y el formato basta para encontrar el equivalente en la
-  otra cadena **siempre**, en las 498 combinaciones. Esto es lo que sostiene
-  la tarea 6 del plan ("equivalencia de productos"): la recuperacion ya
+- *Equivalencia*: recall@1 = 0.996 (497 de 498 pares). El embedding denso con
+  el nombre, la marca, la categoria y el formato basta para encontrar el
+  equivalente en la otra cadena **casi siempre**. Esto es lo que sostiene la
+  tarea 6 del plan ("equivalencia de productos"): la recuperacion ya
   funciona; lo que queda por delante es el LLM decidiendo entre candidatos y
   el ground truth etiquetado sobre datos reales.
 
-> 498 pares = productos canonicos con equivalente en otra cadena x (cadenas
-> destino posibles). No todos los 85 productos canonicos tienen equivalente en
-> las dos otras cadenas (los que cambian de formato quedan fuera).
-
 ### Comparativa de modelos de embeddings
 
+Mismo dataset, mismos filtros, mismas consultas, mismo codigo:
+
 ```bash
-python -m rag.cli compare          # reindexa y evalua los tres candidatos
+python -m rag.cli compare
 ```
 
-El resultado queda en `docs/resultados-embeddings.json`. Se ejecuto con el
-mismo dataset, los mismos filtros y las mismas consultas para los tres
-modelos, de modo que la comparacion es justa.
+| Modelo | Dim | recall@1 | recall@3 | recall@5 | MRR | Equiv. recall@1 | Peso en disco | Indexado (s) |
+|---|---|---|---|---|---|---|---|---|
+| **`intfloat/multilingual-e5-small`** | 384 | **0.837** | **0.994** | 0.994 | **0.908** | 0.996 | **471 MB** | **27-62** |
+| `BAAI/bge-m3` | 1024 | 0.584 | 0.970 | 0.994 | 0.778 | **1.000** | 2.3 GB | 74-99 |
+| `Qwen/Qwen3-Embedding-0.6B` | 1024 | - | - | - | - | - | 1.2 GB | no medido (OOM en la maquina de desarrollo) |
+
+Conclusion: **el modelo pequeno gana**. En catalogo es 25 puntos mejor en
+recall@1 y 0.13 mejor en MRR; en equivalencia pierde un caso de 498. Y pesa
+cinco veces menos, lo que en una VM con RAM limitada es lo que decide (ver
+[`01-decision-modelos.md`](01-decision-modelos.md)).
 
 ### Con LLM
 
@@ -110,9 +115,9 @@ muestra, que es lo que se hace en la demo.
    reales hay que etiquetar a mano (y de ahi sale la tarea de "equivalencia
    de productos" del plan).
 3. **No hay metricas de latencia de la recuperacion con el LLM real** todavia
-   (si las de indexado: 257 productos en ~99 s con bge-m3 en CPU, que es lo
-   que tarda en cargar el modelo; el embedding de 257 textos es de menos de un
-   segundo).
+   (si las de indexado: 257 productos en 27-62 s con `e5-small` en CPU, casi
+   todo el tiempo es cargar el modelo; el embedding de 257 textos es de menos
+   de un segundo).
 4. **El `recall@1` del catalogo no es comparable** entre modelos si cambia el
    dataset. La comparativa de `docs/01-decision-modelos.md` usa el mismo
    dataset, asi que si es comparable.

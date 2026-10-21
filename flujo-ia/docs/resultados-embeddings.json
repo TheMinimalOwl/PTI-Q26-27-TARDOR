@@ -1,0 +1,42 @@
+[
+  {
+    "modelo": "intfloat/multilingual-e5-small",
+    "key": "e5-small",
+    "dim": 384,
+    "peso_disco": "471 MB",
+    "segundos_indexado": 27.07,
+    "catalogo_recall@1": 0.8373,
+    "catalogo_recall@3": 0.994,
+    "catalogo_recall@5": 0.994,
+    "catalogo_recall_full@3": 0.994,
+    "catalogo_mrr": 0.9085,
+    "equivalencia_recall@1": 0.996,
+    "equivalencia_recall@3": 1.0,
+    "equivalencia_recall@5": 1.0,
+    "medido": true
+  },
+  {
+    "modelo": "BAAI/bge-m3",
+    "key": "bge-m3",
+    "dim": 1024,
+    "peso_disco": "2.3 GB",
+    "segundos_indexado": 74.4,
+    "catalogo_recall@1": 0.5843,
+    "catalogo_recall@3": 0.9699,
+    "catalogo_recall@5": 0.994,
+    "catalogo_recall_full@3": 0.9699,
+    "catalogo_mrr": 0.7781,
+    "equivalencia_recall@1": 1.0,
+    "equivalencia_recall@3": 1.0,
+    "equivalencia_recall@5": 1.0,
+    "medido": true
+  },
+  {
+    "modelo": "Qwen/Qwen3-Embedding-0.6B",
+    "key": "qwen3-embed-0.6b",
+    "dim": 1024,
+    "peso_disco": "1.2 GB",
+    "medido": false,
+    "nota": "descargar+indexar mataba el proceso por falta de RAM en la maquina de desarrollo (6 GB); medir en la VM"
+  }
+]

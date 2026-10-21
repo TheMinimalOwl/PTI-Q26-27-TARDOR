@@ -94,26 +94,29 @@ def eval_equivalencia(
     Con LLM se mide tambien si el LLM distingue los unos de los otros.
     """
     resultados = []
-    # Los productos origen se codifican en una sola pasada: son 510 pares pero
+    # Los productos origen se codifican en una sola pasada: son 498 pares pero
     # solo ~257 productos distintos, y en CPU cada forward suelto cuesta ~1 s.
-    origenes: list[dict] = []
-    indices_validos: list[int] = []
-    for i, caso in enumerate(gold):
-        doc = retriever.get(caso["pid_origen"])
-        if doc is None:
-            continue
-        origenes.append(doc)
-        indices_validos.append(i)
-    if not origenes:
+    # Se codifican tambien los origenes de las trampas, que son los mismos.
+    pids = []
+    for caso in list(gold) + list(no_equivalentes):
+        pid = str(caso["pid_origen"])
+        if pid not in pids:
+            pids.append(pid)
+    docs = [retriever.get(pid) for pid in pids]
+    pares = [(pid, doc) for pid, doc in zip(pids, docs) if doc is not None]
+    if not pares:
         return {"resumen": {"n": 0}, "casos": [], "trampas": []}
     vectores = retriever.embedder.encode(
-        [_as_product(d).embed_text for d in origenes], is_query=True
+        [_as_product(doc).embed_text for _pid, doc in pares], is_query=True
     )
+    vector_por_pid = {pid: v for (pid, _doc), v in zip(pares, vectores)}
 
-    for caso, origen, vector in zip(
-        [gold[i] for i in indices_validos], origenes, vectores
-    ):
+    for caso in gold:
+        origen = retriever.get(caso["pid_origen"])
+        vector = vector_por_pid.get(str(caso["pid_origen"]))
         destino = caso["pid_destino"]
+        if origen is None or vector is None:
+            continue
         filtros = Filters(chain=caso["chain_destino"])
         hits = retriever.store.search(vector, k=max(ks), where=filtros.matches)
         recovered = [h.doc.get("id") for h in hits]
@@ -121,7 +124,9 @@ def eval_equivalencia(
         for k in ks:
             fila[f"recall@{k}"] = 1.0 if destino in recovered[:k] else 0.0
         if llm is not None:
-            res = equivalencia(retriever, llm, origen, chain_destino=caso["chain_destino"])
+            res = equivalencia(
+                retriever, llm, origen, chain_destino=caso["chain_destino"], vector=vector
+            )
             fila["llm_pid"] = res.pid_elegido
             fila["llm_ok"] = 1.0 if res.pid_elegido == destino else 0.0
             fila["llm_confianza"] = res.confianza
@@ -147,9 +152,12 @@ def eval_equivalencia(
     trampas = []
     for caso in no_equivalentes:
         origen = retriever.get(caso["pid_origen"])
-        if origen is None or llm is None:
+        vector = vector_por_pid.get(str(caso["pid_origen"]))
+        if origen is None or llm is None or vector is None:
             continue
-        res = equivalencia(retriever, llm, origen, chain_destino=caso.get("chain_destino"))
+        res = equivalencia(
+            retriever, llm, origen, chain_destino=caso.get("chain_destino"), vector=vector
+        )
         bien = 1.0 if res.pid_elegido != caso["pid_destino"] else 0.0
         trampas.append(
             {

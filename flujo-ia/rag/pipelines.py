@@ -164,10 +164,12 @@ def equivalencia(
     producto: Product | dict,
     chain_destino: str | None = None,
     k: int = 8,
+    vector=None,
 ) -> EquivalenciaResult:
     """Equivalencia entre cadenas: 'este de Mercadona, cual es en Carrefour?'.
 
     Sin LLM devuelve el primer candidato recuperado (baseline de solo retrieval).
+    `vector` permite pasar el embedding ya calculado (evaluacion por lotes).
     """
     if isinstance(producto, Product):
         src = producto.to_dict()
@@ -182,9 +184,10 @@ def equivalencia(
     # La consulta es el producto origen, no su nombre pelado: el texto de
     # embedding incluye categoria y tamano, que es justo lo que hay que
     # comparar.
-    q = Product.from_dict(src).embed_text
-    qv = retriever.embedder.encode_one(q, is_query=True)
-    hits = retriever.store.search(qv, k=k, where=filtros.matches)
+    if vector is None:
+        q = Product.from_dict(src).embed_text
+        vector = retriever.embedder.encode_one(q, is_query=True)
+    hits = retriever.store.search(vector, k=k, where=filtros.matches)
 
     res = EquivalenciaResult(origen=src, candidatos=hits)
     if llm is None or not hits:
