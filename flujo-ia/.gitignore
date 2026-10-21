@@ -1,0 +1,15 @@
+# Entorno y caches (todo se regenera con setup.sh + `python -m rag.cli index`)
+.venv/
+.cache/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+
+# Informes completos de evaluacion: se regeneran con `rag.cli eval --json ...`
+# y ocupan cientos de KB. El resumen vive en docs/03-evaluacion.md.
+docs/resultados-retrieval.json
+docs/resultados-qa-*.json
+
+# Modelos de Ollama y de HuggingFace, si se guardan dentro del repo
+models/
+*.gguf

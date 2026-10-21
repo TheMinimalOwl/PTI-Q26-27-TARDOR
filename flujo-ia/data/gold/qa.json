@@ -1,0 +1,2578 @@
+[
+  {
+    "question": "¿Cuál es el aceite de girasol más barato por unidad?",
+    "expected_pids": [
+      "10010"
+    ],
+    "expected_contains": [
+      [
+        "2.40",
+        "2,40"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceite de girasol más barato en total?",
+    "expected_pids": [
+      "10011"
+    ],
+    "expected_contains": [
+      [
+        "2.21",
+        "2,21"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceite de oliva suave más barato por unidad?",
+    "expected_pids": [
+      "10007"
+    ],
+    "expected_contains": [
+      [
+        "7.20",
+        "7,20"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceite de oliva suave más barato en total?",
+    "expected_pids": [
+      "10008"
+    ],
+    "expected_contains": [
+      [
+        "6.76",
+        "6,76"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceite de oliva virgen extra más barato por unidad?",
+    "expected_pids": [
+      "10004"
+    ],
+    "expected_contains": [
+      [
+        "13.60",
+        "13,60"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceite de oliva virgen extra más barato en total?",
+    "expected_pids": [
+      "10005"
+    ],
+    "expected_contains": [
+      [
+        "6.36",
+        "6,36"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceite de oliva virgen extra más barato por unidad?",
+    "expected_pids": [
+      "10001"
+    ],
+    "expected_contains": [
+      [
+        "12.50",
+        "12,50"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceite de oliva virgen extra más barato en total?",
+    "expected_pids": [
+      "10002"
+    ],
+    "expected_contains": [
+      [
+        "11.70",
+        "11,70"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceitunas verdes rellenas más barato por unidad?",
+    "expected_pids": [
+      "10124"
+    ],
+    "expected_contains": [
+      [
+        "11.60",
+        "11,60"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceitunas verdes rellenas más barato en total?",
+    "expected_pids": [
+      "10125"
+    ],
+    "expected_contains": [
+      [
+        "2.70",
+        "2,70"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el agua con gas más barato por unidad?",
+    "expected_pids": [
+      "10130"
+    ],
+    "expected_contains": [
+      [
+        "0.50",
+        "0,50"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el agua con gas más barato en total?",
+    "expected_pids": [
+      "10131"
+    ],
+    "expected_contains": [
+      [
+        "0.71",
+        "0,71"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el agua mineral más barato por unidad?",
+    "expected_pids": [
+      "10127"
+    ],
+    "expected_contains": [
+      [
+        "0.30",
+        "0,30"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el agua mineral más barato en total?",
+    "expected_pids": [
+      "10128"
+    ],
+    "expected_contains": [
+      [
+        "0.42",
+        "0,42"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aguacates más barato por unidad?",
+    "expected_pids": [
+      "10226"
+    ],
+    "expected_contains": [
+      [
+        "0.88",
+        "0,88"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aguacates más barato en total?",
+    "expected_pids": [
+      "10227"
+    ],
+    "expected_contains": [
+      [
+        "3.26",
+        "3,26"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el alubias cocidas más barato por unidad?",
+    "expected_pids": [
+      "10112"
+    ],
+    "expected_contains": [
+      [
+        "2.37",
+        "2,37"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el alubias cocidas más barato en total?",
+    "expected_pids": [
+      "10113"
+    ],
+    "expected_contains": [
+      [
+        "1.28",
+        "1,28"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el atún claro en aceite de oliva más barato por unidad?",
+    "expected_pids": [
+      "10103"
+    ],
+    "expected_contains": [
+      [
+        "0.77",
+        "0,77"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el atún claro en aceite de oliva más barato en total?",
+    "expected_pids": [
+      "10104"
+    ],
+    "expected_contains": [
+      [
+        "2.13",
+        "2,13"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el atún en salmuera más barato por unidad?",
+    "expected_pids": [
+      "10115"
+    ],
+    "expected_contains": [
+      [
+        "0.87",
+        "0,87"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el atún en salmuera más barato en total?",
+    "expected_pids": [
+      "10116"
+    ],
+    "expected_contains": [
+      [
+        "2.47",
+        "2,47"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el azúcar blanco más barato por unidad?",
+    "expected_pids": [
+      "10028"
+    ],
+    "expected_contains": [
+      [
+        "1.10",
+        "1,10"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el azúcar blanco más barato en total?",
+    "expected_pids": [
+      "10029"
+    ],
+    "expected_contains": [
+      [
+        "1.01",
+        "1,01"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el barra de pan rústica más barato por unidad?",
+    "expected_pids": [
+      "10073"
+    ],
+    "expected_contains": [
+      [
+        "4.80",
+        "4,80"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el barra de pan rústica más barato en total?",
+    "expected_pids": [
+      "10074"
+    ],
+    "expected_contains": [
+      [
+        "1.14",
+        "1,14"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el batido de chocolate más barato por unidad?",
+    "expected_pids": [
+      "10064"
+    ],
+    "expected_contains": [
+      [
+        "1.90",
+        "1,90"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el batido de chocolate más barato en total?",
+    "expected_pids": [
+      "10065"
+    ],
+    "expected_contains": [
+      [
+        "1.80",
+        "1,80"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el bayeta de microfibra más barato por unidad?",
+    "expected_pids": [
+      "10196"
+    ],
+    "expected_contains": [
+      [
+        "0.50",
+        "0,50"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el bayeta de microfibra más barato en total?",
+    "expected_pids": [
+      "10197"
+    ],
+    "expected_contains": [
+      [
+        "2.33",
+        "2,33"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el bolsas de basura más barato por unidad?",
+    "expected_pids": [
+      "10200"
+    ],
+    "expected_contains": [
+      [
+        "0.07",
+        "0,07"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el bolsas de basura más barato en total?",
+    "expected_pids": [
+      "10200"
+    ],
+    "expected_contains": [
+      [
+        "1.31",
+        "1,31"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el cacahuetes salados más barato por unidad?",
+    "expected_pids": [
+      "10154"
+    ],
+    "expected_contains": [
+      [
+        "7.50",
+        "7,50"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el cacahuetes salados más barato en total?",
+    "expected_pids": [
+      "10155"
+    ],
+    "expected_contains": [
+      [
+        "1.39",
+        "1,39"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el café molido natural más barato por unidad?",
+    "expected_pids": [
+      "10034"
+    ],
+    "expected_contains": [
+      [
+        "14.00",
+        "14,00"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el café molido natural más barato en total?",
+    "expected_pids": [
+      "10035"
+    ],
+    "expected_contains": [
+      [
+        "3.28",
+        "3,28"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el cebollas más barato por unidad?",
+    "expected_pids": [
+      "10229"
+    ],
+    "expected_contains": [
+      [
+        "1.50",
+        "1,50"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el cebollas más barato en total?",
+    "expected_pids": [
+      "10230"
+    ],
+    "expected_contains": [
+      [
+        "1.43",
+        "1,43"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el cereales con chocolate más barato por unidad?",
+    "expected_pids": [
+      "10091"
+    ],
+    "expected_contains": [
+      [
+        "4.60",
+        "4,60"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el cereales con chocolate más barato en total?",
+    "expected_pids": [
+      "10092"
+    ],
+    "expected_contains": [
+      [
+        "2.19",
+        "2,19"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el cerveza rubia más barato por unidad?",
+    "expected_pids": [
+      "10142"
+    ],
+    "expected_contains": [
+      [
+        "2.73",
+        "2,73"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el cerveza rubia más barato en total?",
+    "expected_pids": [
+      "10143"
+    ],
+    "expected_contains": [
+      [
+        "0.85",
+        "0,85"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el chocolate con leche más barato por unidad?",
+    "expected_pids": [
+      "10157"
+    ],
+    "expected_contains": [
+      [
+        "12.80",
+        "12,80"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el chocolate con leche más barato en total?",
+    "expected_pids": [
+      "10158"
+    ],
+    "expected_contains": [
+      [
+        "1.49",
+        "1,49"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el chucherías surtidas más barato por unidad?",
+    "expected_pids": [
+      "10163"
+    ],
+    "expected_contains": [
+      [
+        "12.00",
+        "12,00"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el chucherías surtidas más barato en total?",
+    "expected_pids": [
+      "10164"
+    ],
+    "expected_contains": [
+      [
+        "1.67",
+        "1,67"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el comida para gatos más barato por unidad?",
+    "expected_pids": [
+      "10247"
+    ],
+    "expected_contains": [
+      [
+        "2.80",
+        "2,80"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el comida para gatos más barato en total?",
+    "expected_pids": [
+      "10248"
+    ],
+    "expected_contains": [
+      [
+        "3.89",
+        "3,89"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el comida para perros más barato por unidad?",
+    "expected_pids": [
+      "10244"
+    ],
+    "expected_contains": [
+      [
+        "2.17",
+        "2,17"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el comida para perros más barato en total?",
+    "expected_pids": [
+      "10245"
+    ],
+    "expected_contains": [
+      [
+        "6.08",
+        "6,08"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el copos de avena más barato por unidad?",
+    "expected_pids": [
+      "10088"
+    ],
+    "expected_contains": [
+      [
+        "3.20",
+        "3,20"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el copos de avena más barato en total?",
+    "expected_pids": [
+      "10089"
+    ],
+    "expected_contains": [
+      [
+        "1.50",
+        "1,50"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el corn flakes más barato por unidad?",
+    "expected_pids": [
+      "10094"
+    ],
+    "expected_contains": [
+      [
+        "4.20",
+        "4,20"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el corn flakes más barato en total?",
+    "expected_pids": [
+      "10095"
+    ],
+    "expected_contains": [
+      [
+        "1.96",
+        "1,96"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el croissant de mantequilla más barato por unidad?",
+    "expected_pids": [
+      "10082"
+    ],
+    "expected_contains": [
+      [
+        "6.36",
+        "6,36"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el croissant de mantequilla más barato en total?",
+    "expected_pids": [
+      "10083"
+    ],
+    "expected_contains": [
+      [
+        "0.33",
+        "0,33"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el detergente líquido más barato por unidad?",
+    "expected_pids": [
+      "10173"
+    ],
+    "expected_contains": [
+      [
+        "0.22",
+        "0,22"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el detergente líquido más barato en total?",
+    "expected_pids": [
+      "10173"
+    ],
+    "expected_contains": [
+      [
+        "8.81",
+        "8,81"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el donut de chocolate más barato por unidad?",
+    "expected_pids": [
+      "10085"
+    ],
+    "expected_contains": [
+      [
+        "0.45",
+        "0,45"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el donut de chocolate más barato en total?",
+    "expected_pids": [
+      "10086"
+    ],
+    "expected_contains": [
+      [
+        "0.42",
+        "0,42"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el flan de vainilla más barato por unidad?",
+    "expected_pids": [
+      "10067"
+    ],
+    "expected_contains": [
+      [
+        "0.45",
+        "0,45"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el flan de vainilla más barato en total?",
+    "expected_pids": [
+      "10068"
+    ],
+    "expected_contains": [
+      [
+        "1.66",
+        "1,66"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el galletas de chocolate más barato por unidad?",
+    "expected_pids": [
+      "10160"
+    ],
+    "expected_contains": [
+      [
+        "4.00",
+        "4,00"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el galletas de chocolate más barato en total?",
+    "expected_pids": [
+      "10161"
+    ],
+    "expected_contains": [
+      [
+        "1.13",
+        "1,13"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el guisantes congelados más barato por unidad?",
+    "expected_pids": [
+      "10232"
+    ],
+    "expected_contains": [
+      [
+        "2.60",
+        "2,60"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el guisantes congelados más barato en total?",
+    "expected_pids": [
+      "10233"
+    ],
+    "expected_contains": [
+      [
+        "2.45",
+        "2,45"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el gulas caseras más barato por unidad?",
+    "expected_pids": [
+      "10106"
+    ],
+    "expected_contains": [
+      [
+        "8.75",
+        "8,75"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el gulas caseras más barato en total?",
+    "expected_pids": [
+      "10107"
+    ],
+    "expected_contains": [
+      [
+        "3.25",
+        "3,25"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el harina de trigo más barato por unidad?",
+    "expected_pids": [
+      "10031"
+    ],
+    "expected_contains": [
+      [
+        "1.05",
+        "1,05"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el harina de trigo más barato en total?",
+    "expected_pids": [
+      "10032"
+    ],
+    "expected_contains": [
+      [
+        "0.99",
+        "0,99"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el jabón de manos más barato por unidad?",
+    "expected_pids": [
+      "10184"
+    ],
+    "expected_contains": [
+      [
+        "4.80",
+        "4,80"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el jabón de manos más barato en total?",
+    "expected_pids": [
+      "10185"
+    ],
+    "expected_contains": [
+      [
+        "2.26",
+        "2,26"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el kikos más barato por unidad?",
+    "expected_pids": [
+      "10167"
+    ],
+    "expected_contains": [
+      [
+        "14.86",
+        "14,86"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el kikos más barato en total?",
+    "expected_pids": [
+      "10167"
+    ],
+    "expected_contains": [
+      [
+        "1.04",
+        "1,04"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el lavavajillas concentrado más barato por unidad?",
+    "expected_pids": [
+      "10187"
+    ],
+    "expected_contains": [
+      [
+        "3.73",
+        "3,73"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el lavavajillas concentrado más barato en total?",
+    "expected_pids": [
+      "10188"
+    ],
+    "expected_contains": [
+      [
+        "2.65",
+        "2,65"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el leche desnatada más barato por unidad?",
+    "expected_pids": [
+      "10043"
+    ],
+    "expected_contains": [
+      [
+        "1.10",
+        "1,10"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el leche desnatada más barato en total?",
+    "expected_pids": [
+      "10044"
+    ],
+    "expected_contains": [
+      [
+        "1.01",
+        "1,01"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el leche entera más barato por unidad?",
+    "expected_pids": [
+      "10037"
+    ],
+    "expected_contains": [
+      [
+        "1.15",
+        "1,15"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el leche entera más barato en total?",
+    "expected_pids": [
+      "10038"
+    ],
+    "expected_contains": [
+      [
+        "1.07",
+        "1,07"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el leche semidesnatada más barato por unidad?",
+    "expected_pids": [
+      "10040"
+    ],
+    "expected_contains": [
+      [
+        "1.10",
+        "1,10"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el leche semidesnatada más barato en total?",
+    "expected_pids": [
+      "10041"
+    ],
+    "expected_contains": [
+      [
+        "1.05",
+        "1,05"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el lechuga iceberg más barato por unidad?",
+    "expected_pids": [
+      "10214"
+    ],
+    "expected_contains": [
+      [
+        "1.20",
+        "1,20"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el lechuga iceberg más barato en total?",
+    "expected_pids": [
+      "10215"
+    ],
+    "expected_contains": [
+      [
+        "1.13",
+        "1,13"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el lejía perfumada más barato por unidad?",
+    "expected_pids": [
+      "10175"
+    ],
+    "expected_contains": [
+      [
+        "1.05",
+        "1,05"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el lejía perfumada más barato en total?",
+    "expected_pids": [
+      "10176"
+    ],
+    "expected_contains": [
+      [
+        "1.96",
+        "1,96"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el limones más barato por unidad?",
+    "expected_pids": [
+      "10223"
+    ],
+    "expected_contains": [
+      [
+        "1.90",
+        "1,90"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el limones más barato en total?",
+    "expected_pids": [
+      "10224"
+    ],
+    "expected_contains": [
+      [
+        "1.78",
+        "1,78"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el limpiacristales más barato por unidad?",
+    "expected_pids": [
+      "10178"
+    ],
+    "expected_contains": [
+      [
+        "2.13",
+        "2,13"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el limpiacristales más barato en total?",
+    "expected_pids": [
+      "10179"
+    ],
+    "expected_contains": [
+      [
+        "1.49",
+        "1,49"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el limpiador multiusos más barato por unidad?",
+    "expected_pids": [
+      "10202"
+    ],
+    "expected_contains": [
+      [
+        "1.80",
+        "1,80"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el limpiador multiusos más barato en total?",
+    "expected_pids": [
+      "10203"
+    ],
+    "expected_contains": [
+      [
+        "1.66",
+        "1,66"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el magdalenas más barato por unidad?",
+    "expected_pids": [
+      "10079"
+    ],
+    "expected_contains": [
+      [
+        "0.12",
+        "0,12"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el magdalenas más barato en total?",
+    "expected_pids": [
+      "10080"
+    ],
+    "expected_contains": [
+      [
+        "1.39",
+        "1,39"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el maíz dulce más barato por unidad?",
+    "expected_pids": [
+      "10121"
+    ],
+    "expected_contains": [
+      [
+        "4.00",
+        "4,00"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el maíz dulce más barato en total?",
+    "expected_pids": [
+      "10122"
+    ],
+    "expected_contains": [
+      [
+        "1.15",
+        "1,15"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el mantequilla más barato por unidad?",
+    "expected_pids": [
+      "10058"
+    ],
+    "expected_contains": [
+      [
+        "9.20",
+        "9,20"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el mantequilla más barato en total?",
+    "expected_pids": [
+      "10060"
+    ],
+    "expected_contains": [
+      [
+        "2.19",
+        "2,19"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el manzana golden más barato por unidad?",
+    "expected_pids": [
+      "10208"
+    ],
+    "expected_contains": [
+      [
+        "2.40",
+        "2,40"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el manzana golden más barato en total?",
+    "expected_pids": [
+      "10209"
+    ],
+    "expected_contains": [
+      [
+        "2.27",
+        "2,27"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el mayonesa más barato por unidad?",
+    "expected_pids": [
+      "10019"
+    ],
+    "expected_contains": [
+      [
+        "10.75",
+        "10,75"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el mayonesa más barato en total?",
+    "expected_pids": [
+      "10020"
+    ],
+    "expected_contains": [
+      [
+        "3.99",
+        "3,99"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el merluza en filetes más barato por unidad?",
+    "expected_pids": [
+      "10235"
+    ],
+    "expected_contains": [
+      [
+        "13.75",
+        "13,75"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el merluza en filetes más barato en total?",
+    "expected_pids": [
+      "10237"
+    ],
+    "expected_contains": [
+      [
+        "5.25",
+        "5,25"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el mermelada de fresa más barato por unidad?",
+    "expected_pids": [
+      "10097"
+    ],
+    "expected_contains": [
+      [
+        "8.00",
+        "8,00"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el mermelada de fresa más barato en total?",
+    "expected_pids": [
+      "10098"
+    ],
+    "expected_contains": [
+      [
+        "2.28",
+        "2,28"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el miel más barato por unidad?",
+    "expected_pids": [
+      "10100"
+    ],
+    "expected_contains": [
+      [
+        "6.50",
+        "6,50"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el miel más barato en total?",
+    "expected_pids": [
+      "10101"
+    ],
+    "expected_contains": [
+      [
+        "6.18",
+        "6,18"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el mostaza más barato por unidad?",
+    "expected_pids": [
+      "10022"
+    ],
+    "expected_contains": [
+      [
+        "7.60",
+        "7,60"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el mostaza más barato en total?",
+    "expected_pids": [
+      "10023"
+    ],
+    "expected_contains": [
+      [
+        "1.80",
+        "1,80"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el queso mozzarella más barato por unidad?",
+    "expected_pids": [
+      "10055"
+    ],
+    "expected_contains": [
+      [
+        "12.80",
+        "12,80"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el queso mozzarella más barato en total?",
+    "expected_pids": [
+      "10056"
+    ],
+    "expected_contains": [
+      [
+        "1.49",
+        "1,49"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el nata para cocinar más barato por unidad?",
+    "expected_pids": [
+      "10061"
+    ],
+    "expected_contains": [
+      [
+        "3.40",
+        "3,40"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el nata para cocinar más barato en total?",
+    "expected_pids": [
+      "10062"
+    ],
+    "expected_contains": [
+      [
+        "1.57",
+        "1,57"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el pan de molde blanco más barato por unidad?",
+    "expected_pids": [
+      "10076"
+    ],
+    "expected_contains": [
+      [
+        "3.00",
+        "3,00"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el pan de molde blanco más barato en total?",
+    "expected_pids": [
+      "10077"
+    ],
+    "expected_contains": [
+      [
+        "1.68",
+        "1,68"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el pan de molde integral más barato por unidad?",
+    "expected_pids": [
+      "10070"
+    ],
+    "expected_contains": [
+      [
+        "4.00",
+        "4,00"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el pan de molde integral más barato en total?",
+    "expected_pids": [
+      "10071"
+    ],
+    "expected_contains": [
+      [
+        "2.22",
+        "2,22"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el papel higiénico más barato por unidad?",
+    "expected_pids": [
+      "10190"
+    ],
+    "expected_contains": [
+      [
+        "0.27",
+        "0,27"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el papel higiénico más barato en total?",
+    "expected_pids": [
+      "10191"
+    ],
+    "expected_contains": [
+      [
+        "3.00",
+        "3,00"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el patatas más barato por unidad?",
+    "expected_pids": [
+      "10217"
+    ],
+    "expected_contains": [
+      [
+        "0.80",
+        "0,80"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el patatas más barato en total?",
+    "expected_pids": [
+      "10218"
+    ],
+    "expected_contains": [
+      [
+        "1.86",
+        "1,86"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el patatas fritas más barato por unidad?",
+    "expected_pids": [
+      "10151"
+    ],
+    "expected_contains": [
+      [
+        "11.33",
+        "11,33"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el patatas fritas más barato en total?",
+    "expected_pids": [
+      "10152"
+    ],
+    "expected_contains": [
+      [
+        "1.60",
+        "1,60"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el patatas prefritas congeladas más barato por unidad?",
+    "expected_pids": [
+      "10241"
+    ],
+    "expected_contains": [
+      [
+        "3.20",
+        "3,20"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el patatas prefritas congeladas más barato en total?",
+    "expected_pids": [
+      "10242"
+    ],
+    "expected_contains": [
+      [
+        "3.02",
+        "3,02"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el pizza cuatro quesos más barato por unidad?",
+    "expected_pids": [
+      "10238"
+    ],
+    "expected_contains": [
+      [
+        "8.29",
+        "8,29"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el pizza cuatro quesos más barato en total?",
+    "expected_pids": [
+      "10239"
+    ],
+    "expected_contains": [
+      [
+        "2.68",
+        "2,68"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el plátano de canarias más barato por unidad?",
+    "expected_pids": [
+      "10205"
+    ],
+    "expected_contains": [
+      [
+        "2.10",
+        "2,10"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el plátano de canarias más barato en total?",
+    "expected_pids": [
+      "10206"
+    ],
+    "expected_contains": [
+      [
+        "2.00",
+        "2,00"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el queso curado semicurado más barato por unidad?",
+    "expected_pids": [
+      "10052"
+    ],
+    "expected_contains": [
+      [
+        "18.00",
+        "18,00"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el queso curado semicurado más barato en total?",
+    "expected_pids": [
+      "10053"
+    ],
+    "expected_contains": [
+      [
+        "4.19",
+        "4,19"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el refresco de cola más barato por unidad?",
+    "expected_pids": [
+      "10139"
+    ],
+    "expected_contains": [
+      [
+        "1.05",
+        "1,05"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el refresco de cola más barato en total?",
+    "expected_pids": [
+      "10140"
+    ],
+    "expected_contains": [
+      [
+        "1.95",
+        "1,95"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el rollo de cocina más barato por unidad?",
+    "expected_pids": [
+      "10193"
+    ],
+    "expected_contains": [
+      [
+        "0.95",
+        "0,95"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el rollo de cocina más barato en total?",
+    "expected_pids": [
+      "10194"
+    ],
+    "expected_contains": [
+      [
+        "1.82",
+        "1,82"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el sal marina fina más barato por unidad?",
+    "expected_pids": [
+      "10025"
+    ],
+    "expected_contains": [
+      [
+        "0.85",
+        "0,85"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el sal marina fina más barato en total?",
+    "expected_pids": [
+      "10026"
+    ],
+    "expected_contains": [
+      [
+        "0.81",
+        "0,81"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el salsa de soja más barato por unidad?",
+    "expected_pids": [
+      "10016"
+    ],
+    "expected_contains": [
+      [
+        "8.40",
+        "8,40"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el salsa de soja más barato en total?",
+    "expected_pids": [
+      "10017"
+    ],
+    "expected_contains": [
+      [
+        "1.96",
+        "1,96"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el sardinas en aceite de oliva más barato por unidad?",
+    "expected_pids": [
+      "10118"
+    ],
+    "expected_contains": [
+      [
+        "15.00",
+        "15,00"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el sardinas en aceite de oliva más barato en total?",
+    "expected_pids": [
+      "10119"
+    ],
+    "expected_contains": [
+      [
+        "1.70",
+        "1,70"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el suavizante concentrado más barato por unidad?",
+    "expected_pids": [
+      "10181"
+    ],
+    "expected_contains": [
+      [
+        "3.20",
+        "3,20"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el suavizante concentrado más barato en total?",
+    "expected_pids": [
+      "10182"
+    ],
+    "expected_contains": [
+      [
+        "3.04",
+        "3,04"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el tomate pera más barato por unidad?",
+    "expected_pids": [
+      "10211"
+    ],
+    "expected_contains": [
+      [
+        "2.20",
+        "2,20"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el tomate pera más barato en total?",
+    "expected_pids": [
+      "10212"
+    ],
+    "expected_contains": [
+      [
+        "2.07",
+        "2,07"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el tomate triturado más barato por unidad?",
+    "expected_pids": [
+      "10109"
+    ],
+    "expected_contains": [
+      [
+        "3.50",
+        "3,50"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el tomate triturado más barato en total?",
+    "expected_pids": [
+      "10110"
+    ],
+    "expected_contains": [
+      [
+        "1.33",
+        "1,33"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el tónica más barato por unidad?",
+    "expected_pids": [
+      "10148"
+    ],
+    "expected_contains": [
+      [
+        "1.30",
+        "1,30"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el tónica más barato en total?",
+    "expected_pids": [
+      "10149"
+    ],
+    "expected_contains": [
+      [
+        "1.23",
+        "1,23"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el vinagre de vino blanco más barato por unidad?",
+    "expected_pids": [
+      "10013"
+    ],
+    "expected_contains": [
+      [
+        "1.60",
+        "1,60"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el vinagre de vino blanco más barato en total?",
+    "expected_pids": [
+      "10014"
+    ],
+    "expected_contains": [
+      [
+        "1.48",
+        "1,48"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el vino tinto d.o. más barato por unidad?",
+    "expected_pids": [
+      "10145"
+    ],
+    "expected_contains": [
+      [
+        "6.50",
+        "6,50"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el vino tinto d.o. más barato en total?",
+    "expected_pids": [
+      "10146"
+    ],
+    "expected_contains": [
+      [
+        "6.06",
+        "6,06"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el yogur de fresa más barato por unidad?",
+    "expected_pids": [
+      "10049"
+    ],
+    "expected_contains": [
+      [
+        "5.20",
+        "5,20"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el yogur de fresa más barato en total?",
+    "expected_pids": [
+      "10050"
+    ],
+    "expected_contains": [
+      [
+        "0.60",
+        "0,60"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el yogur natural más barato por unidad?",
+    "expected_pids": [
+      "10046"
+    ],
+    "expected_contains": [
+      [
+        "4.40",
+        "4,40"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el yogur natural más barato en total?",
+    "expected_pids": [
+      "10047"
+    ],
+    "expected_contains": [
+      [
+        "2.05",
+        "2,05"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el zanahoria más barato por unidad?",
+    "expected_pids": [
+      "10220"
+    ],
+    "expected_contains": [
+      [
+        "1.70",
+        "1,70"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el zanahoria más barato en total?",
+    "expected_pids": [
+      "10221"
+    ],
+    "expected_contains": [
+      [
+        "1.61",
+        "1,61"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el zumo de manzana más barato por unidad?",
+    "expected_pids": [
+      "10136"
+    ],
+    "expected_contains": [
+      [
+        "1.40",
+        "1,40"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el zumo de manzana más barato en total?",
+    "expected_pids": [
+      "10137"
+    ],
+    "expected_contains": [
+      [
+        "1.29",
+        "1,29"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el zumo de naranja 100% más barato por unidad?",
+    "expected_pids": [
+      "10133"
+    ],
+    "expected_contains": [
+      [
+        "1.90",
+        "1,90"
+      ],
+      [
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el zumo de naranja 100% más barato en total?",
+    "expected_pids": [
+      "10134"
+    ],
+    "expected_contains": [
+      [
+        "1.78",
+        "1,78"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Qué productos de aceites, especias y salsas cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10013",
+      "10014",
+      "10015",
+      "10017",
+      "10022",
+      "10023",
+      "10024",
+      "10025",
+      "10026",
+      "10027",
+      "10028",
+      "10029",
+      "10030",
+      "10031",
+      "10032",
+      "10033"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  },
+  {
+    "question": "¿Qué productos de bebidas cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10127",
+      "10128",
+      "10129",
+      "10130",
+      "10131",
+      "10132",
+      "10133",
+      "10134",
+      "10135",
+      "10136",
+      "10137",
+      "10138",
+      "10140",
+      "10142",
+      "10143",
+      "10144",
+      "10148",
+      "10149",
+      "10150"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  },
+  {
+    "question": "¿Qué productos de cereales y desayuno cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10088",
+      "10089",
+      "10090",
+      "10095"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  },
+  {
+    "question": "¿Qué productos de conservas cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10109",
+      "10110",
+      "10111",
+      "10112",
+      "10113",
+      "10114",
+      "10118",
+      "10119",
+      "10120",
+      "10121",
+      "10122",
+      "10123"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  },
+  {
+    "question": "¿Qué productos de dulces y snacks cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10151",
+      "10152",
+      "10153",
+      "10154",
+      "10155",
+      "10156",
+      "10157",
+      "10158",
+      "10159",
+      "10160",
+      "10161",
+      "10162",
+      "10163",
+      "10164",
+      "10165",
+      "10166",
+      "10167",
+      "10168"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  },
+  {
+    "question": "¿Qué productos de frutas y verduras cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10214",
+      "10215",
+      "10216",
+      "10218",
+      "10219",
+      "10220",
+      "10221",
+      "10222",
+      "10223",
+      "10224",
+      "10225",
+      "10229",
+      "10230",
+      "10231"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  },
+  {
+    "question": "¿Qué productos de leche y yogures cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10037",
+      "10038",
+      "10039",
+      "10040",
+      "10041",
+      "10042",
+      "10043",
+      "10044",
+      "10045",
+      "10049",
+      "10050",
+      "10051",
+      "10055",
+      "10056",
+      "10057",
+      "10061",
+      "10062",
+      "10063",
+      "10064",
+      "10065",
+      "10066",
+      "10067",
+      "10068",
+      "10069"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  },
+  {
+    "question": "¿Qué productos de limpieza cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10176",
+      "10178",
+      "10179",
+      "10180",
+      "10193",
+      "10194",
+      "10195",
+      "10199",
+      "10200",
+      "10201",
+      "10202",
+      "10203",
+      "10204"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  },
+  {
+    "question": "¿Qué productos de panadería cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10073",
+      "10074",
+      "10075",
+      "10076",
+      "10077",
+      "10078",
+      "10079",
+      "10080",
+      "10081",
+      "10082",
+      "10083",
+      "10084",
+      "10085",
+      "10086",
+      "10087"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  }
+]

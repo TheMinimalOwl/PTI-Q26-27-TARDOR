@@ -1,0 +1,27 @@
+[Unit]
+# Servicio del prototipo de RAG en la VM (fuera del clúster).
+# Es la via mas simple para la demo: no necesita imagen ni manifiesto.
+Description=TARDOR flujo-ia (servicio RAG)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=joelfurca
+WorkingDirectory=/home/joelfurca/Documents/PTI-Q26-27-TARDOR/flujo-ia
+Environment=HF_HOME=/home/joelfurca/.cache/huggingface
+Environment=RAG_CACHE_DIR=/home/joelfurca/.cache/tardor-rag
+Environment=RAG_EMBED_MODEL=bge-m3
+Environment=RAG_LLM=ollama
+Environment=RAG_OLLAMA_MODEL=qwen3:4b
+Environment=OLLAMA_HOST=http://127.0.0.1:11434
+Environment=GEMINI_API_KEY=
+ExecStart=/home/joelfurca/Documents/PTI-Q26-27-TARDOR/flujo-ia/.venv/bin/python -m rag.serve --host 0.0.0.0 --port 8080
+Restart=on-failure
+RestartSec=5
+# El servicio carga el indice al arrancar: la primera vez tarda (carga del
+# modelo de embeddings), asi que el arranque es lento a proposito.
+TimeoutStartSec=300
+
+[Install]
+WantedBy=multi-user.target

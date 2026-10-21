@@ -1,0 +1,90 @@
+Items: 87
+Unitarios: 86 (fuente 79, calculado 7) | Incompletos: 1
+---
+10002 | Aceite oliva virgen extra Carrefour | 11.70EUR total | 12.50EUR/l | 1l | Aceites, especias y salsas | https://tienda.carrefour.es/product/10002 | ref=12.500EUR/L src=fuente
+10005 | Aceite de oliva virgen extra Carrefour | 6.36EUR total | 13.60EUR/l | 0.5l | Aceites, especias y salsas | https://tienda.carrefour.es/product/10005 | ref=13.600EUR/L src=fuente
+10008 | Aceite de oliva suave Carrefour | 6.76EUR total | 7.20EUR/l | 1l | Aceites, especias y salsas | https://tienda.carrefour.es/product/10008 | ref=7.200EUR/L src=fuente
+10011 | Aceite de girasol Carrefour | 2.21EUR total | 2.40EUR/l | 1l | Aceites, especias y salsas | https://tienda.carrefour.es/product/10011 | ref=2.400EUR/L src=fuente
+10014 | Vinagre de vino blanco Carrefour | 1.48EUR total | 1.60EUR/l | 1l | Aceites, especias y salsas | https://tienda.carrefour.es/product/10014 | ref=1.600EUR/L src=fuente
+10017 | Salsa de soja Carrefour | 1.96EUR total | 8.40EUR/l | 0.25l | Aceites, especias y salsas | https://tienda.carrefour.es/product/10017 | ref=8.400EUR/L src=fuente
+10020 | Mayonesa Carrefour | 3.99EUR total | 10.75EUR/l | 0.4l | Aceites, especias y salsas | https://tienda.carrefour.es/product/10020 | ref=10.750EUR/L src=fuente
+10023 | Mostaza Carrefour | 1.80EUR total | 7.60EUR/l | 0.25l | Aceites, especias y salsas | https://tienda.carrefour.es/product/10023 | ref=7.600EUR/L src=fuente
+10026 | Sal marina fina Carrefour | 0.81EUR total | 0.85EUR/kg | 1kg | Aceites, especias y salsas | https://tienda.carrefour.es/product/10026 | ref=0.850EUR/KG src=fuente
+10029 | Azúcar blanco Carrefour | 1.01EUR total | 1.10EUR/kg | 1kg | Aceites, especias y salsas | https://tienda.carrefour.es/product/10029 | ref=1.100EUR/KG src=fuente
+10032 | Harina de trigo Carrefour | 0.99EUR total | 1.05EUR/kg | 1kg | Aceites, especias y salsas | https://tienda.carrefour.es/product/10032 | ref=1.050EUR/KG src=fuente
+10035 | Café molido natural Carrefour | 3.28EUR total | 14.00EUR/kg | 250g | Aceites, especias y salsas | https://tienda.carrefour.es/product/10035 | ref=1.400EUR/100 g src=fuente
+10038 | Leche entera Carrefour | 1.07EUR total | 1.15EUR/l | 1l | Leche y yogures | https://tienda.carrefour.es/product/10038 | ref=1.150EUR/L src=fuente
+10041 | Leche semidesnatada Carrefour | 1.05EUR total | 1.10EUR/l | 1l | Leche y yogures | https://tienda.carrefour.es/product/10041 | ref=1.100EUR/L src=fuente
+10044 | Leche desnatada Carrefour | 1.01EUR total | 1.10EUR/l | 1l | Leche y yogures | https://tienda.carrefour.es/product/10044 | ref=1.100EUR/L src=fuente
+10047 | Yogur natural Carrefour | 2.05EUR total | 4.40EUR/kg | 500g | Leche y yogures | https://tienda.carrefour.es/product/10047 | ref=4.400EUR/KG src=fuente
+10050 | Yogur de fresa Carrefour | 0.60EUR total | 5.20EUR/kg | 125g | Leche y yogures | https://tienda.carrefour.es/product/10050 | ref=0.520EUR/100 g src=fuente
+10053 | Queso curado semicurado Carrefour | 4.19EUR total | 18.00EUR/kg | 250g | Leche y yogures | https://tienda.carrefour.es/product/10053 | ref=18.000EUR/KG src=fuente
+10056 | Queso mozzarella Carrefour | 1.49EUR total | 12.80EUR/kg | 125g | Leche y yogures | https://tienda.carrefour.es/product/10056 | ref=1.280EUR/100 g src=fuente
+10059 | Mantequilla Carrefour | 2.20EUR total | 9.20EUR/kg | 250g | Leche y yogures | https://tienda.carrefour.es/product/10059 | ref=9.200EUR/KG src=fuente
+10062 | Nata para cocinar Carrefour | 1.57EUR total | 3.40EUR/l | 500ml | Leche y yogures | https://tienda.carrefour.es/product/10062 | ref=3.400EUR/L src=fuente
+10065 | Batido chocolate Carrefour | 1.80EUR total | 1.90EUR/l | 1l | Leche y yogures | https://tienda.carrefour.es/product/10065 | ref=1.900EUR/L src=fuente
+10068 | Flan de vainilla Carrefour | 1.66EUR total | 0.45EUR/ud | 4ud | Leche y yogures | https://tienda.carrefour.es/product/10068 | ref=0.450EUR/UD src=fuente
+10071 | Pan de molde integral Carrefour | 2.22EUR total | 4.00EUR/kg | 600g | Panadería | https://tienda.carrefour.es/product/10071 | ref=4.000EUR/KG src=fuente
+10074 | Barra de pan rústica Carrefour | 1.14EUR total | 4.80EUR/kg | 250g | Panadería | https://tienda.carrefour.es/product/10074 | ref=4.800EUR/KG src=fuente
+10077 | Pan de molde blanco Carrefour | 1.68EUR total | 3.00EUR/kg | 600g | Panadería | https://tienda.carrefour.es/product/10077 | ref=3.000EUR/KG src=fuente
+10080 | Magdalenas Carrefour | 1.39EUR total | 0.125EUR/ud | 12ud | Panadería | https://tienda.carrefour.es/product/10080 | ref=0.125EUR/UD src=fuente
+10083 | Croissant de mantequilla Carrefour | 0.33EUR total | 6.36EUR/kg | 55g | Panadería | https://tienda.carrefour.es/product/10083 | ref=0.636EUR/100 g src=fuente
+10086 | Donut chocolate Carrefour | 0.42EUR total | 0.45EUR/ud | 1ud | Panadería | https://tienda.carrefour.es/product/10086 | ref=0.450EUR/UD src=fuente
+10089 | Copos de avena Carrefour | 1.50EUR total | 3.20EUR/kg | 500g | Cereales y desayuno | https://tienda.carrefour.es/product/10089 | ref=3.200EUR/KG src=fuente
+10092 | Cereales con chocolate Carrefour | 2.19EUR total | 4.60EUR/kg | 500g | Cereales y desayuno | https://tienda.carrefour.es/product/10092 | ref=0.460EUR/100 g src=fuente
+10095 | Corn flakes Carrefour | 1.96EUR total | 4.20EUR/kg | 500g | Cereales y desayuno | https://tienda.carrefour.es/product/10095 | ref=4.200EUR/KG src=fuente
+10098 | Mermelada de fresa Carrefour | 2.28EUR total | 8.00EUR/kg | 300g | Cereales y desayuno | https://tienda.carrefour.es/product/10098 | ref=8.000EUR/KG src=fuente
+10101 | Miel Carrefour | 6.18EUR total | 6.50EUR/kg | 1kg | Cereales y desayuno | https://tienda.carrefour.es/product/10101 | ref=6.500EUR/KG src=fuente
+10104 | Atún claro en aceite de oliva Carrefour | 2.13EUR total | 0.767EUR/ud | 3ud | Conservas | https://tienda.carrefour.es/product/10104 | ref=0.767EUR/UD src=fuente
+10107 | Gulas caseras Carrefour | 3.25EUR total | 8.75EUR/kg | 400g | Conservas | https://tienda.carrefour.es/product/10107 | ref=8.750EUR/KG src=fuente
+10110 | Tomate triturado Carrefour | 1.33EUR total | 3.50EUR/kg | 400g | Conservas | https://tienda.carrefour.es/product/10110 | ref=3.500EUR/KG src=fuente
+10113 | Alubias cocidas Carrefour | 1.28EUR total | 2.368EUR/kg | 570g | Conservas | https://tienda.carrefour.es/product/10113 | ref=2.368EUR/KG src=fuente
+10116 | Atún en salmuera Carrefour | 2.47EUR total | 0.867EUR/ud | 3ud | Conservas | https://tienda.carrefour.es/product/10116 | ref=0.867EUR/UD src=fuente
+10119 | Sardinas en aceite de oliva Carrefour | 1.70EUR total | 15.00EUR/kg | 120g | Conservas | https://tienda.carrefour.es/product/10119 | ref=15.000EUR/KG src=fuente
+10122 | Maíz dulce Carrefour | 1.15EUR total | 4.00EUR/kg | 300g | Conservas | https://tienda.carrefour.es/product/10122 | ref=4.000EUR/KG src=fuente
+10125 | Aceitunas verdes rellenas Carrefour | 2.70EUR total | 11.60EUR/kg | 250g | Conservas | https://tienda.carrefour.es/product/10125 | ref=11.600EUR/KG src=fuente
+10128 | Agua mineral Carrefour | 0.42EUR total | 0.30EUR/l | 1.5l | Bebidas | https://tienda.carrefour.es/product/10128 | ref=0.300EUR/L src=fuente
+10131 | Agua con gas Carrefour | 0.71EUR total | 0.50EUR/l | 1.5l | Bebidas | https://tienda.carrefour.es/product/10131 | ref=0.500EUR/L src=fuente
+10134 | Zumo de naranja 100% Carrefour | 1.78EUR total | 1.90EUR/l | 1l | Bebidas | https://tienda.carrefour.es/product/10134 | ref=1.900EUR/L src=fuente
+10137 | Zumo de manzana Carrefour | 1.29EUR total | 1.40EUR/l | 1l | Bebidas | https://tienda.carrefour.es/product/10137 | ref=1.400EUR/L src=fuente
+10140 | Refresco de cola Carrefour | 1.95EUR total | 1.05EUR/l | 2l | Bebidas | https://tienda.carrefour.es/product/10140 | ref=1.050EUR/L src=fuente
+10143 | Cerveza rubia Carrefour | 0.85EUR total | 2.727EUR/l | 0.33l | Bebidas | https://tienda.carrefour.es/product/10143 | ref=2.727EUR/L src=fuente
+10146 | Vino tinto D.O. Carrefour | 6.06EUR total | 6.50EUR/l | 1l | Bebidas | https://tienda.carrefour.es/product/10146 | ref=6.500EUR/L src=fuente
+10149 | Tónica Carrefour | 1.23EUR total | 1.30EUR/l | 1l | Bebidas | https://tienda.carrefour.es/product/10149 | ref=1.300EUR/L src=fuente
+10152 | Patatas fritas Carrefour | 1.60EUR total | 11.333EUR/kg | 150g | Dulces y snacks | https://tienda.carrefour.es/product/10152 | ref=11.333EUR/KG src=fuente
+10155 | Cacahuetes salados Carrefour | 1.39EUR total | 7.50EUR/kg | 200g | Dulces y snacks | https://tienda.carrefour.es/product/10155 | ref=7.500EUR/KG src=fuente
+10158 | Chocolate con leche Carrefour | 1.49EUR total | 12.80EUR/kg | 125g | Dulces y snacks | https://tienda.carrefour.es/product/10158 | ref=1.280EUR/100 g src=fuente
+10161 | Galletas de chocolate Carrefour | 1.13EUR total | 4.00EUR/kg | 300g | Dulces y snacks | https://tienda.carrefour.es/product/10161 | ref=4.000EUR/KG src=fuente
+10164 | Chucherías surtidas Carrefour | 1.67EUR total | 12.00EUR/kg | 150g | Dulces y snacks | https://tienda.carrefour.es/product/10164 | ref=12.000EUR/KG src=fuente
+10167 | Kikos Carrefour | 1.04EUR total | 14.8571EUR/kg | 70g | Dulces y snacks | https://tienda.carrefour.es/product/10167 | ref=-EUR/ src=calculado
+10170 | Chicle menta Carrefour | -EUR total | - (sin_precio) | 1ud | Dulces y snacks | https://tienda.carrefour.es/product/10170 | ref=-EUR/- src=-
+10173 | Detergente líquido Carrefour | 8.81EUR total | 0.2202EUR/lavado | 40lv | Limpieza | https://tienda.carrefour.es/product/10173 | ref=-EUR/ src=calculado
+10176 | Lejía perfumada Carrefour | 1.96EUR total | 1.05EUR/l | 2l | Limpieza | https://tienda.carrefour.es/product/10176 | ref=1.050EUR/L src=fuente
+10179 | Limpiacristales Carrefour | 1.49EUR total | 2.133EUR/l | 750ml | Limpieza | https://tienda.carrefour.es/product/10179 | ref=2.133EUR/L src=fuente
+10182 | Suavizante concentrado Carrefour | 3.04EUR total | 3.20EUR/l | 1l | Limpieza | https://tienda.carrefour.es/product/10182 | ref=3.200EUR/L src=fuente
+10185 | Jabón de manos Carrefour | 2.26EUR total | 4.80EUR/l | 500ml | Limpieza | https://tienda.carrefour.es/product/10185 | ref=4.800EUR/L src=fuente
+10188 | Lavavajillas concentrado Carrefour | 2.65EUR total | 3.733EUR/l | 750ml | Limpieza | https://tienda.carrefour.es/product/10188 | ref=3.733EUR/L src=fuente
+10191 | Papel higiénico Carrefour | 3.00EUR total | 0.267EUR/ud | 12ud | Limpieza | https://tienda.carrefour.es/product/10191 | ref=0.267EUR/UD src=fuente
+10194 | Rollo de cocina Carrefour | 1.82EUR total | 0.95EUR/ud | 2ud | Limpieza | https://tienda.carrefour.es/product/10194 | ref=0.950EUR/UD src=fuente
+10197 | Bayeta de microfibra Carrefour | 2.33EUR total | 0.50EUR/ud | 5ud | Limpieza | https://tienda.carrefour.es/product/10197 | ref=0.500EUR/UD src=fuente
+10200 | Bolsas de basura Carrefour | 1.31EUR total | 0.0655EUR/ud | 20ud | Limpieza | https://tienda.carrefour.es/product/10200 | ref=-EUR/ src=calculado
+10203 | Limpiador multiusos Carrefour | 1.66EUR total | 1.80EUR/l | 1l | Limpieza | https://tienda.carrefour.es/product/10203 | ref=1.800EUR/L src=fuente
+10206 | Plátano de Canarias Carrefour | 2.00EUR total | 2.10EUR/kg | 1kg | Frutas y verduras | https://tienda.carrefour.es/product/10206 | ref=2.100EUR/KG src=fuente
+10209 | Manzana golden Carrefour | 2.27EUR total | 2.40EUR/kg | 1kg | Frutas y verduras | https://tienda.carrefour.es/product/10209 | ref=2.400EUR/KG src=fuente
+10212 | Tomate pera Carrefour | 2.07EUR total | 2.20EUR/kg | 1kg | Frutas y verduras | https://tienda.carrefour.es/product/10212 | ref=2.200EUR/KG src=fuente
+10215 | Lechuga iceberg Carrefour | 1.13EUR total | 1.20EUR/ud | 1ud | Frutas y verduras | https://tienda.carrefour.es/product/10215 | ref=1.200EUR/UD src=fuente
+10218 | Patatas Carrefour | 1.86EUR total | 0.80EUR/kg | 2.5kg | Frutas y verduras | https://tienda.carrefour.es/product/10218 | ref=0.800EUR/KG src=fuente
+10221 | Zanahoria Carrefour | 1.61EUR total | 1.70EUR/kg | 1kg | Frutas y verduras | https://tienda.carrefour.es/product/10221 | ref=1.700EUR/KG src=fuente
+10224 | Limones Carrefour | 1.78EUR total | 1.90EUR/kg | 1kg | Frutas y verduras | https://tienda.carrefour.es/product/10224 | ref=1.900EUR/KG src=fuente
+10227 | Aguacates Carrefour | 3.26EUR total | 0.875EUR/ud | 4ud | Frutas y verduras | https://tienda.carrefour.es/product/10227 | ref=0.875EUR/UD src=fuente
+10230 | Cebollas Carrefour | 1.43EUR total | 1.50EUR/kg | 1kg | Frutas y verduras | https://tienda.carrefour.es/product/10230 | ref=1.500EUR/KG src=fuente
+10233 | Guisantes congelados Carrefour | 2.45EUR total | 2.60EUR/kg | 1kg | Congelados | https://tienda.carrefour.es/product/10233 | ref=2.600EUR/KG src=fuente
+10236 | Merluza en filetes Carrefour | 5.26EUR total | 13.75EUR/kg | 400g | Congelados | https://tienda.carrefour.es/product/10236 | ref=13.750EUR/KG src=fuente
+10239 | Pizza cuatro quesos Carrefour | 2.68EUR total | 8.286EUR/kg | 350g | Congelados | https://tienda.carrefour.es/product/10239 | ref=8.286EUR/KG src=fuente
+10242 | Patatas prefritas congeladas Carrefour | 3.02EUR total | 3.20EUR/kg | 1kg | Congelados | https://tienda.carrefour.es/product/10242 | ref=3.200EUR/KG src=fuente
+10245 | Comida para perros Carrefour | 6.08EUR total | 2.167EUR/kg | 3kg | Mascotas | https://tienda.carrefour.es/product/10245 | ref=2.167EUR/KG src=fuente
+10248 | Comida para gatos Carrefour | 3.89EUR total | 2.80EUR/kg | 1.5kg | Mascotas | https://tienda.carrefour.es/product/10248 | ref=2.800EUR/KG src=fuente
+10250 | Flan de vainilla Carrefour | 2.43EUR total | 0.3038EUR/ud | 8ud | Leche y yogures | https://tienda.carrefour.es/product/10250 | ref=-EUR/- src=calculado
+10251 | Atún claro en aceite de oliva Carrefour | 3.10EUR total | 0.5167EUR/ud | 6ud | Conservas | https://tienda.carrefour.es/product/10251 | ref=-EUR/- src=calculado
+10253 | Bolsas de basura Carrefour | 1.89EUR total | 0.063EUR/ud | 30ud | Limpieza | https://tienda.carrefour.es/product/10253 | ref=-EUR/- src=calculado
+10255 | Aceite de oliva virgen extra Carrefour | 16.88EUR total | 22.5067EUR/l | 0.75l | Aceites, especias y salsas | https://tienda.carrefour.es/product/10255 | ref=-EUR/- src=calculado
