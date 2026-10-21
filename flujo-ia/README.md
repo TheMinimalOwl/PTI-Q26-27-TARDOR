@@ -60,6 +60,7 @@ Todo se cambia por variable de entorno, sin tocar codigo:
 | `RAG_EMBED_MODEL` | `e5-small` | Modelo de embeddings (`e5-small`, `bge-m3`, `qwen3-embed-0.6b` o un id de HF) |
 | `RAG_LLM` | `ollama` | Backend de LLM: `ollama`, `gemini` o `none` |
 | `RAG_OLLAMA_MODEL` | `qwen3:4b` | Modelo local de Ollama |
+| `RAG_OLLAMA_THINK` | `false` | Si el modelo razona antes de responder. En CPU la diferencia es de **15 s a 0,7 s** por respuesta |
 | `RAG_OLLAMA_HOST` | `http://localhost:11434` | Endpoint de Ollama |
 | `RAG_GEMINI_MODEL` | `gemini-2.5-flash` | Modelo de la API de Gemini |
 | `GEMINI_API_KEY` | — | Clave de AI Studio (la cuenta de la uni da mas cuota) |

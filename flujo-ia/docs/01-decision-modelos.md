@@ -186,6 +186,35 @@ RAG_LLM=ollama python -m rag.cli ask "..."     # local, 0 EUR, funciona sin red
 RAG_LLM=gemini python -m rag.cli ask "..."     # API, mejor calidad, usa la cuota de la uni
 ```
 
+### 4.4 Medido en la VM (`gastly`, 4 cores, 15 GB, sin GPU)
+
+Con `qwen3:8b` (Q4_K_M, 5.2 GB) y Ollama 0.40.7:
+
+| | Con razonamiento | Sin razonamiento (`think: false`) |
+|---|---|---|
+| Tokens generados para responder "OK" | 216 | **2** |
+| Tiempo | 15,6 s | **0,7 s** |
+| Velocidad | 14,6 tok/s | 30,4 tok/s |
+
+Un modelo razonador se gasta cientos de tokens *pensando* antes de responder,
+y en CPU eso se nota mas que en GPU. Por eso `RAG_OLLAMA_THINK=false` es el
+valor por defecto: el prompt ya esta cerrado (contexto filtrado, formato
+declarado, instruccion de no inventar) y el modelo no necesita razonar para
+obedecer. Se activa con `RAG_OLLAMA_THINK=true` cuando la tarea lojustifique
+(por ejemplo, elegir el equivalente entre candidatos).
+
+Tiempos reales del pipeline completo en esa VM:
+
+| Operacion | Tiempo |
+|---|---|
+| Indexado (257 productos, e5-small) | 19 s |
+| Consulta de catalogo sin LLM | < 1 s |
+| Consulta de QA con LLM (primera, carga el modelo en RAM) | 22 s |
+| Consulta de QA con LLM (siguientes) | 2-5 s |
+
+Por eso el timeout de Ollama esta en 300 s: en CPU la primera respuesta
+incluye cargar 5 GB de modelo en RAM.
+
 Por que hibrido y no uno solo:
 
 1. **L4 - la demo no puede depender de la red ni de una cuota.** La VM del

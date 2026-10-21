@@ -54,6 +54,64 @@ sudo systemctl restart ollama
 
 Igual con HuggingFace: `HF_HOME` (lo usa `setup.sh` y el servicio systemd).
 
+## 2bis. Ollama sin sudo (instalacion por usuario)
+
+El `install.sh` de Ollama necesita sudo (instala el servicio del sistema). Si
+no hay sudo en la maquina, la instalacion por usuario funciona igual y es la
+que se ha probado en la VM:
+
+```bash
+VER=v0.40.7
+curl -fL https://github.com/ollama/ollama/releases/download/$VER/ollama-linux-amd64.tar.zst -o ollama.tar.zst
+zstd -d -c ollama.tar.zst | tar -x -C ollama        # necesita el paquete zstd
+export OLLAMA_MODELS=$HOME/.ollama/models
+setsid nohup env OLLAMA_MODELS=$OLLAMA_MODELS OLLAMA_HOST=127.0.0.1:11434 \
+  $HOME/ollama/bin/ollama serve > $HOME/ollama.log 2>&1 < /dev/null &
+$HOME/ollama/bin/ollama pull qwen3:8b
+```
+
+> [!IMPORTANT]
+> **No se puede borrar la carpeta `lib/`.** El binario `ollama` busca al
+> servidor de inferencia en `<dir del binario>/../lib/ollama/llama-server`.
+> Si se copia solo `bin/ollama`, el modelo se descarga pero toda inferencia
+> falla con `llama-server binary not found`.
+
+### Como servicio (usuario), para que sobreviva a un reinicio
+
+```ini
+# ~/.config/systemd/user/ollama.service
+[Unit]
+Description=Ollama (LLM local del prototipo de RAG)
+After=network-online.target
+
+[Service]
+ExecStart=%h/ollama/bin/ollama serve
+Environment=OLLAMA_MODELS=%h/.ollama/models
+Environment=OLLAMA_HOST=127.0.0.1:11434
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=default.target
+```
+
+```bash
+systemctl --user daemon-reload
+systemctl --user enable --now ollama
+```
+
+Para que arranque sin sesion abierta (por ejemplo, tras un reinicio por SSH):
+
+```bash
+sudo loginctl enable-linger $USER
+```
+
+### Y el servicio de RAG
+
+Igual, en `~/.config/systemd/user/flujo-ia.service` (plantilla en
+`deploy/flujo-ia.service`): `After=... ollama.service`, `RAG_LLM=ollama` y
+`OLLAMA_HOST=http://127.0.0.1:11434`.
+
 ## 3. Camino A · systemd en la VM (el de la demo)
 
 ```bash
