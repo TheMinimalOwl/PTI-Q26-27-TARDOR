@@ -28,7 +28,7 @@ import json
 import os
 from decimal import Decimal, InvalidOperation
 
-from flask import Flask, jsonify, request
+from flask import Flask, Response, jsonify, request
 
 from . import config
 from .chain import flujo_qa
@@ -36,7 +36,7 @@ from .embeddings import Embedder
 from .guardrails import aplicar_guardrails, construir_respuesta, validar
 from .indexer import load_index
 from .ingest import Product
-from .llm import build_llm
+from .llm import NoLLM, build_llm
 from .pipelines import catalogo, equivalencia, qa
 from .retriever import Filters, Retriever
 
@@ -192,7 +192,7 @@ def ask():
         return jsonify({"error": "falta 'question'"}), 400
     k = int(payload.get("k") or config.TOP_K)
     filtros = _filtros(payload)
-    res = qa(_retriever(), _llm(), question, k=k, filtros=filtros)
+    res = qa(_retriever(), _llm(), question, k=k, filters=filtros)
 
     g = aplicar_guardrails(
         res.respuesta or "",
@@ -235,12 +235,12 @@ def ask_stream():
     k = int(payload.get("k") or config.TOP_K)
     filtros = _filtros(payload)
     llm = _llm()
-    if llm is None:
-        return jsonify({"error": "streaming necesita un LLM configurado"}), 400
+    if llm is None or isinstance(llm, NoLLM):
+        return jsonify({"error": "streaming necesita un LLM configurado (RAG_LLM=ollama|gemini)"}), 400
 
     def generar():
         try:
-            for tipo, dato in flujo_qa(_retriever(), llm, question, k=k, filtros=filtros):
+            for tipo, dato in flujo_qa(_retriever(), llm, question, k=k, filters=filtros):
                 yield "event: " + tipo + "\ndata: " + json.dumps(dato, ensure_ascii=False, default=str) + "\n\n"
         except Exception as e:  # noqa: BLE001 - el error viaja como evento
             yield "event: error\ndata: " + json.dumps({"error": str(e)}, ensure_ascii=False) + "\n\n"
@@ -252,3 +252,22 @@ def ask_stream():
     )
 
 
+
+def main(argv: list[str] | None = None) -> int:
+    p = argparse.ArgumentParser(prog="rag.serve", description="Servicio HTTP del RAG")
+    p.add_argument("--host", default=os.environ.get("RAG_HOST", "0.0.0.0"))
+    p.add_argument("--port", type=int, default=int(os.environ.get("RAG_PORT", "8080")))
+    p.add_argument("--embed", default=config.DEFAULT_EMBEDDING)
+    p.add_argument("--llm", default=config.DEFAULT_LLM, choices=config.LLM_PROVIDERS)
+    args = p.parse_args(argv)
+
+    inicializar(args.embed, args.llm)
+    print(f"embeddings: {_ESTADO.get('embeddings')}")
+    print(f"llm: {_ESTADO['llm'].describe() if _ESTADO.get('llm') else 'ninguno'}")
+    print(f"productos indexados: {len(_ESTADO['retriever'].store)}")
+    app.run(host=args.host, port=args.port, threaded=True)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
