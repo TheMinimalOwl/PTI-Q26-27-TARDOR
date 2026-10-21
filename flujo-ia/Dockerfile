@@ -32,7 +32,7 @@ COPY tests/ ./tests/
 
 # Modelo de embeddings + indice. Se hornea para que el contenedor no dependa
 # de la red al arrancar.
-RUN python -m rag.cli index --embed "${RAG_EMBED_MODEL}"
+RUN python -m rag.cli --embed "${RAG_EMBED_MODEL}" index
 
 EXPOSE 8080
 

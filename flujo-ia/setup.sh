@@ -22,7 +22,7 @@ PY="$VENV/bin/python"
 PIP="$VENV/bin/pip"
 CACHE="$RAIZ/.cache"
 
-EMBED_MODEL="${RAG_EMBED_MODEL:-bge-m3}"
+EMBED_MODEL="${RAG_EMBED_MODEL:-e5-small}"
 OLLAMA_MODEL="${RAG_OLLAMA_MODEL:-qwen3:4b}"
 
 export HF_HOME="${HF_HOME:-$CACHE/huggingface}"
@@ -91,9 +91,9 @@ fi
 # ---------------------------------------------------------------------------
 log "4/5 Indice de embeddings ($EMBED_MODEL)"
 if [[ ! -f ".cache/index/$EMBED_MODEL/meta.json" ]]; then
-  "$PY" -m rag.cli index --embed "$EMBED_MODEL"
+  "$PY" -m rag.cli --embed "$EMBED_MODEL" index
 else
-  echo "el indice de $EMBED_MODEL ya existe (reindexar con: python -m rag.cli index --embed $EMBED_MODEL)"
+  echo "el indice de $EMBED_MODEL ya existe (reindexar con: python -m rag.cli --embed $EMBED_MODEL index)"
 fi
 
 # ---------------------------------------------------------------------------
