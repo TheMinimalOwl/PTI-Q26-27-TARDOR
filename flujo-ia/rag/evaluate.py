@@ -202,7 +202,7 @@ def eval_qa(retriever: Retriever, gold: list[dict], llm: BaseLLM | None = None, 
         citados = set(res.fuentes)
         recuperados = {h.doc.get("id") for h in res.hits}
         # Cita inventada: el LLM menciona un id que no estaba en el contexto.
-        citas_inventadas = sorted(citadas - recuperados)
+        citas_inventadas = sorted(citados - recuperados)
         resultados.append(
             {
                 "question": caso["question"],
@@ -299,14 +299,25 @@ def ejecutar_evaluacion(
     catalogo_gold = gold["catalogo"][:max_casos] if max_casos else gold["catalogo"]
     eq_gold = gold["equivalencias"][:max_casos] if max_casos else gold["equivalencias"]
     qa_gold = gold["qa"][:max_casos] if max_casos else gold["qa"]
-    informe = {
-        "catalogo": eval_catalogo(retriever, catalogo_gold),
-        "equivalencia": eval_equivalencia(
-            retriever, eq_gold, gold["no_equivalentes"], llm=llm
+    informe: dict = {}
+    # Cada bloque se aísla: con el LLM local una evaluación son ~70 llamadas
+    # de 10-20 s, y un fallo al final no debe tirar el trabajo de antes.
+    for nombre, funcion in (
+        ("catalogo", lambda: eval_catalogo(retriever, catalogo_gold)),
+        (
+            "equivalencia",
+            lambda: eval_equivalencia(
+                retriever, eq_gold, gold["no_equivalentes"], llm=llm
+            ),
         ),
-    }
-    if llm is not None:
-        informe["qa"] = eval_qa(retriever, qa_gold, llm=llm)
+        ("qa", lambda: eval_qa(retriever, qa_gold, llm=llm)),
+    ):
+        if nombre == "qa" and llm is None:
+            continue
+        try:
+            informe[nombre] = funcion()
+        except Exception as e:  # noqa: BLE001 - un bloque roto no invalida los demas
+            informe[nombre] = {"resumen": {"n": 0, "error": f"{type(e).__name__}: {e}"}, "casos": []}
     informe["meta"] = {
         "n_catalogo": len(catalogo_gold),
         "n_equivalencia": len(eq_gold),
