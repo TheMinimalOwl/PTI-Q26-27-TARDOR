@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: normalizer-consumer
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: normalizer-consumer
+  template:
+    metadata:
+      labels:
+        app: normalizer-consumer
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: consumer
+          image: normalizer-consumer:v2
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: NATS_URL
+              value: "nats://nats.messaging.svc.cluster.local:4222"
+            - name: NORMALIZE_URL
+              value: "http://router.fission/normalize"
+            - name: CONSUMER_BATCH
+              value: "50"
+          resources:
+            requests: { cpu: "100m", memory: "128Mi" }
+            limits: { cpu: "500m", memory: "512Mi" }

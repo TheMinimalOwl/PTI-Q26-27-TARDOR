@@ -11,7 +11,7 @@ metadata:
 
 spec:
 
-  schedule: "*/30 * * * *"
+  schedule: "0 2 * * *"
 
   concurrencyPolicy: Forbid
 
@@ -44,6 +44,16 @@ spec:
                 - secretRef:
 
                     name: scraper-secrets
+
+              env:
+
+                - name: NATS_URL
+
+                  value: "nats://nats.messaging.svc.cluster.local:4222"
+
+                - name: SCRAPER_WH
+
+                  value: "default"
 
               resources:
 
