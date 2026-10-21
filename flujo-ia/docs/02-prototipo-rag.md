@@ -112,6 +112,23 @@ Los tres comparten la misma recuperacion y el mismo esqueleto de prompt
 (sistema + contexto con ids + peticion). Lo que cambia es la instruccion y el
 formato de salida.
 
+**La orquestacion es una cadena de LangChain (LCEL).** Las tres cadenas se
+componen con los *runnables* de `langchain-core` sobre la recuperacion y el
+LLM que ya teniamos:
+
+```python
+cadena_qa(retriever, llm) = (
+    RunnableLambda(recuperar)      # añade context y hits al estado
+    | RunnableLambda(render)       # ChatPromptTemplate -> mensajes
+    | RunnableLambda(llamar)       # el LLM responde
+    | RunnableLambda(parsear)      # separa respuesta y fuentes
+)
+```
+
+El estado es un `dict` que viaja por los pasos, de modo que los `hits` (y por
+tanto las fuentes) sobreviven a la cadena. Se invoca con
+`.invoke({"question": ...})`. Ver [`rag/chain.py`](../rag/chain.py).
+
 ### 6. Prompts
 
 El prompt es corto a proposito: el modelo local por defecto es un 4B, que
@@ -135,7 +152,79 @@ El prompt de equivalencia pide JSON
 `extract_json()`, que tolera vallas de codigo, texto alrededor y JSON
 delimitado en medio de una frase (los modelos pequeños cometen eso).
 
-### 7. Degradacion elegante
+### 7. Guardrails: lo que se comprueba antes de responder
+
+Un guardrail es una comprobacion automatica sobre la respuesta. No sustituye
+al LLM: es la red de seguridad, y su resultado viaja en la respuesta (campo
+`guardrails`) para que la app pueda avisar al usuario.
+
+| Control | Que comprueba | Que pasa si falla |
+|---|---|---|
+| **Citas validas** | Todo `[id]` citado tiene que estar en el contexto recuperado | En modo estricto se quita la cita invalida y se avisa |
+| **Cifras del contexto** | Ningun numero con decimales de la respuesta puede ser un precio que no este en el contexto | Se marca `numbers_valid: false` y se avisa (el precio se conserva: puede ser una cifra correcta que el LLM ha redondeado) |
+| **Abstencion** | Sin contexto no hay respuesta; y si el modelo dice que no encuentra el dato, la abstention es una respuesta **valida**, no un fallo | Sin contexto la respuesta se sustituye por una abstension |
+
+En un comparador de precios, **un precio inventado es el fallo mas grave
+posible**, y por eso el control de cifras existe: es el que caza el
+`"cuesta 3,99 EUR/l"` que el modelo se ha inventado.
+
+Ver [`rag/guardrails.py`](../rag/guardrails.py) y los tests de
+`tests/test_guardrails.py`.
+
+### 8. Salida con JSON Schema
+
+`POST /ask` **no devuelve texto libre**: devuelve un JSON validado contra
+[`rag/schemas/respuesta-asistente.schema.json`](../rag/schemas/respuesta-asistente.schema.json)
+(Draft 2020-12, validado con `jsonschema`). El contrato es:
+
+```json
+{
+  "question": "¿cual es el mas barato?",
+  "answer": "El mas barato es [10003] Aceite de oliva 1 l, 12.50 EUR/l",
+  "sources": [
+    {"id": "10003", "name": "Aceite de oliva 1 l", "chain": "alcampo",
+     "price_total": 12.3, "price_unit": 12.5, "unit": "l",
+     "url": "https://...", "reason": "el mas barato por litro"}
+  ],
+  "confidence": 0.8,
+  "abstained": false,
+  "guardrails": {"ok": true, "warnings": [], "citations_valid": true, "numbers_valid": true},
+  "provider": "ollama",
+  "model": "qwen3:8b",
+  "latency_s": 9.3
+}
+```
+
+El motivo de que sea JSON y no texto: lo consume **el equipo de API y la app**
+(Fardin). Con un contrato declarado, la app puede pintar la respuesta, las
+fuentes con su precio y avisar si el asistente se ha abstenido, sin tener que
+parsear prosa. Si la respuesta no cumpliese el esquema, el servicio lo avisa
+en `guardrails.warnings` en vez de devolver algo roto.
+
+### 9. Streaming por SSE
+
+`POST /ask/stream` devuelve la misma respuesta **token a token**, en formato
+Server-Sent Events:
+
+```
+event: fuentes
+data: ["10003", "10006", "10004", "10002", "10255"]
+
+event: token
+data: " El"
+
+event: token
+data: " aceite"
+
+event: fin
+data: {"question": "...", "respuesta": "...", "hits": [...]}
+```
+
+El evento `fuentes` va primero, para que la app pueda pintar los productos
+mientras se genera la respuesta. Es lo que espera la pantalla de asistente
+de la app.
+
+### 10. Degradacion elegante
 
 Ningun fallo del LLM tumba el pipeline:
 

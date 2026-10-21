@@ -75,6 +75,24 @@ embeddings) y funciona sin GPU, sin claves y sin red. El LLM solo hace falta
 para redactar la respuesta, para elegir el equivalente entre candidatos y para
 responder preguntas.
 
+## Servicio HTTP
+
+El servicio (`python -m rag.serve`) expone lo que consume el equipo de API y
+la app:
+
+| Endpoint | Que hace |
+|---|---|
+| `GET /health` | Estado: modelo de embeddings, LLM, nº de productos |
+| `POST /search` | Busqueda de catalogo (texto y metadatos) |
+| `POST /ask` | Pregunta en lenguaje natural. Devuelve **JSON validado contra un JSON Schema**, con guardrails (citas validas, cifras del contexto, abstension) |
+| `POST /ask/stream` | Lo mismo en **streaming por SSE** (`fuentes`, `token`, `fin`) |
+| `POST /equiv` | Equivalencia entre cadenas: el equivalente de un producto en otra cadena |
+
+```bash
+curl -s localhost:8080/ask -H 'Content-Type: application/json' \
+  -d '{"question":"¿cual es el aceite de oliva mas barato por litro?"}' | python3 -m json.tool
+```
+
 ## Estructura
 
 ```
@@ -89,9 +107,13 @@ flujo-ia/
 │   ├── store.py              # indice vectorial
 │   ├── indexer.py            # orquestacion de indexado
 │   ├── retriever.py          # busqueda con filtros
-│   ├── llm.py                # Ollama | Gemini | ninguno
-│   ├── pipelines.py          # catalogo, equivalencia, QA
+│   ├── llm.py                # Ollama | Gemini | ninguno (con streaming)
+│   ├── chain.py              # cadenas RAG con LangChain (LCEL)
+│   ├── guardrails.py         # controles de la respuesta + JSON Schema
+│   ├── schemas/              # JSON Schema de la respuesta
+│   ├── pipelines.py          # catalogo, equivalencia, QA (adaptador sobre chain.py)
 │   ├── evaluate.py           # metricas
+│   ├── serve.py              # servicio HTTP (Flask)
 │   └── cli.py                # CLI
 ├── data/
 │   ├── generate_dataset.py   # genera el dataset de prueba y el ground truth
@@ -115,8 +137,11 @@ formato de la linea limpia cambie en el equipo de ingesta.
 
 - [x] Decision de modelo de embeddings (medida sobre el dataset, no de opinion): `e5-small` por defecto, `bge-m3` como alternativa
 - [x] Prototipo de RAG con los tres pipelines
+- [x] Cadena RAG con **LangChain** (LCEL sobre `langchain-core`)
 - [x] Dataset de prueba con ground truth exacto
 - [x] Evaluacion de retrieval reproducible
 - [x] Evaluacion con LLM en la VM (`qwen3:8b` local): precision@1 de equivalencia 1.000,
       trampas 8/8, QA 0.880 de contenido y 1.000 de citas sin inventar
+- [x] Guardrails (citas, cifras, abstension) y salida con **JSON Schema**
+- [x] **Streaming SSE** en `/ask/stream`
 - [ ] Integracion con el subject `scraper.<cadena>.clean` (pendiente de que ingesta lo exponga)
