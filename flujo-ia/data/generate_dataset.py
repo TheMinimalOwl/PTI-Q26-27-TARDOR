@@ -514,30 +514,34 @@ def escribir_gold(productos: list[dict]) -> None:
         completos = [p for p in prods if not p.get("variante") and not p.get("incompleto")]
         if len(completos) < 2:
             continue
-        # Mas barato por precio unitario.
-        mejor = min(completos, key=lambda p: Decimal(p["unit_price"]))
-        preguntas.append(
-            {
-                "question": f"¿Cuál es el {canonico.nombre.lower()} más barato por unidad?",
-                "expected_pids": [mejor["pid"]],
+
+        def _pregunta(titulo: str, campo: str, nota: str) -> dict:
+            """Genera la pregunta de minimo con su ground truth.
+
+            Ojo con los empates: el **precio unitario** viene del precio de
+            referencia de la fuente, que es el mismo en las tres cadenas, asi
+            que "el mas barato por unidad" suele ser un empate de tres. El
+            ground truth tiene que aceptar **todas** las cadenas empatadas:
+            si no, se marca como fallo una respuesta que es correcta.
+            """
+            minimo = min(Decimal(p[campo]) for p in completos)
+            empatados = [p for p in completos if Decimal(p[campo]) == minimo]
+            valor = f"{minimo:.2f}"
+            return {
+                "question": f"¿Cuál es el {canonico.nombre.lower()} {titulo}?",
+                "expected_pids": [p["pid"] for p in empatados],
                 "expected_contains": [
-                    [f"{Decimal(mejor['unit_price']):.2f}", f"{Decimal(mejor['unit_price']):.2f}".replace(".", ",")],
-                    [mejor["chain"]],
+                    [valor, valor.replace(".", ",")],
+                    sorted({p["chain"] for p in empatados}),
                 ],
-                "note": "precio unitario minimo entre cadenas",
+                "note": nota,
             }
+
+        preguntas.append(
+            _pregunta("más barato por unidad", "unit_price", "precio unitario minimo entre cadenas")
         )
-        # Mas barato por precio total.
-        mejor_total = min(completos, key=lambda p: Decimal(p["total"]))
         preguntas.append(
-            {
-                "question": f"¿Cuál es el {canonico.nombre.lower()} más barato en total?",
-                "expected_pids": [mejor_total["pid"]],
-                "expected_contains": [
-                    [f"{Decimal(mejor_total['total']):.2f}", f"{Decimal(mejor_total['total']):.2f}".replace(".", ",")]
-                ],
-                "note": "precio total minimo entre cadenas",
-            }
+            _pregunta("más barato en total", "total", "precio total minimo entre cadenas")
         )
 
     # Preguntas agregadas por categoria con umbral de precio.
