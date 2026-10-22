@@ -1,0 +1,3144 @@
+[
+  {
+    "question": "¿Cuál es el aceite de girasol de 1 l más barato por unidad?",
+    "expected_pids": [
+      "10010",
+      "10011",
+      "10012"
+    ],
+    "expected_contains": [
+      [
+        "2.40",
+        "2,40"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceite de girasol de 1 l más barato en total?",
+    "expected_pids": [
+      "10011"
+    ],
+    "expected_contains": [
+      [
+        "2.21",
+        "2,21"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceite de oliva suave de 1 l más barato por unidad?",
+    "expected_pids": [
+      "10007",
+      "10008",
+      "10009"
+    ],
+    "expected_contains": [
+      [
+        "7.20",
+        "7,20"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceite de oliva suave de 1 l más barato en total?",
+    "expected_pids": [
+      "10008"
+    ],
+    "expected_contains": [
+      [
+        "6.76",
+        "6,76"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceite de oliva virgen extra de 0.5 l más barato por unidad?",
+    "expected_pids": [
+      "10004",
+      "10005",
+      "10006"
+    ],
+    "expected_contains": [
+      [
+        "13.60",
+        "13,60"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceite de oliva virgen extra de 0.5 l más barato en total?",
+    "expected_pids": [
+      "10005"
+    ],
+    "expected_contains": [
+      [
+        "6.36",
+        "6,36"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceite de oliva virgen extra de 1 l más barato por unidad?",
+    "expected_pids": [
+      "10001",
+      "10002",
+      "10003"
+    ],
+    "expected_contains": [
+      [
+        "12.50",
+        "12,50"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceite de oliva virgen extra de 1 l más barato en total?",
+    "expected_pids": [
+      "10002"
+    ],
+    "expected_contains": [
+      [
+        "11.70",
+        "11,70"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceitunas verdes rellenas de 250 g más barato por unidad?",
+    "expected_pids": [
+      "10124",
+      "10125",
+      "10126"
+    ],
+    "expected_contains": [
+      [
+        "11.60",
+        "11,60"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aceitunas verdes rellenas de 250 g más barato en total?",
+    "expected_pids": [
+      "10125"
+    ],
+    "expected_contains": [
+      [
+        "2.70",
+        "2,70"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el agua con gas de 1.5 l más barato por unidad?",
+    "expected_pids": [
+      "10130",
+      "10131",
+      "10132"
+    ],
+    "expected_contains": [
+      [
+        "0.50",
+        "0,50"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el agua con gas de 1.5 l más barato en total?",
+    "expected_pids": [
+      "10131",
+      "10132"
+    ],
+    "expected_contains": [
+      [
+        "0.71",
+        "0,71"
+      ],
+      [
+        "alcampo",
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el agua mineral de 1.5 l más barato por unidad?",
+    "expected_pids": [
+      "10127",
+      "10128",
+      "10129"
+    ],
+    "expected_contains": [
+      [
+        "0.30",
+        "0,30"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el agua mineral de 1.5 l más barato en total?",
+    "expected_pids": [
+      "10128"
+    ],
+    "expected_contains": [
+      [
+        "0.42",
+        "0,42"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aguacates de 4 ud más barato por unidad?",
+    "expected_pids": [
+      "10226",
+      "10227",
+      "10228"
+    ],
+    "expected_contains": [
+      [
+        "0.88",
+        "0,88"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el aguacates de 4 ud más barato en total?",
+    "expected_pids": [
+      "10227"
+    ],
+    "expected_contains": [
+      [
+        "3.26",
+        "3,26"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el alubias cocidas de 570 g más barato por unidad?",
+    "expected_pids": [
+      "10112",
+      "10113",
+      "10114"
+    ],
+    "expected_contains": [
+      [
+        "2.37",
+        "2,37"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el alubias cocidas de 570 g más barato en total?",
+    "expected_pids": [
+      "10113"
+    ],
+    "expected_contains": [
+      [
+        "1.28",
+        "1,28"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el atún claro en aceite de oliva de 3 ud más barato por unidad?",
+    "expected_pids": [
+      "10103",
+      "10104",
+      "10105"
+    ],
+    "expected_contains": [
+      [
+        "0.77",
+        "0,77"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el atún claro en aceite de oliva de 3 ud más barato en total?",
+    "expected_pids": [
+      "10104"
+    ],
+    "expected_contains": [
+      [
+        "2.13",
+        "2,13"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el atún en salmuera de 3 ud más barato por unidad?",
+    "expected_pids": [
+      "10115",
+      "10116",
+      "10117"
+    ],
+    "expected_contains": [
+      [
+        "0.87",
+        "0,87"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el atún en salmuera de 3 ud más barato en total?",
+    "expected_pids": [
+      "10116"
+    ],
+    "expected_contains": [
+      [
+        "2.47",
+        "2,47"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el azúcar blanco de 1 kg más barato por unidad?",
+    "expected_pids": [
+      "10028",
+      "10029",
+      "10030"
+    ],
+    "expected_contains": [
+      [
+        "1.10",
+        "1,10"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el azúcar blanco de 1 kg más barato en total?",
+    "expected_pids": [
+      "10029"
+    ],
+    "expected_contains": [
+      [
+        "1.01",
+        "1,01"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el barra de pan rústica de 250 g más barato por unidad?",
+    "expected_pids": [
+      "10073",
+      "10074",
+      "10075"
+    ],
+    "expected_contains": [
+      [
+        "4.80",
+        "4,80"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el barra de pan rústica de 250 g más barato en total?",
+    "expected_pids": [
+      "10074"
+    ],
+    "expected_contains": [
+      [
+        "1.14",
+        "1,14"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el batido de chocolate de 1 l más barato por unidad?",
+    "expected_pids": [
+      "10064",
+      "10065",
+      "10066"
+    ],
+    "expected_contains": [
+      [
+        "1.90",
+        "1,90"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el batido de chocolate de 1 l más barato en total?",
+    "expected_pids": [
+      "10065"
+    ],
+    "expected_contains": [
+      [
+        "1.80",
+        "1,80"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el bayeta de microfibra de 5 ud más barato por unidad?",
+    "expected_pids": [
+      "10196",
+      "10197",
+      "10198"
+    ],
+    "expected_contains": [
+      [
+        "0.50",
+        "0,50"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el bayeta de microfibra de 5 ud más barato en total?",
+    "expected_pids": [
+      "10197"
+    ],
+    "expected_contains": [
+      [
+        "2.33",
+        "2,33"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el bolsas de basura de 20 ud más barato por unidad?",
+    "expected_pids": [
+      "10200"
+    ],
+    "expected_contains": [
+      [
+        "0.07",
+        "0,07"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el bolsas de basura de 20 ud más barato en total?",
+    "expected_pids": [
+      "10200"
+    ],
+    "expected_contains": [
+      [
+        "1.31",
+        "1,31"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el cacahuetes salados de 200 g más barato por unidad?",
+    "expected_pids": [
+      "10154",
+      "10155",
+      "10156"
+    ],
+    "expected_contains": [
+      [
+        "7.50",
+        "7,50"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el cacahuetes salados de 200 g más barato en total?",
+    "expected_pids": [
+      "10155"
+    ],
+    "expected_contains": [
+      [
+        "1.39",
+        "1,39"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el café molido natural de 250 g más barato por unidad?",
+    "expected_pids": [
+      "10034",
+      "10035",
+      "10036"
+    ],
+    "expected_contains": [
+      [
+        "14.00",
+        "14,00"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el café molido natural de 250 g más barato en total?",
+    "expected_pids": [
+      "10035"
+    ],
+    "expected_contains": [
+      [
+        "3.28",
+        "3,28"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el cebollas de 1 kg más barato por unidad?",
+    "expected_pids": [
+      "10229",
+      "10230",
+      "10231"
+    ],
+    "expected_contains": [
+      [
+        "1.50",
+        "1,50"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el cebollas de 1 kg más barato en total?",
+    "expected_pids": [
+      "10230"
+    ],
+    "expected_contains": [
+      [
+        "1.43",
+        "1,43"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el cereales con chocolate de 500 g más barato por unidad?",
+    "expected_pids": [
+      "10091",
+      "10092",
+      "10093"
+    ],
+    "expected_contains": [
+      [
+        "4.60",
+        "4,60"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el cereales con chocolate de 500 g más barato en total?",
+    "expected_pids": [
+      "10092"
+    ],
+    "expected_contains": [
+      [
+        "2.19",
+        "2,19"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el cerveza rubia de 0.33 l más barato por unidad?",
+    "expected_pids": [
+      "10142",
+      "10143",
+      "10144"
+    ],
+    "expected_contains": [
+      [
+        "2.73",
+        "2,73"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el cerveza rubia de 0.33 l más barato en total?",
+    "expected_pids": [
+      "10143"
+    ],
+    "expected_contains": [
+      [
+        "0.85",
+        "0,85"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el chocolate con leche de 125 g más barato por unidad?",
+    "expected_pids": [
+      "10157",
+      "10158",
+      "10159"
+    ],
+    "expected_contains": [
+      [
+        "12.80",
+        "12,80"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el chocolate con leche de 125 g más barato en total?",
+    "expected_pids": [
+      "10158"
+    ],
+    "expected_contains": [
+      [
+        "1.49",
+        "1,49"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el chucherías surtidas de 150 g más barato por unidad?",
+    "expected_pids": [
+      "10163",
+      "10164",
+      "10165"
+    ],
+    "expected_contains": [
+      [
+        "12.00",
+        "12,00"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el chucherías surtidas de 150 g más barato en total?",
+    "expected_pids": [
+      "10164"
+    ],
+    "expected_contains": [
+      [
+        "1.67",
+        "1,67"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el comida para gatos de 1.5 kg más barato por unidad?",
+    "expected_pids": [
+      "10247",
+      "10248",
+      "10249"
+    ],
+    "expected_contains": [
+      [
+        "2.80",
+        "2,80"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el comida para gatos de 1.5 kg más barato en total?",
+    "expected_pids": [
+      "10248"
+    ],
+    "expected_contains": [
+      [
+        "3.89",
+        "3,89"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el comida para perros de 3 kg más barato por unidad?",
+    "expected_pids": [
+      "10244",
+      "10245",
+      "10246"
+    ],
+    "expected_contains": [
+      [
+        "2.17",
+        "2,17"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el comida para perros de 3 kg más barato en total?",
+    "expected_pids": [
+      "10245"
+    ],
+    "expected_contains": [
+      [
+        "6.08",
+        "6,08"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el copos de avena de 500 g más barato por unidad?",
+    "expected_pids": [
+      "10088",
+      "10089",
+      "10090"
+    ],
+    "expected_contains": [
+      [
+        "3.20",
+        "3,20"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el copos de avena de 500 g más barato en total?",
+    "expected_pids": [
+      "10089"
+    ],
+    "expected_contains": [
+      [
+        "1.50",
+        "1,50"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el corn flakes de 500 g más barato por unidad?",
+    "expected_pids": [
+      "10094",
+      "10095",
+      "10096"
+    ],
+    "expected_contains": [
+      [
+        "4.20",
+        "4,20"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el corn flakes de 500 g más barato en total?",
+    "expected_pids": [
+      "10095"
+    ],
+    "expected_contains": [
+      [
+        "1.96",
+        "1,96"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el croissant de mantequilla de 55 g más barato por unidad?",
+    "expected_pids": [
+      "10082",
+      "10083",
+      "10084"
+    ],
+    "expected_contains": [
+      [
+        "6.36",
+        "6,36"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el croissant de mantequilla de 55 g más barato en total?",
+    "expected_pids": [
+      "10083"
+    ],
+    "expected_contains": [
+      [
+        "0.33",
+        "0,33"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el detergente líquido de 40 lv más barato por unidad?",
+    "expected_pids": [
+      "10173"
+    ],
+    "expected_contains": [
+      [
+        "0.22",
+        "0,22"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el detergente líquido de 40 lv más barato en total?",
+    "expected_pids": [
+      "10173"
+    ],
+    "expected_contains": [
+      [
+        "8.81",
+        "8,81"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el donut de chocolate de 1 ud más barato por unidad?",
+    "expected_pids": [
+      "10085",
+      "10086",
+      "10087"
+    ],
+    "expected_contains": [
+      [
+        "0.45",
+        "0,45"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el donut de chocolate de 1 ud más barato en total?",
+    "expected_pids": [
+      "10086"
+    ],
+    "expected_contains": [
+      [
+        "0.42",
+        "0,42"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el flan de vainilla de 4 ud más barato por unidad?",
+    "expected_pids": [
+      "10067",
+      "10068",
+      "10069"
+    ],
+    "expected_contains": [
+      [
+        "0.45",
+        "0,45"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el flan de vainilla de 4 ud más barato en total?",
+    "expected_pids": [
+      "10068"
+    ],
+    "expected_contains": [
+      [
+        "1.66",
+        "1,66"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el galletas de chocolate de 300 g más barato por unidad?",
+    "expected_pids": [
+      "10160",
+      "10161",
+      "10162"
+    ],
+    "expected_contains": [
+      [
+        "4.00",
+        "4,00"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el galletas de chocolate de 300 g más barato en total?",
+    "expected_pids": [
+      "10161"
+    ],
+    "expected_contains": [
+      [
+        "1.13",
+        "1,13"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el guisantes congelados de 1 kg más barato por unidad?",
+    "expected_pids": [
+      "10232",
+      "10233",
+      "10234"
+    ],
+    "expected_contains": [
+      [
+        "2.60",
+        "2,60"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el guisantes congelados de 1 kg más barato en total?",
+    "expected_pids": [
+      "10233"
+    ],
+    "expected_contains": [
+      [
+        "2.45",
+        "2,45"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el gulas caseras de 400 g más barato por unidad?",
+    "expected_pids": [
+      "10106",
+      "10107",
+      "10108"
+    ],
+    "expected_contains": [
+      [
+        "8.75",
+        "8,75"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el gulas caseras de 400 g más barato en total?",
+    "expected_pids": [
+      "10107"
+    ],
+    "expected_contains": [
+      [
+        "3.25",
+        "3,25"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el harina de trigo de 1 kg más barato por unidad?",
+    "expected_pids": [
+      "10031",
+      "10032",
+      "10033"
+    ],
+    "expected_contains": [
+      [
+        "1.05",
+        "1,05"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el harina de trigo de 1 kg más barato en total?",
+    "expected_pids": [
+      "10032"
+    ],
+    "expected_contains": [
+      [
+        "0.99",
+        "0,99"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el jabón de manos de 500 ml más barato por unidad?",
+    "expected_pids": [
+      "10184",
+      "10185",
+      "10186"
+    ],
+    "expected_contains": [
+      [
+        "4.80",
+        "4,80"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el jabón de manos de 500 ml más barato en total?",
+    "expected_pids": [
+      "10185"
+    ],
+    "expected_contains": [
+      [
+        "2.26",
+        "2,26"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el kikos de 70 g más barato por unidad?",
+    "expected_pids": [
+      "10167"
+    ],
+    "expected_contains": [
+      [
+        "14.86",
+        "14,86"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el kikos de 70 g más barato en total?",
+    "expected_pids": [
+      "10167"
+    ],
+    "expected_contains": [
+      [
+        "1.04",
+        "1,04"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el lavavajillas concentrado de 750 ml más barato por unidad?",
+    "expected_pids": [
+      "10187",
+      "10188",
+      "10189"
+    ],
+    "expected_contains": [
+      [
+        "3.73",
+        "3,73"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el lavavajillas concentrado de 750 ml más barato en total?",
+    "expected_pids": [
+      "10188"
+    ],
+    "expected_contains": [
+      [
+        "2.65",
+        "2,65"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el leche desnatada de 1 l más barato por unidad?",
+    "expected_pids": [
+      "10043",
+      "10044",
+      "10045"
+    ],
+    "expected_contains": [
+      [
+        "1.10",
+        "1,10"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el leche desnatada de 1 l más barato en total?",
+    "expected_pids": [
+      "10044"
+    ],
+    "expected_contains": [
+      [
+        "1.01",
+        "1,01"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el leche entera de 1 l más barato por unidad?",
+    "expected_pids": [
+      "10037",
+      "10038",
+      "10039"
+    ],
+    "expected_contains": [
+      [
+        "1.15",
+        "1,15"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el leche entera de 1 l más barato en total?",
+    "expected_pids": [
+      "10038"
+    ],
+    "expected_contains": [
+      [
+        "1.07",
+        "1,07"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el leche semidesnatada de 1 l más barato por unidad?",
+    "expected_pids": [
+      "10040",
+      "10041",
+      "10042"
+    ],
+    "expected_contains": [
+      [
+        "1.10",
+        "1,10"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el leche semidesnatada de 1 l más barato en total?",
+    "expected_pids": [
+      "10041"
+    ],
+    "expected_contains": [
+      [
+        "1.05",
+        "1,05"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el lechuga iceberg de 1 ud más barato por unidad?",
+    "expected_pids": [
+      "10214",
+      "10215",
+      "10216"
+    ],
+    "expected_contains": [
+      [
+        "1.20",
+        "1,20"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el lechuga iceberg de 1 ud más barato en total?",
+    "expected_pids": [
+      "10215"
+    ],
+    "expected_contains": [
+      [
+        "1.13",
+        "1,13"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el lejía perfumada de 2 l más barato por unidad?",
+    "expected_pids": [
+      "10175",
+      "10176",
+      "10177"
+    ],
+    "expected_contains": [
+      [
+        "1.05",
+        "1,05"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el lejía perfumada de 2 l más barato en total?",
+    "expected_pids": [
+      "10176"
+    ],
+    "expected_contains": [
+      [
+        "1.96",
+        "1,96"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el limones de 1 kg más barato por unidad?",
+    "expected_pids": [
+      "10223",
+      "10224",
+      "10225"
+    ],
+    "expected_contains": [
+      [
+        "1.90",
+        "1,90"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el limones de 1 kg más barato en total?",
+    "expected_pids": [
+      "10224"
+    ],
+    "expected_contains": [
+      [
+        "1.78",
+        "1,78"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el limpiacristales de 750 ml más barato por unidad?",
+    "expected_pids": [
+      "10178",
+      "10179",
+      "10180"
+    ],
+    "expected_contains": [
+      [
+        "2.13",
+        "2,13"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el limpiacristales de 750 ml más barato en total?",
+    "expected_pids": [
+      "10179"
+    ],
+    "expected_contains": [
+      [
+        "1.49",
+        "1,49"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el limpiador multiusos de 1 l más barato por unidad?",
+    "expected_pids": [
+      "10202",
+      "10203",
+      "10204"
+    ],
+    "expected_contains": [
+      [
+        "1.80",
+        "1,80"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el limpiador multiusos de 1 l más barato en total?",
+    "expected_pids": [
+      "10203"
+    ],
+    "expected_contains": [
+      [
+        "1.66",
+        "1,66"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el magdalenas de 12 ud más barato por unidad?",
+    "expected_pids": [
+      "10079",
+      "10080",
+      "10081"
+    ],
+    "expected_contains": [
+      [
+        "0.12",
+        "0,12"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el magdalenas de 12 ud más barato en total?",
+    "expected_pids": [
+      "10080"
+    ],
+    "expected_contains": [
+      [
+        "1.39",
+        "1,39"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el maíz dulce de 300 g más barato por unidad?",
+    "expected_pids": [
+      "10121",
+      "10122",
+      "10123"
+    ],
+    "expected_contains": [
+      [
+        "4.00",
+        "4,00"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el maíz dulce de 300 g más barato en total?",
+    "expected_pids": [
+      "10122"
+    ],
+    "expected_contains": [
+      [
+        "1.15",
+        "1,15"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el mantequilla de 250 g más barato por unidad?",
+    "expected_pids": [
+      "10058",
+      "10059",
+      "10060"
+    ],
+    "expected_contains": [
+      [
+        "9.20",
+        "9,20"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el mantequilla de 250 g más barato en total?",
+    "expected_pids": [
+      "10060"
+    ],
+    "expected_contains": [
+      [
+        "2.19",
+        "2,19"
+      ],
+      [
+        "alcampo"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el manzana golden de 1 kg más barato por unidad?",
+    "expected_pids": [
+      "10208",
+      "10209",
+      "10210"
+    ],
+    "expected_contains": [
+      [
+        "2.40",
+        "2,40"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el manzana golden de 1 kg más barato en total?",
+    "expected_pids": [
+      "10209"
+    ],
+    "expected_contains": [
+      [
+        "2.27",
+        "2,27"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el mayonesa de 0.4 l más barato por unidad?",
+    "expected_pids": [
+      "10019",
+      "10020",
+      "10021"
+    ],
+    "expected_contains": [
+      [
+        "10.75",
+        "10,75"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el mayonesa de 0.4 l más barato en total?",
+    "expected_pids": [
+      "10020"
+    ],
+    "expected_contains": [
+      [
+        "3.99",
+        "3,99"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el merluza en filetes de 400 g más barato por unidad?",
+    "expected_pids": [
+      "10235",
+      "10236",
+      "10237"
+    ],
+    "expected_contains": [
+      [
+        "13.75",
+        "13,75"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el merluza en filetes de 400 g más barato en total?",
+    "expected_pids": [
+      "10237"
+    ],
+    "expected_contains": [
+      [
+        "5.25",
+        "5,25"
+      ],
+      [
+        "alcampo"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el mermelada de fresa de 300 g más barato por unidad?",
+    "expected_pids": [
+      "10097",
+      "10098",
+      "10099"
+    ],
+    "expected_contains": [
+      [
+        "8.00",
+        "8,00"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el mermelada de fresa de 300 g más barato en total?",
+    "expected_pids": [
+      "10098"
+    ],
+    "expected_contains": [
+      [
+        "2.28",
+        "2,28"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el miel de 1 kg más barato por unidad?",
+    "expected_pids": [
+      "10100",
+      "10101",
+      "10102"
+    ],
+    "expected_contains": [
+      [
+        "6.50",
+        "6,50"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el miel de 1 kg más barato en total?",
+    "expected_pids": [
+      "10101"
+    ],
+    "expected_contains": [
+      [
+        "6.18",
+        "6,18"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el mostaza de 0.25 l más barato por unidad?",
+    "expected_pids": [
+      "10022",
+      "10023",
+      "10024"
+    ],
+    "expected_contains": [
+      [
+        "7.60",
+        "7,60"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el mostaza de 0.25 l más barato en total?",
+    "expected_pids": [
+      "10023"
+    ],
+    "expected_contains": [
+      [
+        "1.80",
+        "1,80"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el queso mozzarella de 125 g más barato por unidad?",
+    "expected_pids": [
+      "10055",
+      "10056",
+      "10057"
+    ],
+    "expected_contains": [
+      [
+        "12.80",
+        "12,80"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el queso mozzarella de 125 g más barato en total?",
+    "expected_pids": [
+      "10056"
+    ],
+    "expected_contains": [
+      [
+        "1.49",
+        "1,49"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el nata para cocinar de 500 ml más barato por unidad?",
+    "expected_pids": [
+      "10061",
+      "10062",
+      "10063"
+    ],
+    "expected_contains": [
+      [
+        "3.40",
+        "3,40"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el nata para cocinar de 500 ml más barato en total?",
+    "expected_pids": [
+      "10062"
+    ],
+    "expected_contains": [
+      [
+        "1.57",
+        "1,57"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el pan de molde blanco de 600 g más barato por unidad?",
+    "expected_pids": [
+      "10076",
+      "10077",
+      "10078"
+    ],
+    "expected_contains": [
+      [
+        "3.00",
+        "3,00"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el pan de molde blanco de 600 g más barato en total?",
+    "expected_pids": [
+      "10077"
+    ],
+    "expected_contains": [
+      [
+        "1.68",
+        "1,68"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el pan de molde integral de 600 g más barato por unidad?",
+    "expected_pids": [
+      "10070",
+      "10071",
+      "10072"
+    ],
+    "expected_contains": [
+      [
+        "4.00",
+        "4,00"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el pan de molde integral de 600 g más barato en total?",
+    "expected_pids": [
+      "10071"
+    ],
+    "expected_contains": [
+      [
+        "2.22",
+        "2,22"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el papel higiénico de 12 ud más barato por unidad?",
+    "expected_pids": [
+      "10190",
+      "10191",
+      "10192"
+    ],
+    "expected_contains": [
+      [
+        "0.27",
+        "0,27"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el papel higiénico de 12 ud más barato en total?",
+    "expected_pids": [
+      "10191"
+    ],
+    "expected_contains": [
+      [
+        "3.00",
+        "3,00"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el patatas de 2.5 kg más barato por unidad?",
+    "expected_pids": [
+      "10217",
+      "10218",
+      "10219"
+    ],
+    "expected_contains": [
+      [
+        "0.80",
+        "0,80"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el patatas de 2.5 kg más barato en total?",
+    "expected_pids": [
+      "10218"
+    ],
+    "expected_contains": [
+      [
+        "1.86",
+        "1,86"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el patatas fritas de 150 g más barato por unidad?",
+    "expected_pids": [
+      "10151",
+      "10152",
+      "10153"
+    ],
+    "expected_contains": [
+      [
+        "11.33",
+        "11,33"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el patatas fritas de 150 g más barato en total?",
+    "expected_pids": [
+      "10152"
+    ],
+    "expected_contains": [
+      [
+        "1.60",
+        "1,60"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el patatas prefritas congeladas de 1 kg más barato por unidad?",
+    "expected_pids": [
+      "10241",
+      "10242",
+      "10243"
+    ],
+    "expected_contains": [
+      [
+        "3.20",
+        "3,20"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el patatas prefritas congeladas de 1 kg más barato en total?",
+    "expected_pids": [
+      "10242"
+    ],
+    "expected_contains": [
+      [
+        "3.02",
+        "3,02"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el pizza cuatro quesos de 350 g más barato por unidad?",
+    "expected_pids": [
+      "10238",
+      "10239",
+      "10240"
+    ],
+    "expected_contains": [
+      [
+        "8.29",
+        "8,29"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el pizza cuatro quesos de 350 g más barato en total?",
+    "expected_pids": [
+      "10239"
+    ],
+    "expected_contains": [
+      [
+        "2.68",
+        "2,68"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el plátano de canarias de 1 kg más barato por unidad?",
+    "expected_pids": [
+      "10205",
+      "10206",
+      "10207"
+    ],
+    "expected_contains": [
+      [
+        "2.10",
+        "2,10"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el plátano de canarias de 1 kg más barato en total?",
+    "expected_pids": [
+      "10206"
+    ],
+    "expected_contains": [
+      [
+        "2.00",
+        "2,00"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el queso curado semicurado de 250 g más barato por unidad?",
+    "expected_pids": [
+      "10052",
+      "10053",
+      "10054"
+    ],
+    "expected_contains": [
+      [
+        "18.00",
+        "18,00"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el queso curado semicurado de 250 g más barato en total?",
+    "expected_pids": [
+      "10053"
+    ],
+    "expected_contains": [
+      [
+        "4.19",
+        "4,19"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el refresco de cola de 2 l más barato por unidad?",
+    "expected_pids": [
+      "10139",
+      "10140",
+      "10141"
+    ],
+    "expected_contains": [
+      [
+        "1.05",
+        "1,05"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el refresco de cola de 2 l más barato en total?",
+    "expected_pids": [
+      "10140"
+    ],
+    "expected_contains": [
+      [
+        "1.95",
+        "1,95"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el rollo de cocina de 2 ud más barato por unidad?",
+    "expected_pids": [
+      "10193",
+      "10194",
+      "10195"
+    ],
+    "expected_contains": [
+      [
+        "0.95",
+        "0,95"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el rollo de cocina de 2 ud más barato en total?",
+    "expected_pids": [
+      "10194"
+    ],
+    "expected_contains": [
+      [
+        "1.82",
+        "1,82"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el sal marina fina de 1 kg más barato por unidad?",
+    "expected_pids": [
+      "10025",
+      "10026",
+      "10027"
+    ],
+    "expected_contains": [
+      [
+        "0.85",
+        "0,85"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el sal marina fina de 1 kg más barato en total?",
+    "expected_pids": [
+      "10026",
+      "10027"
+    ],
+    "expected_contains": [
+      [
+        "0.81",
+        "0,81"
+      ],
+      [
+        "alcampo",
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el salsa de soja de 0.25 l más barato por unidad?",
+    "expected_pids": [
+      "10016",
+      "10017",
+      "10018"
+    ],
+    "expected_contains": [
+      [
+        "8.40",
+        "8,40"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el salsa de soja de 0.25 l más barato en total?",
+    "expected_pids": [
+      "10017"
+    ],
+    "expected_contains": [
+      [
+        "1.96",
+        "1,96"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el sardinas en aceite de oliva de 120 g más barato por unidad?",
+    "expected_pids": [
+      "10118",
+      "10119",
+      "10120"
+    ],
+    "expected_contains": [
+      [
+        "15.00",
+        "15,00"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el sardinas en aceite de oliva de 120 g más barato en total?",
+    "expected_pids": [
+      "10119"
+    ],
+    "expected_contains": [
+      [
+        "1.70",
+        "1,70"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el suavizante concentrado de 1 l más barato por unidad?",
+    "expected_pids": [
+      "10181",
+      "10182",
+      "10183"
+    ],
+    "expected_contains": [
+      [
+        "3.20",
+        "3,20"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el suavizante concentrado de 1 l más barato en total?",
+    "expected_pids": [
+      "10182"
+    ],
+    "expected_contains": [
+      [
+        "3.04",
+        "3,04"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el tomate pera de 1 kg más barato por unidad?",
+    "expected_pids": [
+      "10211",
+      "10212",
+      "10213"
+    ],
+    "expected_contains": [
+      [
+        "2.20",
+        "2,20"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el tomate pera de 1 kg más barato en total?",
+    "expected_pids": [
+      "10212"
+    ],
+    "expected_contains": [
+      [
+        "2.07",
+        "2,07"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el tomate triturado de 400 g más barato por unidad?",
+    "expected_pids": [
+      "10109",
+      "10110",
+      "10111"
+    ],
+    "expected_contains": [
+      [
+        "3.50",
+        "3,50"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el tomate triturado de 400 g más barato en total?",
+    "expected_pids": [
+      "10110"
+    ],
+    "expected_contains": [
+      [
+        "1.33",
+        "1,33"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el tónica de 1 l más barato por unidad?",
+    "expected_pids": [
+      "10148",
+      "10149",
+      "10150"
+    ],
+    "expected_contains": [
+      [
+        "1.30",
+        "1,30"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el tónica de 1 l más barato en total?",
+    "expected_pids": [
+      "10149"
+    ],
+    "expected_contains": [
+      [
+        "1.23",
+        "1,23"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el vinagre de vino blanco de 1 l más barato por unidad?",
+    "expected_pids": [
+      "10013",
+      "10014",
+      "10015"
+    ],
+    "expected_contains": [
+      [
+        "1.60",
+        "1,60"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el vinagre de vino blanco de 1 l más barato en total?",
+    "expected_pids": [
+      "10014"
+    ],
+    "expected_contains": [
+      [
+        "1.48",
+        "1,48"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el vino tinto d.o. de 1 l más barato por unidad?",
+    "expected_pids": [
+      "10145",
+      "10146",
+      "10147"
+    ],
+    "expected_contains": [
+      [
+        "6.50",
+        "6,50"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el vino tinto d.o. de 1 l más barato en total?",
+    "expected_pids": [
+      "10146"
+    ],
+    "expected_contains": [
+      [
+        "6.06",
+        "6,06"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el yogur de fresa de 125 g más barato por unidad?",
+    "expected_pids": [
+      "10049",
+      "10050",
+      "10051"
+    ],
+    "expected_contains": [
+      [
+        "5.20",
+        "5,20"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el yogur de fresa de 125 g más barato en total?",
+    "expected_pids": [
+      "10050"
+    ],
+    "expected_contains": [
+      [
+        "0.60",
+        "0,60"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el yogur natural de 500 g más barato por unidad?",
+    "expected_pids": [
+      "10046",
+      "10047",
+      "10048"
+    ],
+    "expected_contains": [
+      [
+        "4.40",
+        "4,40"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el yogur natural de 500 g más barato en total?",
+    "expected_pids": [
+      "10047"
+    ],
+    "expected_contains": [
+      [
+        "2.05",
+        "2,05"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el zanahoria de 1 kg más barato por unidad?",
+    "expected_pids": [
+      "10220",
+      "10221",
+      "10222"
+    ],
+    "expected_contains": [
+      [
+        "1.70",
+        "1,70"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el zanahoria de 1 kg más barato en total?",
+    "expected_pids": [
+      "10221"
+    ],
+    "expected_contains": [
+      [
+        "1.61",
+        "1,61"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el zumo de manzana de 1 l más barato por unidad?",
+    "expected_pids": [
+      "10136",
+      "10137",
+      "10138"
+    ],
+    "expected_contains": [
+      [
+        "1.40",
+        "1,40"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el zumo de manzana de 1 l más barato en total?",
+    "expected_pids": [
+      "10137"
+    ],
+    "expected_contains": [
+      [
+        "1.29",
+        "1,29"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el zumo de naranja 100% de 1 l más barato por unidad?",
+    "expected_pids": [
+      "10133",
+      "10134",
+      "10135"
+    ],
+    "expected_contains": [
+      [
+        "1.90",
+        "1,90"
+      ],
+      [
+        "alcampo",
+        "carrefour",
+        "mercadona"
+      ]
+    ],
+    "note": "precio unitario minimo entre cadenas"
+  },
+  {
+    "question": "¿Cuál es el zumo de naranja 100% de 1 l más barato en total?",
+    "expected_pids": [
+      "10134"
+    ],
+    "expected_contains": [
+      [
+        "1.78",
+        "1,78"
+      ],
+      [
+        "carrefour"
+      ]
+    ],
+    "note": "precio total minimo entre cadenas"
+  },
+  {
+    "question": "¿Qué productos de aceites, especias y salsas cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10013",
+      "10014",
+      "10015",
+      "10017",
+      "10022",
+      "10023",
+      "10024",
+      "10025",
+      "10026",
+      "10027",
+      "10028",
+      "10029",
+      "10030",
+      "10031",
+      "10032",
+      "10033"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  },
+  {
+    "question": "¿Qué productos de bebidas cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10127",
+      "10128",
+      "10129",
+      "10130",
+      "10131",
+      "10132",
+      "10133",
+      "10134",
+      "10135",
+      "10136",
+      "10137",
+      "10138",
+      "10140",
+      "10142",
+      "10143",
+      "10144",
+      "10148",
+      "10149",
+      "10150"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  },
+  {
+    "question": "¿Qué productos de cereales y desayuno cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10088",
+      "10089",
+      "10090",
+      "10095"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  },
+  {
+    "question": "¿Qué productos de conservas cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10109",
+      "10110",
+      "10111",
+      "10112",
+      "10113",
+      "10114",
+      "10118",
+      "10119",
+      "10120",
+      "10121",
+      "10122",
+      "10123"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  },
+  {
+    "question": "¿Qué productos de dulces y snacks cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10151",
+      "10152",
+      "10153",
+      "10154",
+      "10155",
+      "10156",
+      "10157",
+      "10158",
+      "10159",
+      "10160",
+      "10161",
+      "10162",
+      "10163",
+      "10164",
+      "10165",
+      "10166",
+      "10167",
+      "10168"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  },
+  {
+    "question": "¿Qué productos de frutas y verduras cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10214",
+      "10215",
+      "10216",
+      "10218",
+      "10219",
+      "10220",
+      "10221",
+      "10222",
+      "10223",
+      "10224",
+      "10225",
+      "10229",
+      "10230",
+      "10231"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  },
+  {
+    "question": "¿Qué productos de leche y yogures cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10037",
+      "10038",
+      "10039",
+      "10040",
+      "10041",
+      "10042",
+      "10043",
+      "10044",
+      "10045",
+      "10049",
+      "10050",
+      "10051",
+      "10055",
+      "10056",
+      "10057",
+      "10061",
+      "10062",
+      "10063",
+      "10064",
+      "10065",
+      "10066",
+      "10067",
+      "10068",
+      "10069"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  },
+  {
+    "question": "¿Qué productos de limpieza cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10176",
+      "10178",
+      "10179",
+      "10180",
+      "10193",
+      "10194",
+      "10195",
+      "10199",
+      "10200",
+      "10201",
+      "10202",
+      "10203",
+      "10204"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  },
+  {
+    "question": "¿Qué productos de panadería cuestan menos de 2 EUR?",
+    "expected_pids": [
+      "10073",
+      "10074",
+      "10075",
+      "10076",
+      "10077",
+      "10078",
+      "10079",
+      "10080",
+      "10081",
+      "10082",
+      "10083",
+      "10084",
+      "10085",
+      "10086",
+      "10087"
+    ],
+    "expected_contains": [],
+    "note": "pregunta agregada con filtro de precio"
+  }
+]

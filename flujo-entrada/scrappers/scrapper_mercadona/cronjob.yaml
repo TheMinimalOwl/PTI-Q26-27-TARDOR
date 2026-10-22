@@ -1,0 +1,63 @@
+
+apiVersion: batch/v1
+
+kind: CronJob
+
+metadata:
+
+  name: scrapper-mercadona
+
+  namespace: scrappers
+
+spec:
+
+  schedule: "0 2 * * *"
+
+  concurrencyPolicy: Forbid
+
+  successfulJobsHistoryLimit: 2
+
+  failedJobsHistoryLimit: 2
+
+  jobTemplate:
+
+    spec:
+
+      backoffLimit: 2
+
+      template:
+
+        spec:
+
+          restartPolicy: OnFailure
+
+          containers:
+
+            - name: scraper
+
+              image: scrapper-mercadona:v1
+
+              imagePullPolicy: IfNotPresent
+
+              envFrom:
+
+                - secretRef:
+
+                    name: scraper-secrets
+
+              env:
+
+                - name: NATS_URL
+
+                  value: "nats://nats.messaging.svc.cluster.local:4222"
+
+                - name: SCRAPER_WH
+
+                  value: "default"
+
+              resources:
+
+                requests: { cpu: "100m", memory: "128Mi" }
+
+                limits:   { cpu: "500m", memory: "512Mi" }
+

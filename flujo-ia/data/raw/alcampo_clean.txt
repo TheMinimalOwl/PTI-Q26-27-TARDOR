@@ -1,0 +1,90 @@
+Items: 87
+Unitarios: 86 (fuente 79, calculado 7) | Incompletos: 1
+---
+10003 | Aceite de oliva virgen extra. Alcampo | 12.30EUR total | 12.50EUR/l | 1l | Aceites, especias y salsas | https://tienda.alcampo.es/product/10003 | ref=12.500EUR/L src=fuente
+10006 | Aceite de oliva virgen extra Alcampo | 6.55EUR total | 13.60EUR/l | 0.5l | Aceites, especias y salsas | https://tienda.alcampo.es/product/10006 | ref=13.600EUR/L src=fuente
+10009 | Aceite de oliva suave Alcampo | 6.96EUR total | 7.20EUR/l | 1l | Aceites, especias y salsas | https://tienda.alcampo.es/product/10009 | ref=7.200EUR/L src=fuente
+10012 | Aceite de girasol Alcampo | 2.34EUR total | 2.40EUR/l | 1l | Aceites, especias y salsas | https://tienda.alcampo.es/product/10012 | ref=2.400EUR/L src=fuente
+10015 | Vinagre de vino blanco Alcampo | 1.55EUR total | 1.60EUR/l | 1l | Aceites, especias y salsas | https://tienda.alcampo.es/product/10015 | ref=1.600EUR/L src=fuente
+10018 | Salsa de soja Alcampo | 2.07EUR total | 8.40EUR/l | 0.25l | Aceites, especias y salsas | https://tienda.alcampo.es/product/10018 | ref=8.400EUR/L src=fuente
+10021 | Mayonesa Alcampo | 4.11EUR total | 10.75EUR/l | 0.4l | Aceites, especias y salsas | https://tienda.alcampo.es/product/10021 | ref=10.750EUR/L src=fuente
+10024 | Mostaza Alcampo | 1.81EUR total | 7.60EUR/l | 0.25l | Aceites, especias y salsas | https://tienda.alcampo.es/product/10024 | ref=7.600EUR/L src=fuente
+10027 | Sal marina fina Alcampo | 0.81EUR total | 0.85EUR/kg | 1kg | Aceites, especias y salsas | https://tienda.alcampo.es/product/10027 | ref=0.850EUR/KG src=fuente
+10030 | Azúcar blanco Alcampo | 1.07EUR total | 1.10EUR/kg | 1kg | Aceites, especias y salsas | https://tienda.alcampo.es/product/10030 | ref=1.100EUR/KG src=fuente
+10033 | Harina de trigo Alcampo | 1.00EUR total | 1.05EUR/kg | 1kg | Aceites, especias y salsas | https://tienda.alcampo.es/product/10033 | ref=1.050EUR/KG src=fuente
+10036 | Café molido natural Alcampo | 3.44EUR total | 14.00EUR/kg | 250g | Aceites, especias y salsas | https://tienda.alcampo.es/product/10036 | ref=1.400EUR/100 g src=fuente
+10039 | Leche entera Alcampo | 1.11EUR total | 1.15EUR/l | 1l | Leche y yogures | https://tienda.alcampo.es/product/10039 | ref=1.150EUR/L src=fuente
+10042 | Leche semidesnatada Alcampo | 1.06EUR total | 1.10EUR/l | 1l | Leche y yogures | https://tienda.alcampo.es/product/10042 | ref=1.100EUR/L src=fuente
+10045 | Leche desnatada Alcampo | 1.06EUR total | 1.10EUR/l | 1l | Leche y yogures | https://tienda.alcampo.es/product/10045 | ref=1.100EUR/L src=fuente
+10048 | Yogur natural Alcampo | 2.15EUR total | 4.40EUR/kg | 500g | Leche y yogures | https://tienda.alcampo.es/product/10048 | ref=4.400EUR/KG src=fuente
+10051 | Yogur de fresa Alcampo | 0.62EUR total | 5.20EUR/kg | 125g | Leche y yogures | https://tienda.alcampo.es/product/10051 | ref=0.520EUR/100 g src=fuente
+10054 | Queso curado semicurado Alcampo | 4.39EUR total | 18.00EUR/kg | 250g | Leche y yogures | https://tienda.alcampo.es/product/10054 | ref=18.000EUR/KG src=fuente
+10057 | Queso mozzarella Alcampo | 1.53EUR total | 12.80EUR/kg | 125g | Leche y yogures | https://tienda.alcampo.es/product/10057 | ref=1.280EUR/100 g src=fuente
+10060 | Mantequilla Alcampo | 2.19EUR total | 9.20EUR/kg | 250g | Leche y yogures | https://tienda.alcampo.es/product/10060 | ref=9.200EUR/KG src=fuente
+10063 | Nata para cocinar Alcampo | 1.66EUR total | 3.40EUR/l | 500ml | Leche y yogures | https://tienda.alcampo.es/product/10063 | ref=3.400EUR/L src=fuente
+10066 | Batido de chocolate Alcampo | 1.82EUR total | 1.90EUR/l | 1l | Leche y yogures | https://tienda.alcampo.es/product/10066 | ref=1.900EUR/L src=fuente
+10069 | Flan de vainilla Alcampo | 1.74EUR total | 0.45EUR/ud | 4ud | Leche y yogures | https://tienda.alcampo.es/product/10069 | ref=0.450EUR/UD src=fuente
+10072 | Pan de molde integral Alcampo | 2.33EUR total | 4.00EUR/kg | 600g | Panadería | https://tienda.alcampo.es/product/10072 | ref=4.000EUR/KG src=fuente
+10075 | Barra de pan rústica Alcampo | 1.16EUR total | 4.80EUR/kg | 250g | Panadería | https://tienda.alcampo.es/product/10075 | ref=4.800EUR/KG src=fuente
+10078 | Pan de molde blanco Alcampo | 1.77EUR total | 3.00EUR/kg | 600g | Panadería | https://tienda.alcampo.es/product/10078 | ref=3.000EUR/KG src=fuente
+10081 | Magdalenas Alcampo | 1.46EUR total | 0.125EUR/ud | 12ud | Panadería | https://tienda.alcampo.es/product/10081 | ref=0.125EUR/UD src=fuente
+10084 | Croissant de mantequilla Alcampo | 0.35EUR total | 6.36EUR/kg | 55g | Panadería | https://tienda.alcampo.es/product/10084 | ref=0.636EUR/100 g src=fuente
+10087 | Donut de chocolate Alcampo | 0.43EUR total | 0.45EUR/ud | 1ud | Panadería | https://tienda.alcampo.es/product/10087 | ref=0.450EUR/UD src=fuente
+10090 | Copos de avena Alcampo | 1.56EUR total | 3.20EUR/kg | 500g | Cereales y desayuno | https://tienda.alcampo.es/product/10090 | ref=3.200EUR/KG src=fuente
+10093 | Cereales con chocolate Alcampo | 2.22EUR total | 4.60EUR/kg | 500g | Cereales y desayuno | https://tienda.alcampo.es/product/10093 | ref=0.460EUR/100 g src=fuente
+10096 | Corn flakes Alcampo | 2.01EUR total | 4.20EUR/kg | 500g | Cereales y desayuno | https://tienda.alcampo.es/product/10096 | ref=4.200EUR/KG src=fuente
+10099 | Mermelada de fresa Alcampo | 2.31EUR total | 8.00EUR/kg | 300g | Cereales y desayuno | https://tienda.alcampo.es/product/10099 | ref=8.000EUR/KG src=fuente
+10102 | Miel Alcampo | 6.32EUR total | 6.50EUR/kg | 1kg | Cereales y desayuno | https://tienda.alcampo.es/product/10102 | ref=6.500EUR/KG src=fuente
+10105 | Atún claro en aceite de oliva Alcampo | 2.25EUR total | 0.767EUR/ud | 3ud | Conservas | https://tienda.alcampo.es/product/10105 | ref=0.767EUR/UD src=fuente
+10108 | Gulas caseras Alcampo | 3.36EUR total | 8.75EUR/kg | 400g | Conservas | https://tienda.alcampo.es/product/10108 | ref=8.750EUR/KG src=fuente
+10111 | Tomate triturado Alcampo | 1.38EUR total | 3.50EUR/kg | 400g | Conservas | https://tienda.alcampo.es/product/10111 | ref=3.500EUR/KG src=fuente
+10114 | Alubias cocidas Alcampo | 1.32EUR total | 2.368EUR/kg | 570g | Conservas | https://tienda.alcampo.es/product/10114 | ref=2.368EUR/KG src=fuente
+10117 | Atún en salmuera Alcampo | 2.57EUR total | 0.867EUR/ud | 3ud | Conservas | https://tienda.alcampo.es/product/10117 | ref=0.867EUR/UD src=fuente
+10120 | Sardinas en aceite de oliva Alcampo | 1.73EUR total | 15.00EUR/kg | 120g | Conservas | https://tienda.alcampo.es/product/10120 | ref=15.000EUR/KG src=fuente
+10123 | Maíz dulce Alcampo | 1.18EUR total | 4.00EUR/kg | 300g | Conservas | https://tienda.alcampo.es/product/10123 | ref=4.000EUR/KG src=fuente
+10126 | Aceitunas verdes rellenas Alcampo | 2.76EUR total | 11.60EUR/kg | 250g | Conservas | https://tienda.alcampo.es/product/10126 | ref=11.600EUR/KG src=fuente
+10129 | Agua mineral Alcampo | 0.44EUR total | 0.30EUR/l | 1.5l | Bebidas | https://tienda.alcampo.es/product/10129 | ref=0.300EUR/L src=fuente
+10132 | Agua con gas Alcampo | 0.71EUR total | 0.50EUR/l | 1.5l | Bebidas | https://tienda.alcampo.es/product/10132 | ref=0.500EUR/L src=fuente
+10135 | Zumo de naranja 100% Alcampo | 1.81EUR total | 1.90EUR/l | 1l | Bebidas | https://tienda.alcampo.es/product/10135 | ref=1.900EUR/L src=fuente
+10138 | Zumo de manzana Alcampo | 1.34EUR total | 1.40EUR/l | 1l | Bebidas | https://tienda.alcampo.es/product/10138 | ref=1.400EUR/L src=fuente
+10141 | Refresco de cola Alcampo | 2.05EUR total | 1.05EUR/l | 2l | Bebidas | https://tienda.alcampo.es/product/10141 | ref=1.050EUR/L src=fuente
+10144 | Cerveza rubia Alcampo | 0.88EUR total | 2.727EUR/l | 0.33l | Bebidas | https://tienda.alcampo.es/product/10144 | ref=2.727EUR/L src=fuente
+10147 | Vino tinto D.O. Alcampo | 6.24EUR total | 6.50EUR/l | 1l | Bebidas | https://tienda.alcampo.es/product/10147 | ref=6.500EUR/L src=fuente
+10150 | Tónica Alcampo | 1.26EUR total | 1.30EUR/l | 1l | Bebidas | https://tienda.alcampo.es/product/10150 | ref=1.300EUR/L src=fuente
+10153 | Patatas fritas Alcampo | 1.66EUR total | 11.333EUR/kg | 150g | Dulces y snacks | https://tienda.alcampo.es/product/10153 | ref=11.333EUR/KG src=fuente
+10156 | Cacahuetes salados Alcampo | 1.43EUR total | 7.50EUR/kg | 200g | Dulces y snacks | https://tienda.alcampo.es/product/10156 | ref=7.500EUR/KG src=fuente
+10159 | Chocolate con leche Alcampo | 1.56EUR total | 12.80EUR/kg | 125g | Dulces y snacks | https://tienda.alcampo.es/product/10159 | ref=1.280EUR/100 g src=fuente
+10162 | Galletas de chocolate Alcampo | 1.16EUR total | 4.00EUR/kg | 300g | Dulces y snacks | https://tienda.alcampo.es/product/10162 | ref=4.000EUR/KG src=fuente
+10165 | Chucherías surtidas Alcampo | 1.76EUR total | 12.00EUR/kg | 150g | Dulces y snacks | https://tienda.alcampo.es/product/10165 | ref=12.000EUR/KG src=fuente
+10168 | Kikos Alcampo | 1.08EUR total | 15.4286EUR/kg | 70g | Dulces y snacks | https://tienda.alcampo.es/product/10168 | ref=-EUR/ src=calculado
+10171 | Chicle de menta Alcampo | -EUR total | - (sin_precio) | 1ud | Dulces y snacks | https://tienda.alcampo.es/product/10171 | ref=-EUR/- src=-
+10174 | Detergente líquido Alcampo | 9.05EUR total | 0.2262EUR/lavado | 40lv | Limpieza | https://tienda.alcampo.es/product/10174 | ref=-EUR/ src=calculado
+10177 | Lejía perfumada Alcampo | 2.06EUR total | 1.05EUR/l | 2l | Limpieza | https://tienda.alcampo.es/product/10177 | ref=1.050EUR/L src=fuente
+10180 | Limpiacristales Alcampo | 1.58EUR total | 2.133EUR/l | 750ml | Limpieza | https://tienda.alcampo.es/product/10180 | ref=2.133EUR/L src=fuente
+10183 | Suavizante concentrado Alcampo | 3.10EUR total | 3.20EUR/l | 1l | Limpieza | https://tienda.alcampo.es/product/10183 | ref=3.200EUR/L src=fuente
+10186 | Jabón de manos Alcampo | 2.28EUR total | 4.80EUR/l | 500ml | Limpieza | https://tienda.alcampo.es/product/10186 | ref=4.800EUR/L src=fuente
+10189 | Lavavajillas concentrado Alcampo | 2.68EUR total | 3.733EUR/l | 750ml | Limpieza | https://tienda.alcampo.es/product/10189 | ref=3.733EUR/L src=fuente
+10192 | Papel higiénico Alcampo | 3.09EUR total | 0.267EUR/ud | 12ud | Limpieza | https://tienda.alcampo.es/product/10192 | ref=0.267EUR/UD src=fuente
+10195 | Rollo de cocina Alcampo | 1.88EUR total | 0.95EUR/ud | 2ud | Limpieza | https://tienda.alcampo.es/product/10195 | ref=0.950EUR/UD src=fuente
+10198 | Bayeta de microfibra Alcampo | 2.44EUR total | 0.50EUR/ud | 5ud | Limpieza | https://tienda.alcampo.es/product/10198 | ref=0.500EUR/UD src=fuente
+10201 | Bolsas de basura Alcampo | 1.37EUR total | 0.0685EUR/ud | 20ud | Limpieza | https://tienda.alcampo.es/product/10201 | ref=-EUR/ src=calculado
+10204 | Limpiador multiusos Alcampo | 1.75EUR total | 1.80EUR/l | 1l | Limpieza | https://tienda.alcampo.es/product/10204 | ref=1.800EUR/L src=fuente
+10207 | Plátano de Canarias Alcampo | 2.06EUR total | 2.10EUR/kg | 1kg | Frutas y verduras | https://tienda.alcampo.es/product/10207 | ref=2.100EUR/KG src=fuente
+10210 | Manzana golden Alcampo | 2.34EUR total | 2.40EUR/kg | 1kg | Frutas y verduras | https://tienda.alcampo.es/product/10210 | ref=2.400EUR/KG src=fuente
+10213 | Tomate pera Alcampo | 2.13EUR total | 2.20EUR/kg | 1kg | Frutas y verduras | https://tienda.alcampo.es/product/10213 | ref=2.200EUR/KG src=fuente
+10216 | Lechuga iceberg Alcampo | 1.14EUR total | 1.20EUR/ud | 1ud | Frutas y verduras | https://tienda.alcampo.es/product/10216 | ref=1.200EUR/UD src=fuente
+10219 | Patatas Alcampo | 1.91EUR total | 0.80EUR/kg | 2.5kg | Frutas y verduras | https://tienda.alcampo.es/product/10219 | ref=0.800EUR/KG src=fuente
+10222 | Zanahoria Alcampo | 1.65EUR total | 1.70EUR/kg | 1kg | Frutas y verduras | https://tienda.alcampo.es/product/10222 | ref=1.700EUR/KG src=fuente
+10225 | Limones Alcampo | 1.84EUR total | 1.90EUR/kg | 1kg | Frutas y verduras | https://tienda.alcampo.es/product/10225 | ref=1.900EUR/KG src=fuente
+10228 | Aguacates Alcampo | 3.43EUR total | 0.875EUR/ud | 4ud | Frutas y verduras | https://tienda.alcampo.es/product/10228 | ref=0.875EUR/UD src=fuente
+10231 | Cebollas Alcampo | 1.46EUR total | 1.50EUR/kg | 1kg | Frutas y verduras | https://tienda.alcampo.es/product/10231 | ref=1.500EUR/KG src=fuente
+10234 | Guisantes congelados Alcampo | 2.53EUR total | 2.60EUR/kg | 1kg | Congelados | https://tienda.alcampo.es/product/10234 | ref=2.600EUR/KG src=fuente
+10237 | Merluza en filetes Alcampo | 5.25EUR total | 13.75EUR/kg | 400g | Congelados | https://tienda.alcampo.es/product/10237 | ref=13.750EUR/KG src=fuente
+10240 | Pizza cuatro quesos Alcampo | 2.87EUR total | 8.286EUR/kg | 350g | Congelados | https://tienda.alcampo.es/product/10240 | ref=8.286EUR/KG src=fuente
+10243 | Patatas prefritas congeladas Alcampo | 3.11EUR total | 3.20EUR/kg | 1kg | Congelados | https://tienda.alcampo.es/product/10243 | ref=3.200EUR/KG src=fuente
+10246 | Comida para perros Alcampo | 6.30EUR total | 2.167EUR/kg | 3kg | Mascotas | https://tienda.alcampo.es/product/10246 | ref=2.167EUR/KG src=fuente
+10249 | Comida para gatos Alcampo | 4.05EUR total | 2.80EUR/kg | 1.5kg | Mascotas | https://tienda.alcampo.es/product/10249 | ref=2.800EUR/KG src=fuente
+10252 | Papel higiénico Alcampo | 4.32EUR total | 0.18EUR/ud | 24ud | Limpieza | https://tienda.alcampo.es/product/10252 | ref=-EUR/- src=calculado
+10254 | Aguacates Alcampo | 4.72EUR total | 0.7867EUR/ud | 6ud | Frutas y verduras | https://tienda.alcampo.es/product/10254 | ref=-EUR/- src=calculado
+10256 | Leche entera Alcampo | 1.55EUR total | 3.10EUR/l | 0.5l | Leche y yogures | https://tienda.alcampo.es/product/10256 | ref=-EUR/- src=calculado
+10257 | Detergente líquido Alcampo | 12.82EUR total | 0.2137EUR/lavado | 60lv | Limpieza | https://tienda.alcampo.es/product/10257 | ref=-EUR/- src=calculado

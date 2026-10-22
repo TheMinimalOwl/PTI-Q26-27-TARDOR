@@ -1,0 +1,86 @@
+Items: 83
+Unitarios: 82 (fuente 79, calculado 3) | Incompletos: 1
+---
+10001 | Aceite de oliva virgen extra Hacendado | 12.52EUR total | 12.50EUR/l | 1l | Aceites, especias y salsas | https://tienda.mercadona.es/product/10001 | ref=12.500EUR/L src=fuente
+10004 | Aceite de oliva virgen extra Hacendado | 6.67EUR total | 13.60EUR/l | 0.5l | Aceites, especias y salsas | https://tienda.mercadona.es/product/10004 | ref=13.600EUR/L src=fuente
+10007 | Aceite de oliva suave Hacendado | 7.24EUR total | 7.20EUR/l | 1l | Aceites, especias y salsas | https://tienda.mercadona.es/product/10007 | ref=7.200EUR/L src=fuente
+10010 | Aceite de girasol Hacendado | 2.44EUR total | 2.40EUR/l | 1l | Aceites, especias y salsas | https://tienda.mercadona.es/product/10010 | ref=2.400EUR/L src=fuente
+10013 | Vinagre de vino blanco Hacendado | 1.61EUR total | 1.60EUR/l | 1l | Aceites, especias y salsas | https://tienda.mercadona.es/product/10013 | ref=1.600EUR/L src=fuente
+10016 | Salsa de soja Hacendado | 2.07EUR total | 8.40EUR/l | 0.25l | Aceites, especias y salsas | https://tienda.mercadona.es/product/10016 | ref=8.400EUR/L src=fuente
+10019 | Mayonesa Hacendado | 4.26EUR total | 10.75EUR/l | 0.4l | Aceites, especias y salsas | https://tienda.mercadona.es/product/10019 | ref=10.750EUR/L src=fuente
+10022 | Mostaza Hacendado | 1.94EUR total | 7.60EUR/l | 0.25l | Aceites, especias y salsas | https://tienda.mercadona.es/product/10022 | ref=7.600EUR/L src=fuente
+10025 | Sal marina fina Hacendado | 0.83EUR total | 0.85EUR/kg | 1kg | Aceites, especias y salsas | https://tienda.mercadona.es/product/10025 | ref=0.850EUR/KG src=fuente
+10028 | Azúcar blanco Hacendado | 1.11EUR total | 1.10EUR/kg | 1kg | Aceites, especias y salsas | https://tienda.mercadona.es/product/10028 | ref=1.100EUR/KG src=fuente
+10031 | Harina de trigo Hacendado | 1.04EUR total | 1.05EUR/kg | 1kg | Aceites, especias y salsas | https://tienda.mercadona.es/product/10031 | ref=1.050EUR/KG src=fuente
+10034 | Café molido natural Hacendado | 3.47EUR total | 14.00EUR/kg | 250g | Aceites, especias y salsas | https://tienda.mercadona.es/product/10034 | ref=1.400EUR/100 g src=fuente
+10037 | Leche entera Hacendado | 1.13EUR total | 1.15EUR/l | 1l | Leche y yogures | https://tienda.mercadona.es/product/10037 | ref=1.150EUR/L src=fuente
+10040 | Leche semidesnatada Hacendado | 1.08EUR total | 1.10EUR/l | 1l | Leche y yogures | https://tienda.mercadona.es/product/10040 | ref=1.100EUR/L src=fuente
+10043 | Leche desnatada Hacendado | 1.09EUR total | 1.10EUR/l | 1l | Leche y yogures | https://tienda.mercadona.es/product/10043 | ref=1.100EUR/L src=fuente
+10046 | Yogur natural Hacendado | 2.21EUR total | 4.40EUR/kg | 500g | Leche y yogures | https://tienda.mercadona.es/product/10046 | ref=4.400EUR/KG src=fuente
+10049 | Yogur de fresa Hacendado | 0.65EUR total | 5.20EUR/kg | 125g | Leche y yogures | https://tienda.mercadona.es/product/10049 | ref=0.520EUR/100 g src=fuente
+10052 | Queso curado semicurado Hacendado | 4.46EUR total | 18.00EUR/kg | 250g | Leche y yogures | https://tienda.mercadona.es/product/10052 | ref=18.000EUR/KG src=fuente
+10055 | Queso mozzarella Hacendado | 1.63EUR total | 12.80EUR/kg | 125g | Leche y yogures | https://tienda.mercadona.es/product/10055 | ref=1.280EUR/100 g src=fuente
+10058 | Mantequilla Hacendado | 2.30EUR total | 9.20EUR/kg | 250g | Leche y yogures | https://tienda.mercadona.es/product/10058 | ref=9.200EUR/KG src=fuente
+10061 | Nata para cocinar Hacendado | 1.69EUR total | 3.40EUR/l | 500ml | Leche y yogures | https://tienda.mercadona.es/product/10061 | ref=3.400EUR/L src=fuente
+10064 | Batido de chocolate Hacendado | 1.88EUR total | 1.90EUR/l | 1l | Leche y yogures | https://tienda.mercadona.es/product/10064 | ref=1.900EUR/L src=fuente
+10067 | Flan de vainilla Hacendado | 1.82EUR total | 0.45EUR/ud | 4ud | Leche y yogures | https://tienda.mercadona.es/product/10067 | ref=0.450EUR/UD src=fuente
+10070 | Pan de molde integral Hacendado | 2.37EUR total | 4.00EUR/kg | 600g | Panadería | https://tienda.mercadona.es/product/10070 | ref=4.000EUR/KG src=fuente
+10073 | Barra de pan rústica Hacendado | 1.22EUR total | 4.80EUR/kg | 250g | Panadería | https://tienda.mercadona.es/product/10073 | ref=4.800EUR/KG src=fuente
+10076 | Pan de molde blanco Hacendado | 1.78EUR total | 3.00EUR/kg | 600g | Panadería | https://tienda.mercadona.es/product/10076 | ref=3.000EUR/KG src=fuente
+10079 | Magdalenas Hacendado | 1.52EUR total | 0.125EUR/ud | 12ud | Panadería | https://tienda.mercadona.es/product/10079 | ref=0.125EUR/UD src=fuente
+10082 | Croissant de mantequilla Hacendado | 0.35EUR total | 6.36EUR/kg | 55g | Panadería | https://tienda.mercadona.es/product/10082 | ref=0.636EUR/100 g src=fuente
+10085 | Donut de chocolate Hacendado | 0.44EUR total | 0.45EUR/ud | 1ud | Panadería | https://tienda.mercadona.es/product/10085 | ref=0.450EUR/UD src=fuente
+10088 | Copos de avena Hacendado | 1.58EUR total | 3.20EUR/kg | 500g | Cereales y desayuno | https://tienda.mercadona.es/product/10088 | ref=3.200EUR/KG src=fuente
+10091 | Cereales con chocolate Hacendado | 2.28EUR total | 4.60EUR/kg | 500g | Cereales y desayuno | https://tienda.mercadona.es/product/10091 | ref=0.460EUR/100 g src=fuente
+10094 | Corn flakes Hacendado | 2.12EUR total | 4.20EUR/kg | 500g | Cereales y desayuno | https://tienda.mercadona.es/product/10094 | ref=4.200EUR/KG src=fuente
+10097 | Mermelada de fresa Hacendado | 2.42EUR total | 8.00EUR/kg | 300g | Cereales y desayuno | https://tienda.mercadona.es/product/10097 | ref=8.000EUR/KG src=fuente
+10100 | Miel Hacendado | 6.58EUR total | 6.50EUR/kg | 1kg | Cereales y desayuno | https://tienda.mercadona.es/product/10100 | ref=6.500EUR/KG src=fuente
+10103 | Atún claro en aceite de oliva Hacendado | 2.32EUR total | 0.767EUR/ud | 3ud | Conservas | https://tienda.mercadona.es/product/10103 | ref=0.767EUR/UD src=fuente
+10106 | Gulas caseras Hacendado | 3.52EUR total | 8.75EUR/kg | 400g | Conservas | https://tienda.mercadona.es/product/10106 | ref=8.750EUR/KG src=fuente
+10109 | Tomate triturado Hacendado | 1.40EUR total | 3.50EUR/kg | 400g | Conservas | https://tienda.mercadona.es/product/10109 | ref=3.500EUR/KG src=fuente
+10112 | Alubias cocidas Hacendado | 1.33EUR total | 2.368EUR/kg | 570g | Conservas | https://tienda.mercadona.es/product/10112 | ref=2.368EUR/KG src=fuente
+10115 | Atún en salmuera Hacendado | 2.61EUR total | 0.867EUR/ud | 3ud | Conservas | https://tienda.mercadona.es/product/10115 | ref=0.867EUR/UD src=fuente
+10118 | Sardinas en aceite de oliva Hacendado | 1.80EUR total | 15.00EUR/kg | 120g | Conservas | https://tienda.mercadona.es/product/10118 | ref=15.000EUR/KG src=fuente
+10121 | Maíz dulce Hacendado | 1.19EUR total | 4.00EUR/kg | 300g | Conservas | https://tienda.mercadona.es/product/10121 | ref=4.000EUR/KG src=fuente
+10124 | Aceitunas verdes rellenas Hacendado | 2.94EUR total | 11.60EUR/kg | 250g | Conservas | https://tienda.mercadona.es/product/10124 | ref=11.600EUR/KG src=fuente
+10127 | Agua mineral Hacendado | 0.45EUR total | 0.30EUR/l | 1.5l | Bebidas | https://tienda.mercadona.es/product/10127 | ref=0.300EUR/L src=fuente
+10130 | Agua con gas Hacendado | 0.74EUR total | 0.50EUR/l | 1.5l | Bebidas | https://tienda.mercadona.es/product/10130 | ref=0.500EUR/L src=fuente
+10133 | Zumo de naranja 100% Hacendado | 1.91EUR total | 1.90EUR/l | 1l | Bebidas | https://tienda.mercadona.es/product/10133 | ref=1.900EUR/L src=fuente
+10136 | Zumo de manzana Hacendado | 1.38EUR total | 1.40EUR/l | 1l | Bebidas | https://tienda.mercadona.es/product/10136 | ref=1.400EUR/L src=fuente
+10139 | Refresco de cola Hacendado | 2.10EUR total | 1.05EUR/l | 2l | Bebidas | https://tienda.mercadona.es/product/10139 | ref=1.050EUR/L src=fuente
+10142 | Cerveza rubia Hacendado | 0.89EUR total | 2.727EUR/l | 0.33l | Bebidas | https://tienda.mercadona.es/product/10142 | ref=2.727EUR/L src=fuente
+10145 | Vino tinto D.O. Hacendado | 6.38EUR total | 6.50EUR/l | 1l | Bebidas | https://tienda.mercadona.es/product/10145 | ref=6.500EUR/L src=fuente
+10148 | Tónica Hacendado | 1.28EUR total | 1.30EUR/l | 1l | Bebidas | https://tienda.mercadona.es/product/10148 | ref=1.300EUR/L src=fuente
+10151 | Patatas fritas Hacendado | 1.68EUR total | 11.333EUR/kg | 150g | Dulces y snacks | https://tienda.mercadona.es/product/10151 | ref=11.333EUR/KG src=fuente
+10154 | Cacahuetes salados Hacendado | 1.52EUR total | 7.50EUR/kg | 200g | Dulces y snacks | https://tienda.mercadona.es/product/10154 | ref=7.500EUR/KG src=fuente
+10157 | Chocolate con leche Hacendado | 1.60EUR total | 12.80EUR/kg | 125g | Dulces y snacks | https://tienda.mercadona.es/product/10157 | ref=1.280EUR/100 g src=fuente
+10160 | Galletas de chocolate Hacendado | 1.20EUR total | 4.00EUR/kg | 300g | Dulces y snacks | https://tienda.mercadona.es/product/10160 | ref=4.000EUR/KG src=fuente
+10163 | Chucherías surtidas Hacendado | 1.81EUR total | 12.00EUR/kg | 150g | Dulces y snacks | https://tienda.mercadona.es/product/10163 | ref=12.000EUR/KG src=fuente
+10166 | Kikos Hacendado | 1.10EUR total | 15.7143EUR/kg | 70g | Dulces y snacks | https://tienda.mercadona.es/product/10166 | ref=-EUR/ src=calculado
+10169 | Chicle de menta Hacendado | -EUR total | - (sin_precio) | 1ud | Dulces y snacks | https://tienda.mercadona.es/product/10169 | ref=-EUR/- src=-
+10172 | Detergente líquido Hacendado | 9.36EUR total | 0.234EUR/lavado | 40lv | Limpieza | https://tienda.mercadona.es/product/10172 | ref=-EUR/ src=calculado
+10175 | Lejía perfumada Hacendado | 2.11EUR total | 1.05EUR/l | 2l | Limpieza | https://tienda.mercadona.es/product/10175 | ref=1.050EUR/L src=fuente
+10178 | Limpiacristales Hacendado | 1.60EUR total | 2.133EUR/l | 750ml | Limpieza | https://tienda.mercadona.es/product/10178 | ref=2.133EUR/L src=fuente
+10181 | Suavizante concentrado Hacendado | 3.16EUR total | 3.20EUR/l | 1l | Limpieza | https://tienda.mercadona.es/product/10181 | ref=3.200EUR/L src=fuente
+10184 | Jabón de manos Hacendado | 2.41EUR total | 4.80EUR/l | 500ml | Limpieza | https://tienda.mercadona.es/product/10184 | ref=4.800EUR/L src=fuente
+10187 | Lavavajillas concentrado Hacendado | 2.83EUR total | 3.733EUR/l | 750ml | Limpieza | https://tienda.mercadona.es/product/10187 | ref=3.733EUR/L src=fuente
+10190 | Papel higiénico Hacendado | 3.14EUR total | 0.267EUR/ud | 12ud | Limpieza | https://tienda.mercadona.es/product/10190 | ref=0.267EUR/UD src=fuente
+10193 | Rollo de cocina Hacendado | 1.91EUR total | 0.95EUR/ud | 2ud | Limpieza | https://tienda.mercadona.es/product/10193 | ref=0.950EUR/UD src=fuente
+10196 | Bayeta de microfibra Hacendado | 2.48EUR total | 0.50EUR/ud | 5ud | Limpieza | https://tienda.mercadona.es/product/10196 | ref=0.500EUR/UD src=fuente
+10199 | Bolsas de basura Hacendado | 1.38EUR total | 0.069EUR/ud | 20ud | Limpieza | https://tienda.mercadona.es/product/10199 | ref=-EUR/ src=calculado
+10202 | Limpiador multiusos Hacendado | 1.82EUR total | 1.80EUR/l | 1l | Limpieza | https://tienda.mercadona.es/product/10202 | ref=1.800EUR/L src=fuente
+10205 | Plátano de Canarias Hacendado | 2.09EUR total | 2.10EUR/kg | 1kg | Frutas y verduras | https://tienda.mercadona.es/product/10205 | ref=2.100EUR/KG src=fuente
+10208 | Manzana golden Hacendado | 2.44EUR total | 2.40EUR/kg | 1kg | Frutas y verduras | https://tienda.mercadona.es/product/10208 | ref=2.400EUR/KG src=fuente
+10211 | Tomate pera Hacendado | 2.21EUR total | 2.20EUR/kg | 1kg | Frutas y verduras | https://tienda.mercadona.es/product/10211 | ref=2.200EUR/KG src=fuente
+10214 | Lechuga iceberg Hacendado | 1.18EUR total | 1.20EUR/ud | 1ud | Frutas y verduras | https://tienda.mercadona.es/product/10214 | ref=1.200EUR/UD src=fuente
+10217 | Patatas Hacendado | 2.03EUR total | 0.80EUR/kg | 2.5kg | Frutas y verduras | https://tienda.mercadona.es/product/10217 | ref=0.800EUR/KG src=fuente
+10220 | Zanahoria Hacendado | 1.69EUR total | 1.70EUR/kg | 1kg | Frutas y verduras | https://tienda.mercadona.es/product/10220 | ref=1.700EUR/KG src=fuente
+10223 | Limones Hacendado | 1.87EUR total | 1.90EUR/kg | 1kg | Frutas y verduras | https://tienda.mercadona.es/product/10223 | ref=1.900EUR/KG src=fuente
+10226 | Aguacates Hacendado | 3.48EUR total | 0.875EUR/ud | 4ud | Frutas y verduras | https://tienda.mercadona.es/product/10226 | ref=0.875EUR/UD src=fuente
+10229 | Cebollas Hacendado | 1.48EUR total | 1.50EUR/kg | 1kg | Frutas y verduras | https://tienda.mercadona.es/product/10229 | ref=1.500EUR/KG src=fuente
+10232 | Guisantes congelados Hacendado | 2.56EUR total | 2.60EUR/kg | 1kg | Congelados | https://tienda.mercadona.es/product/10232 | ref=2.600EUR/KG src=fuente
+10235 | Merluza en filetes Hacendado | 5.51EUR total | 13.75EUR/kg | 400g | Congelados | https://tienda.mercadona.es/product/10235 | ref=13.750EUR/KG src=fuente
+10238 | Pizza cuatro quesos Hacendado | 2.93EUR total | 8.286EUR/kg | 350g | Congelados | https://tienda.mercadona.es/product/10238 | ref=8.286EUR/KG src=fuente
+10241 | Patatas prefritas congeladas Hacendado | 3.18EUR total | 3.20EUR/kg | 1kg | Congelados | https://tienda.mercadona.es/product/10241 | ref=3.200EUR/KG src=fuente
+10244 | Comida para perros Hacendado | 6.45EUR total | 2.167EUR/kg | 3kg | Mascotas | https://tienda.mercadona.es/product/10244 | ref=2.167EUR/KG src=fuente
+10247 | Comida para gatos Hacendado | 4.14EUR total | 2.80EUR/kg | 1.5kg | Mascotas | https://tienda.mercadona.es/product/10247 | ref=2.800EUR/KG src=fuente
