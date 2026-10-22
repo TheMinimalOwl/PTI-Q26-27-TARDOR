@@ -1,0 +1,9 @@
+pid_origen,pid_destino,key,cadena_destino,motivo
+10067,10250,flan-vainilla-4ud,carrefour,formato distinto: 4ud vs 8ud
+10103,10251,atun-aceite-3ud,carrefour,formato distinto: 3ud vs 6ud
+10190,10252,papel-higienico-12ud,alcampo,formato distinto: 12ud vs 24ud
+10199,10253,bolsas-basura-20ud,carrefour,formato distinto: 20ud vs 30ud
+10226,10254,aguacates-4ud,alcampo,formato distinto: 4ud vs 6ud
+10001,10255,aceite-oliva-ve-1l,carrefour,formato distinto: 1l vs 0.75l
+10037,10256,leche-entera-1l,alcampo,formato distinto: 1l vs 0.5l
+10172,10257,detergente-liquido-40lav,alcampo,formato distinto: 40lv vs 60lv

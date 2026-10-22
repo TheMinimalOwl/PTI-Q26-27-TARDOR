@@ -1,0 +1,1496 @@
+[
+  {
+    "query": "aceite de girasol 1 l",
+    "expected_ids": [
+      "10012",
+      "10011",
+      "10010"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "aceite de oliva suave 1 l",
+    "expected_ids": [
+      "10009",
+      "10008",
+      "10007"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "aceite de oliva virgen extra 0.5 l",
+    "expected_ids": [
+      "10006",
+      "10005",
+      "10004"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "aceite de oliva virgen extra 1 l",
+    "expected_ids": [
+      "10003",
+      "10002",
+      "10001"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "aceitunas verdes rellenas 250 g",
+    "expected_ids": [
+      "10126",
+      "10125",
+      "10124"
+    ],
+    "category": "Conservas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "agua con gas 1.5 l",
+    "expected_ids": [
+      "10132",
+      "10131",
+      "10130"
+    ],
+    "category": "Bebidas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "agua mineral 1.5 l",
+    "expected_ids": [
+      "10129",
+      "10128",
+      "10127"
+    ],
+    "category": "Bebidas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "aguacates 4 ud",
+    "expected_ids": [
+      "10228",
+      "10227",
+      "10226"
+    ],
+    "category": "Frutas y verduras",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "alubias cocidas 570 g",
+    "expected_ids": [
+      "10114",
+      "10113",
+      "10112"
+    ],
+    "category": "Conservas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "atún claro en aceite de oliva 3 ud",
+    "expected_ids": [
+      "10105",
+      "10104",
+      "10103"
+    ],
+    "category": "Conservas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "atún en salmuera 3 ud",
+    "expected_ids": [
+      "10117",
+      "10116",
+      "10115"
+    ],
+    "category": "Conservas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "azúcar blanco 1 kg",
+    "expected_ids": [
+      "10030",
+      "10029",
+      "10028"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "barra de pan rústica 250 g",
+    "expected_ids": [
+      "10075",
+      "10074",
+      "10073"
+    ],
+    "category": "Panadería",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "batido de chocolate 1 l",
+    "expected_ids": [
+      "10066",
+      "10065",
+      "10064"
+    ],
+    "category": "Leche y yogures",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "bayeta de microfibra 5 ud",
+    "expected_ids": [
+      "10198",
+      "10197",
+      "10196"
+    ],
+    "category": "Limpieza",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "bolsas de basura 20 ud",
+    "expected_ids": [
+      "10201",
+      "10200",
+      "10199"
+    ],
+    "category": "Limpieza",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "cacahuetes salados 200 g",
+    "expected_ids": [
+      "10156",
+      "10155",
+      "10154"
+    ],
+    "category": "Dulces y snacks",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "café molido natural 250 g",
+    "expected_ids": [
+      "10036",
+      "10035",
+      "10034"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "cebollas 1 kg",
+    "expected_ids": [
+      "10231",
+      "10230",
+      "10229"
+    ],
+    "category": "Frutas y verduras",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "cereales con chocolate 500 g",
+    "expected_ids": [
+      "10093",
+      "10092",
+      "10091"
+    ],
+    "category": "Cereales y desayuno",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "cerveza rubia 0.33 l",
+    "expected_ids": [
+      "10144",
+      "10143",
+      "10142"
+    ],
+    "category": "Bebidas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "chicle de menta 1 ud",
+    "expected_ids": [
+      "10171",
+      "10170",
+      "10169"
+    ],
+    "category": "Dulces y snacks",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "chocolate con leche 125 g",
+    "expected_ids": [
+      "10159",
+      "10158",
+      "10157"
+    ],
+    "category": "Dulces y snacks",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "chucherías surtidas 150 g",
+    "expected_ids": [
+      "10165",
+      "10164",
+      "10163"
+    ],
+    "category": "Dulces y snacks",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "comida para gatos 1.5 kg",
+    "expected_ids": [
+      "10249",
+      "10248",
+      "10247"
+    ],
+    "category": "Mascotas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "comida para perros 3 kg",
+    "expected_ids": [
+      "10246",
+      "10245",
+      "10244"
+    ],
+    "category": "Mascotas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "copos de avena 500 g",
+    "expected_ids": [
+      "10090",
+      "10089",
+      "10088"
+    ],
+    "category": "Cereales y desayuno",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "corn flakes 500 g",
+    "expected_ids": [
+      "10096",
+      "10095",
+      "10094"
+    ],
+    "category": "Cereales y desayuno",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "croissant de mantequilla 55 g",
+    "expected_ids": [
+      "10084",
+      "10083",
+      "10082"
+    ],
+    "category": "Panadería",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "detergente líquido 40 lv",
+    "expected_ids": [
+      "10174",
+      "10173",
+      "10172"
+    ],
+    "category": "Limpieza",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "donut de chocolate 1 ud",
+    "expected_ids": [
+      "10087",
+      "10086",
+      "10085"
+    ],
+    "category": "Panadería",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "flan de vainilla 4 ud",
+    "expected_ids": [
+      "10069",
+      "10068",
+      "10067"
+    ],
+    "category": "Leche y yogures",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "galletas de chocolate 300 g",
+    "expected_ids": [
+      "10162",
+      "10161",
+      "10160"
+    ],
+    "category": "Dulces y snacks",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "guisantes congelados 1 kg",
+    "expected_ids": [
+      "10234",
+      "10233",
+      "10232"
+    ],
+    "category": "Congelados",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "gulas caseras 400 g",
+    "expected_ids": [
+      "10108",
+      "10107",
+      "10106"
+    ],
+    "category": "Conservas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "harina de trigo 1 kg",
+    "expected_ids": [
+      "10033",
+      "10032",
+      "10031"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "jabón de manos 500 ml",
+    "expected_ids": [
+      "10186",
+      "10185",
+      "10184"
+    ],
+    "category": "Limpieza",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "kikos 70 g",
+    "expected_ids": [
+      "10168",
+      "10167",
+      "10166"
+    ],
+    "category": "Dulces y snacks",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "lavavajillas concentrado 750 ml",
+    "expected_ids": [
+      "10189",
+      "10188",
+      "10187"
+    ],
+    "category": "Limpieza",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "leche desnatada 1 l",
+    "expected_ids": [
+      "10045",
+      "10044",
+      "10043"
+    ],
+    "category": "Leche y yogures",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "leche entera 1 l",
+    "expected_ids": [
+      "10039",
+      "10038",
+      "10037"
+    ],
+    "category": "Leche y yogures",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "leche semidesnatada 1 l",
+    "expected_ids": [
+      "10042",
+      "10041",
+      "10040"
+    ],
+    "category": "Leche y yogures",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "lechuga iceberg 1 ud",
+    "expected_ids": [
+      "10216",
+      "10215",
+      "10214"
+    ],
+    "category": "Frutas y verduras",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "lejía perfumada 2 l",
+    "expected_ids": [
+      "10177",
+      "10176",
+      "10175"
+    ],
+    "category": "Limpieza",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "limones 1 kg",
+    "expected_ids": [
+      "10225",
+      "10224",
+      "10223"
+    ],
+    "category": "Frutas y verduras",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "limpiacristales 750 ml",
+    "expected_ids": [
+      "10180",
+      "10179",
+      "10178"
+    ],
+    "category": "Limpieza",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "limpiador multiusos 1 l",
+    "expected_ids": [
+      "10204",
+      "10203",
+      "10202"
+    ],
+    "category": "Limpieza",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "magdalenas 12 ud",
+    "expected_ids": [
+      "10081",
+      "10080",
+      "10079"
+    ],
+    "category": "Panadería",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "maíz dulce 300 g",
+    "expected_ids": [
+      "10123",
+      "10122",
+      "10121"
+    ],
+    "category": "Conservas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "mantequilla 250 g",
+    "expected_ids": [
+      "10060",
+      "10059",
+      "10058"
+    ],
+    "category": "Leche y yogures",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "manzana golden 1 kg",
+    "expected_ids": [
+      "10210",
+      "10209",
+      "10208"
+    ],
+    "category": "Frutas y verduras",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "mayonesa 0.4 l",
+    "expected_ids": [
+      "10021",
+      "10020",
+      "10019"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "merluza en filetes 400 g",
+    "expected_ids": [
+      "10237",
+      "10236",
+      "10235"
+    ],
+    "category": "Congelados",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "mermelada de fresa 300 g",
+    "expected_ids": [
+      "10099",
+      "10098",
+      "10097"
+    ],
+    "category": "Cereales y desayuno",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "miel 1 kg",
+    "expected_ids": [
+      "10102",
+      "10101",
+      "10100"
+    ],
+    "category": "Cereales y desayuno",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "mostaza 0.25 l",
+    "expected_ids": [
+      "10024",
+      "10023",
+      "10022"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "queso mozzarella 125 g",
+    "expected_ids": [
+      "10057",
+      "10056",
+      "10055"
+    ],
+    "category": "Leche y yogures",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "nata para cocinar 500 ml",
+    "expected_ids": [
+      "10063",
+      "10062",
+      "10061"
+    ],
+    "category": "Leche y yogures",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "pan de molde blanco 600 g",
+    "expected_ids": [
+      "10078",
+      "10077",
+      "10076"
+    ],
+    "category": "Panadería",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "pan de molde integral 600 g",
+    "expected_ids": [
+      "10072",
+      "10071",
+      "10070"
+    ],
+    "category": "Panadería",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "papel higiénico 12 ud",
+    "expected_ids": [
+      "10192",
+      "10191",
+      "10190"
+    ],
+    "category": "Limpieza",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "patatas 2.5 kg",
+    "expected_ids": [
+      "10219",
+      "10218",
+      "10217"
+    ],
+    "category": "Frutas y verduras",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "patatas fritas 150 g",
+    "expected_ids": [
+      "10153",
+      "10152",
+      "10151"
+    ],
+    "category": "Dulces y snacks",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "patatas prefritas congeladas 1 kg",
+    "expected_ids": [
+      "10243",
+      "10242",
+      "10241"
+    ],
+    "category": "Congelados",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "pizza cuatro quesos 350 g",
+    "expected_ids": [
+      "10240",
+      "10239",
+      "10238"
+    ],
+    "category": "Congelados",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "plátano de canarias 1 kg",
+    "expected_ids": [
+      "10207",
+      "10206",
+      "10205"
+    ],
+    "category": "Frutas y verduras",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "queso curado semicurado 250 g",
+    "expected_ids": [
+      "10054",
+      "10053",
+      "10052"
+    ],
+    "category": "Leche y yogures",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "refresco de cola 2 l",
+    "expected_ids": [
+      "10141",
+      "10140",
+      "10139"
+    ],
+    "category": "Bebidas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "rollo de cocina 2 ud",
+    "expected_ids": [
+      "10195",
+      "10194",
+      "10193"
+    ],
+    "category": "Limpieza",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "sal marina fina 1 kg",
+    "expected_ids": [
+      "10027",
+      "10026",
+      "10025"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "salsa de soja 0.25 l",
+    "expected_ids": [
+      "10018",
+      "10017",
+      "10016"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "sardinas en aceite de oliva 120 g",
+    "expected_ids": [
+      "10120",
+      "10119",
+      "10118"
+    ],
+    "category": "Conservas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "suavizante concentrado 1 l",
+    "expected_ids": [
+      "10183",
+      "10182",
+      "10181"
+    ],
+    "category": "Limpieza",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "tomate pera 1 kg",
+    "expected_ids": [
+      "10213",
+      "10212",
+      "10211"
+    ],
+    "category": "Frutas y verduras",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "tomate triturado 400 g",
+    "expected_ids": [
+      "10111",
+      "10110",
+      "10109"
+    ],
+    "category": "Conservas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "tónica 1 l",
+    "expected_ids": [
+      "10150",
+      "10149",
+      "10148"
+    ],
+    "category": "Bebidas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "vinagre de vino blanco 1 l",
+    "expected_ids": [
+      "10015",
+      "10014",
+      "10013"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "vino tinto d.o. 1 l",
+    "expected_ids": [
+      "10147",
+      "10146",
+      "10145"
+    ],
+    "category": "Bebidas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "yogur de fresa 125 g",
+    "expected_ids": [
+      "10051",
+      "10050",
+      "10049"
+    ],
+    "category": "Leche y yogures",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "yogur natural 500 g",
+    "expected_ids": [
+      "10048",
+      "10047",
+      "10046"
+    ],
+    "category": "Leche y yogures",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "zanahoria 1 kg",
+    "expected_ids": [
+      "10222",
+      "10221",
+      "10220"
+    ],
+    "category": "Frutas y verduras",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "zumo de manzana 1 l",
+    "expected_ids": [
+      "10138",
+      "10137",
+      "10136"
+    ],
+    "category": "Bebidas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "zumo de naranja 100% 1 l",
+    "expected_ids": [
+      "10135",
+      "10134",
+      "10133"
+    ],
+    "category": "Bebidas",
+    "note": "el mismo producto en las tres cadenas"
+  },
+  {
+    "query": "aceite de girasol de mercadona",
+    "expected_ids": [
+      "10010"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "aceite de oliva suave de mercadona",
+    "expected_ids": [
+      "10007"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "aceite de oliva virgen extra de mercadona",
+    "expected_ids": [
+      "10004"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "aceite de oliva virgen extra de mercadona",
+    "expected_ids": [
+      "10001"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "aceitunas verdes rellenas de mercadona",
+    "expected_ids": [
+      "10124"
+    ],
+    "category": "Conservas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "agua con gas de mercadona",
+    "expected_ids": [
+      "10130"
+    ],
+    "category": "Bebidas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "agua mineral de mercadona",
+    "expected_ids": [
+      "10127"
+    ],
+    "category": "Bebidas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "aguacates de mercadona",
+    "expected_ids": [
+      "10226"
+    ],
+    "category": "Frutas y verduras",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "alubias cocidas de mercadona",
+    "expected_ids": [
+      "10112"
+    ],
+    "category": "Conservas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "atún claro en aceite de oliva de mercadona",
+    "expected_ids": [
+      "10103"
+    ],
+    "category": "Conservas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "atún en salmuera de mercadona",
+    "expected_ids": [
+      "10115"
+    ],
+    "category": "Conservas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "azúcar blanco de mercadona",
+    "expected_ids": [
+      "10028"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "barra de pan rústica de mercadona",
+    "expected_ids": [
+      "10073"
+    ],
+    "category": "Panadería",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "batido de chocolate de mercadona",
+    "expected_ids": [
+      "10064"
+    ],
+    "category": "Leche y yogures",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "bayeta de microfibra de mercadona",
+    "expected_ids": [
+      "10196"
+    ],
+    "category": "Limpieza",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "bolsas de basura de mercadona",
+    "expected_ids": [
+      "10199"
+    ],
+    "category": "Limpieza",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "cacahuetes salados de mercadona",
+    "expected_ids": [
+      "10154"
+    ],
+    "category": "Dulces y snacks",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "café molido natural de mercadona",
+    "expected_ids": [
+      "10034"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "cebollas de mercadona",
+    "expected_ids": [
+      "10229"
+    ],
+    "category": "Frutas y verduras",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "cereales con chocolate de mercadona",
+    "expected_ids": [
+      "10091"
+    ],
+    "category": "Cereales y desayuno",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "cerveza rubia de mercadona",
+    "expected_ids": [
+      "10142"
+    ],
+    "category": "Bebidas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "chicle de menta de mercadona",
+    "expected_ids": [
+      "10169"
+    ],
+    "category": "Dulces y snacks",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "chocolate con leche de mercadona",
+    "expected_ids": [
+      "10157"
+    ],
+    "category": "Dulces y snacks",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "chucherías surtidas de mercadona",
+    "expected_ids": [
+      "10163"
+    ],
+    "category": "Dulces y snacks",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "comida para gatos de mercadona",
+    "expected_ids": [
+      "10247"
+    ],
+    "category": "Mascotas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "comida para perros de mercadona",
+    "expected_ids": [
+      "10244"
+    ],
+    "category": "Mascotas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "copos de avena de mercadona",
+    "expected_ids": [
+      "10088"
+    ],
+    "category": "Cereales y desayuno",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "corn flakes de mercadona",
+    "expected_ids": [
+      "10094"
+    ],
+    "category": "Cereales y desayuno",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "croissant de mantequilla de mercadona",
+    "expected_ids": [
+      "10082"
+    ],
+    "category": "Panadería",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "detergente líquido de mercadona",
+    "expected_ids": [
+      "10172"
+    ],
+    "category": "Limpieza",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "donut de chocolate de mercadona",
+    "expected_ids": [
+      "10085"
+    ],
+    "category": "Panadería",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "flan de vainilla de mercadona",
+    "expected_ids": [
+      "10067"
+    ],
+    "category": "Leche y yogures",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "galletas de chocolate de mercadona",
+    "expected_ids": [
+      "10160"
+    ],
+    "category": "Dulces y snacks",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "guisantes congelados de mercadona",
+    "expected_ids": [
+      "10232"
+    ],
+    "category": "Congelados",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "gulas caseras de mercadona",
+    "expected_ids": [
+      "10106"
+    ],
+    "category": "Conservas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "harina de trigo de mercadona",
+    "expected_ids": [
+      "10031"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "jabón de manos de mercadona",
+    "expected_ids": [
+      "10184"
+    ],
+    "category": "Limpieza",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "kikos de mercadona",
+    "expected_ids": [
+      "10166"
+    ],
+    "category": "Dulces y snacks",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "lavavajillas concentrado de mercadona",
+    "expected_ids": [
+      "10187"
+    ],
+    "category": "Limpieza",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "leche desnatada de mercadona",
+    "expected_ids": [
+      "10043"
+    ],
+    "category": "Leche y yogures",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "leche entera de mercadona",
+    "expected_ids": [
+      "10037"
+    ],
+    "category": "Leche y yogures",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "leche semidesnatada de mercadona",
+    "expected_ids": [
+      "10040"
+    ],
+    "category": "Leche y yogures",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "lechuga iceberg de mercadona",
+    "expected_ids": [
+      "10214"
+    ],
+    "category": "Frutas y verduras",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "lejía perfumada de mercadona",
+    "expected_ids": [
+      "10175"
+    ],
+    "category": "Limpieza",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "limones de mercadona",
+    "expected_ids": [
+      "10223"
+    ],
+    "category": "Frutas y verduras",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "limpiacristales de mercadona",
+    "expected_ids": [
+      "10178"
+    ],
+    "category": "Limpieza",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "limpiador multiusos de mercadona",
+    "expected_ids": [
+      "10202"
+    ],
+    "category": "Limpieza",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "magdalenas de mercadona",
+    "expected_ids": [
+      "10079"
+    ],
+    "category": "Panadería",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "maíz dulce de mercadona",
+    "expected_ids": [
+      "10121"
+    ],
+    "category": "Conservas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "mantequilla de mercadona",
+    "expected_ids": [
+      "10058"
+    ],
+    "category": "Leche y yogures",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "manzana golden de mercadona",
+    "expected_ids": [
+      "10208"
+    ],
+    "category": "Frutas y verduras",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "mayonesa de mercadona",
+    "expected_ids": [
+      "10019"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "merluza en filetes de mercadona",
+    "expected_ids": [
+      "10235"
+    ],
+    "category": "Congelados",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "mermelada de fresa de mercadona",
+    "expected_ids": [
+      "10097"
+    ],
+    "category": "Cereales y desayuno",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "miel de mercadona",
+    "expected_ids": [
+      "10100"
+    ],
+    "category": "Cereales y desayuno",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "mostaza de mercadona",
+    "expected_ids": [
+      "10022"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "queso mozzarella de mercadona",
+    "expected_ids": [
+      "10055"
+    ],
+    "category": "Leche y yogures",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "nata para cocinar de mercadona",
+    "expected_ids": [
+      "10061"
+    ],
+    "category": "Leche y yogures",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "pan de molde blanco de mercadona",
+    "expected_ids": [
+      "10076"
+    ],
+    "category": "Panadería",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "pan de molde integral de mercadona",
+    "expected_ids": [
+      "10070"
+    ],
+    "category": "Panadería",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "papel higiénico de mercadona",
+    "expected_ids": [
+      "10190"
+    ],
+    "category": "Limpieza",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "patatas de mercadona",
+    "expected_ids": [
+      "10217"
+    ],
+    "category": "Frutas y verduras",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "patatas fritas de mercadona",
+    "expected_ids": [
+      "10151"
+    ],
+    "category": "Dulces y snacks",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "patatas prefritas congeladas de mercadona",
+    "expected_ids": [
+      "10241"
+    ],
+    "category": "Congelados",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "pizza cuatro quesos de mercadona",
+    "expected_ids": [
+      "10238"
+    ],
+    "category": "Congelados",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "plátano de canarias de mercadona",
+    "expected_ids": [
+      "10205"
+    ],
+    "category": "Frutas y verduras",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "queso curado semicurado de mercadona",
+    "expected_ids": [
+      "10052"
+    ],
+    "category": "Leche y yogures",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "refresco de cola de mercadona",
+    "expected_ids": [
+      "10139"
+    ],
+    "category": "Bebidas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "rollo de cocina de mercadona",
+    "expected_ids": [
+      "10193"
+    ],
+    "category": "Limpieza",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "sal marina fina de mercadona",
+    "expected_ids": [
+      "10025"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "salsa de soja de mercadona",
+    "expected_ids": [
+      "10016"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "sardinas en aceite de oliva de mercadona",
+    "expected_ids": [
+      "10118"
+    ],
+    "category": "Conservas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "suavizante concentrado de mercadona",
+    "expected_ids": [
+      "10181"
+    ],
+    "category": "Limpieza",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "tomate pera de mercadona",
+    "expected_ids": [
+      "10211"
+    ],
+    "category": "Frutas y verduras",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "tomate triturado de mercadona",
+    "expected_ids": [
+      "10109"
+    ],
+    "category": "Conservas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "tónica de mercadona",
+    "expected_ids": [
+      "10148"
+    ],
+    "category": "Bebidas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "vinagre de vino blanco de mercadona",
+    "expected_ids": [
+      "10013"
+    ],
+    "category": "Aceites, especias y salsas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "vino tinto d.o. de mercadona",
+    "expected_ids": [
+      "10145"
+    ],
+    "category": "Bebidas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "yogur de fresa de mercadona",
+    "expected_ids": [
+      "10049"
+    ],
+    "category": "Leche y yogures",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "yogur natural de mercadona",
+    "expected_ids": [
+      "10046"
+    ],
+    "category": "Leche y yogures",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "zanahoria de mercadona",
+    "expected_ids": [
+      "10220"
+    ],
+    "category": "Frutas y verduras",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "zumo de manzana de mercadona",
+    "expected_ids": [
+      "10136"
+    ],
+    "category": "Bebidas",
+    "note": "filtra por cadena"
+  },
+  {
+    "query": "zumo de naranja 100% de mercadona",
+    "expected_ids": [
+      "10133"
+    ],
+    "category": "Bebidas",
+    "note": "filtra por cadena"
+  }
+]

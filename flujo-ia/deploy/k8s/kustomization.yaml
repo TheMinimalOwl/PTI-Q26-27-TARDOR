@@ -1,0 +1,7 @@
+resources:
+  - namespace.yaml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+  # secrets.yaml no se aplica: el secret se crea en la maquina con la clave
+  # real (kubectl create secret generic ...).

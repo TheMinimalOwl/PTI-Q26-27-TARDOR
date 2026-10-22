@@ -1,0 +1,250 @@
+key,cadena,pid,nombre,total,unit_price,unit
+aceite-girasol-1l,alcampo,10012,Aceite de girasol Alcampo,2.34,2.400,l
+aceite-girasol-1l,carrefour,10011,Aceite de girasol Carrefour,2.21,2.400,l
+aceite-girasol-1l,mercadona,10010,Aceite de girasol Hacendado,2.44,2.400,l
+aceite-oliva-suave-1l,alcampo,10009,Aceite de oliva suave Alcampo,6.96,7.200,l
+aceite-oliva-suave-1l,carrefour,10008,Aceite de oliva suave Carrefour,6.76,7.200,l
+aceite-oliva-suave-1l,mercadona,10007,Aceite de oliva suave Hacendado,7.24,7.200,l
+aceite-oliva-ve-05l,alcampo,10006,Aceite de oliva virgen extra Alcampo,6.55,13.600,l
+aceite-oliva-ve-05l,carrefour,10005,Aceite de oliva virgen extra Carrefour,6.36,13.600,l
+aceite-oliva-ve-05l,mercadona,10004,Aceite de oliva virgen extra Hacendado,6.67,13.600,l
+aceite-oliva-ve-1l,alcampo,10003,Aceite de oliva virgen extra. Alcampo,12.30,12.500,l
+aceite-oliva-ve-1l,carrefour,10002,Aceite oliva virgen extra Carrefour,11.70,12.500,l
+aceite-oliva-ve-1l,mercadona,10001,Aceite de oliva virgen extra Hacendado,12.52,12.500,l
+aceitunas-verdes-250g,alcampo,10126,Aceitunas verdes rellenas Alcampo,2.76,11.600,kg
+aceitunas-verdes-250g,carrefour,10125,Aceitunas verdes rellenas Carrefour,2.70,11.600,kg
+aceitunas-verdes-250g,mercadona,10124,Aceitunas verdes rellenas Hacendado,2.94,11.600,kg
+agua-gas-15l,alcampo,10132,Agua con gas Alcampo,0.71,0.500,l
+agua-gas-15l,carrefour,10131,Agua con gas Carrefour,0.71,0.500,l
+agua-gas-15l,mercadona,10130,Agua con gas Hacendado,0.74,0.500,l
+agua-mineral-15l,alcampo,10129,Agua mineral Alcampo,0.44,0.300,l
+agua-mineral-15l,carrefour,10128,Agua mineral Carrefour,0.42,0.300,l
+agua-mineral-15l,mercadona,10127,Agua mineral Hacendado,0.45,0.300,l
+aguacates-4ud,alcampo,10228,Aguacates Alcampo,3.43,0.875,ud
+aguacates-4ud,carrefour,10227,Aguacates Carrefour,3.26,0.875,ud
+aguacates-4ud,mercadona,10226,Aguacates Hacendado,3.48,0.875,ud
+alubias-cocidas-570g,alcampo,10114,Alubias cocidas Alcampo,1.32,2.368,kg
+alubias-cocidas-570g,carrefour,10113,Alubias cocidas Carrefour,1.28,2.368,kg
+alubias-cocidas-570g,mercadona,10112,Alubias cocidas Hacendado,1.33,2.368,kg
+atun-aceite-3ud,alcampo,10105,Atún claro en aceite de oliva Alcampo,2.25,0.767,ud
+atun-aceite-3ud,carrefour,10104,Atún claro en aceite de oliva Carrefour,2.13,0.767,ud
+atun-aceite-3ud,mercadona,10103,Atún claro en aceite de oliva Hacendado,2.32,0.767,ud
+atun-salmuera-3ud,alcampo,10117,Atún en salmuera Alcampo,2.57,0.867,ud
+atun-salmuera-3ud,carrefour,10116,Atún en salmuera Carrefour,2.47,0.867,ud
+atun-salmuera-3ud,mercadona,10115,Atún en salmuera Hacendado,2.61,0.867,ud
+azucar-blanco-1kg,alcampo,10030,Azúcar blanco Alcampo,1.07,1.100,kg
+azucar-blanco-1kg,carrefour,10029,Azúcar blanco Carrefour,1.01,1.100,kg
+azucar-blanco-1kg,mercadona,10028,Azúcar blanco Hacendado,1.11,1.100,kg
+barra-pan-rustica-250g,alcampo,10075,Barra de pan rústica Alcampo,1.16,4.800,kg
+barra-pan-rustica-250g,carrefour,10074,Barra de pan rústica Carrefour,1.14,4.800,kg
+barra-pan-rustica-250g,mercadona,10073,Barra de pan rústica Hacendado,1.22,4.800,kg
+batido-chocolate-1l,alcampo,10066,Batido de chocolate Alcampo,1.82,1.900,l
+batido-chocolate-1l,carrefour,10065,Batido chocolate Carrefour,1.80,1.900,l
+batido-chocolate-1l,mercadona,10064,Batido de chocolate Hacendado,1.88,1.900,l
+bayeta-microfibra-5ud,alcampo,10198,Bayeta de microfibra Alcampo,2.44,0.500,ud
+bayeta-microfibra-5ud,carrefour,10197,Bayeta de microfibra Carrefour,2.33,0.500,ud
+bayeta-microfibra-5ud,mercadona,10196,Bayeta de microfibra Hacendado,2.48,0.500,ud
+bolsas-basura-20ud,alcampo,10201,Bolsas de basura Alcampo,1.37,0.0685,ud
+bolsas-basura-20ud,carrefour,10200,Bolsas de basura Carrefour,1.31,0.0655,ud
+bolsas-basura-20ud,mercadona,10199,Bolsas de basura Hacendado,1.38,0.0690,ud
+cacahuetes-200g,alcampo,10156,Cacahuetes salados Alcampo,1.43,7.500,kg
+cacahuetes-200g,carrefour,10155,Cacahuetes salados Carrefour,1.39,7.500,kg
+cacahuetes-200g,mercadona,10154,Cacahuetes salados Hacendado,1.52,7.500,kg
+cafe-molido-250g,alcampo,10036,Café molido natural Alcampo,3.44,14.00,kg
+cafe-molido-250g,carrefour,10035,Café molido natural Carrefour,3.28,14.00,kg
+cafe-molido-250g,mercadona,10034,Café molido natural Hacendado,3.47,14.00,kg
+cebollas-1kg,alcampo,10231,Cebollas Alcampo,1.46,1.500,kg
+cebollas-1kg,carrefour,10230,Cebollas Carrefour,1.43,1.500,kg
+cebollas-1kg,mercadona,10229,Cebollas Hacendado,1.48,1.500,kg
+cereales-chocolate-500g,alcampo,10093,Cereales con chocolate Alcampo,2.22,4.60,kg
+cereales-chocolate-500g,carrefour,10092,Cereales con chocolate Carrefour,2.19,4.60,kg
+cereales-chocolate-500g,mercadona,10091,Cereales con chocolate Hacendado,2.28,4.60,kg
+cerveza-rubia-33cl,alcampo,10144,Cerveza rubia Alcampo,0.88,2.727,l
+cerveza-rubia-33cl,carrefour,10143,Cerveza rubia Carrefour,0.85,2.727,l
+cerveza-rubia-33cl,mercadona,10142,Cerveza rubia Hacendado,0.89,2.727,l
+chicle-menta-1ud,alcampo,10171,Chicle de menta Alcampo,,,
+chicle-menta-1ud,carrefour,10170,Chicle menta Carrefour,,,
+chicle-menta-1ud,mercadona,10169,Chicle de menta Hacendado,,,
+chocolate-leche-125g,alcampo,10159,Chocolate con leche Alcampo,1.56,12.80,kg
+chocolate-leche-125g,carrefour,10158,Chocolate con leche Carrefour,1.49,12.80,kg
+chocolate-leche-125g,mercadona,10157,Chocolate con leche Hacendado,1.60,12.80,kg
+chucherias-150g,alcampo,10165,Chucherías surtidas Alcampo,1.76,12.000,kg
+chucherias-150g,carrefour,10164,Chucherías surtidas Carrefour,1.67,12.000,kg
+chucherias-150g,mercadona,10163,Chucherías surtidas Hacendado,1.81,12.000,kg
+comida-gatos-15kg,alcampo,10249,Comida para gatos Alcampo,4.05,2.800,kg
+comida-gatos-15kg,carrefour,10248,Comida para gatos Carrefour,3.89,2.800,kg
+comida-gatos-15kg,mercadona,10247,Comida para gatos Hacendado,4.14,2.800,kg
+comida-perros-3kg,alcampo,10246,Comida para perros Alcampo,6.30,2.167,kg
+comida-perros-3kg,carrefour,10245,Comida para perros Carrefour,6.08,2.167,kg
+comida-perros-3kg,mercadona,10244,Comida para perros Hacendado,6.45,2.167,kg
+copos-avena-500g,alcampo,10090,Copos de avena Alcampo,1.56,3.200,kg
+copos-avena-500g,carrefour,10089,Copos de avena Carrefour,1.50,3.200,kg
+copos-avena-500g,mercadona,10088,Copos de avena Hacendado,1.58,3.200,kg
+corn-flakes-500g,alcampo,10096,Corn flakes Alcampo,2.01,4.200,kg
+corn-flakes-500g,carrefour,10095,Corn flakes Carrefour,1.96,4.200,kg
+corn-flakes-500g,mercadona,10094,Corn flakes Hacendado,2.12,4.200,kg
+croissant-mantequilla-55g,alcampo,10084,Croissant de mantequilla Alcampo,0.35,6.36,kg
+croissant-mantequilla-55g,carrefour,10083,Croissant de mantequilla Carrefour,0.33,6.36,kg
+croissant-mantequilla-55g,mercadona,10082,Croissant de mantequilla Hacendado,0.35,6.36,kg
+detergente-liquido-40lav,alcampo,10174,Detergente líquido Alcampo,9.05,0.2262,lavado
+detergente-liquido-40lav,carrefour,10173,Detergente líquido Carrefour,8.81,0.2202,lavado
+detergente-liquido-40lav,mercadona,10172,Detergente líquido Hacendado,9.36,0.2340,lavado
+donut-chocolate-1ud,alcampo,10087,Donut de chocolate Alcampo,0.43,0.450,ud
+donut-chocolate-1ud,carrefour,10086,Donut chocolate Carrefour,0.42,0.450,ud
+donut-chocolate-1ud,mercadona,10085,Donut de chocolate Hacendado,0.44,0.450,ud
+flan-vainilla-4ud,alcampo,10069,Flan de vainilla Alcampo,1.74,0.450,ud
+flan-vainilla-4ud,carrefour,10068,Flan de vainilla Carrefour,1.66,0.450,ud
+flan-vainilla-4ud,mercadona,10067,Flan de vainilla Hacendado,1.82,0.450,ud
+galletas-chocolate-300g,alcampo,10162,Galletas de chocolate Alcampo,1.16,4.000,kg
+galletas-chocolate-300g,carrefour,10161,Galletas de chocolate Carrefour,1.13,4.000,kg
+galletas-chocolate-300g,mercadona,10160,Galletas de chocolate Hacendado,1.20,4.000,kg
+guisantes-1kg,alcampo,10234,Guisantes congelados Alcampo,2.53,2.600,kg
+guisantes-1kg,carrefour,10233,Guisantes congelados Carrefour,2.45,2.600,kg
+guisantes-1kg,mercadona,10232,Guisantes congelados Hacendado,2.56,2.600,kg
+gulas-caseras-400g,alcampo,10108,Gulas caseras Alcampo,3.36,8.750,kg
+gulas-caseras-400g,carrefour,10107,Gulas caseras Carrefour,3.25,8.750,kg
+gulas-caseras-400g,mercadona,10106,Gulas caseras Hacendado,3.52,8.750,kg
+harina-trigo-1kg,alcampo,10033,Harina de trigo Alcampo,1.00,1.050,kg
+harina-trigo-1kg,carrefour,10032,Harina de trigo Carrefour,0.99,1.050,kg
+harina-trigo-1kg,mercadona,10031,Harina de trigo Hacendado,1.04,1.050,kg
+jabon-manos-500ml,alcampo,10186,Jabón de manos Alcampo,2.28,4.800,l
+jabon-manos-500ml,carrefour,10185,Jabón de manos Carrefour,2.26,4.800,l
+jabon-manos-500ml,mercadona,10184,Jabón de manos Hacendado,2.41,4.800,l
+kikos-70g,alcampo,10168,Kikos Alcampo,1.08,15.4286,kg
+kikos-70g,carrefour,10167,Kikos Carrefour,1.04,14.8571,kg
+kikos-70g,mercadona,10166,Kikos Hacendado,1.10,15.7143,kg
+lavavajillas-750ml,alcampo,10189,Lavavajillas concentrado Alcampo,2.68,3.733,l
+lavavajillas-750ml,carrefour,10188,Lavavajillas concentrado Carrefour,2.65,3.733,l
+lavavajillas-750ml,mercadona,10187,Lavavajillas concentrado Hacendado,2.83,3.733,l
+leche-desnatada-1l,alcampo,10045,Leche desnatada Alcampo,1.06,1.100,l
+leche-desnatada-1l,carrefour,10044,Leche desnatada Carrefour,1.01,1.100,l
+leche-desnatada-1l,mercadona,10043,Leche desnatada Hacendado,1.09,1.100,l
+leche-entera-1l,alcampo,10039,Leche entera Alcampo,1.11,1.150,l
+leche-entera-1l,carrefour,10038,Leche entera Carrefour,1.07,1.150,l
+leche-entera-1l,mercadona,10037,Leche entera Hacendado,1.13,1.150,l
+leche-semidesnatada-1l,alcampo,10042,Leche semidesnatada Alcampo,1.06,1.100,l
+leche-semidesnatada-1l,carrefour,10041,Leche semidesnatada Carrefour,1.05,1.100,l
+leche-semidesnatada-1l,mercadona,10040,Leche semidesnatada Hacendado,1.08,1.100,l
+lechuga-iceberg-1ud,alcampo,10216,Lechuga iceberg Alcampo,1.14,1.200,ud
+lechuga-iceberg-1ud,carrefour,10215,Lechuga iceberg Carrefour,1.13,1.200,ud
+lechuga-iceberg-1ud,mercadona,10214,Lechuga iceberg Hacendado,1.18,1.200,ud
+lejia-2l,alcampo,10177,Lejía perfumada Alcampo,2.06,1.050,l
+lejia-2l,carrefour,10176,Lejía perfumada Carrefour,1.96,1.050,l
+lejia-2l,mercadona,10175,Lejía perfumada Hacendado,2.11,1.050,l
+limones-1kg,alcampo,10225,Limones Alcampo,1.84,1.900,kg
+limones-1kg,carrefour,10224,Limones Carrefour,1.78,1.900,kg
+limones-1kg,mercadona,10223,Limones Hacendado,1.87,1.900,kg
+limpiacristales-750ml,alcampo,10180,Limpiacristales Alcampo,1.58,2.133,l
+limpiacristales-750ml,carrefour,10179,Limpiacristales Carrefour,1.49,2.133,l
+limpiacristales-750ml,mercadona,10178,Limpiacristales Hacendado,1.60,2.133,l
+limpiador-multiusos-1l,alcampo,10204,Limpiador multiusos Alcampo,1.75,1.800,l
+limpiador-multiusos-1l,carrefour,10203,Limpiador multiusos Carrefour,1.66,1.800,l
+limpiador-multiusos-1l,mercadona,10202,Limpiador multiusos Hacendado,1.82,1.800,l
+magdalenas-12ud,alcampo,10081,Magdalenas Alcampo,1.46,0.125,ud
+magdalenas-12ud,carrefour,10080,Magdalenas Carrefour,1.39,0.125,ud
+magdalenas-12ud,mercadona,10079,Magdalenas Hacendado,1.52,0.125,ud
+maiz-duce-300g,alcampo,10123,Maíz dulce Alcampo,1.18,4.000,kg
+maiz-duce-300g,carrefour,10122,Maíz dulce Carrefour,1.15,4.000,kg
+maiz-duce-300g,mercadona,10121,Maíz dulce Hacendado,1.19,4.000,kg
+mantequilla-250g,alcampo,10060,Mantequilla Alcampo,2.19,9.200,kg
+mantequilla-250g,carrefour,10059,Mantequilla Carrefour,2.20,9.200,kg
+mantequilla-250g,mercadona,10058,Mantequilla Hacendado,2.30,9.200,kg
+manzana-golden-1kg,alcampo,10210,Manzana golden Alcampo,2.34,2.400,kg
+manzana-golden-1kg,carrefour,10209,Manzana golden Carrefour,2.27,2.400,kg
+manzana-golden-1kg,mercadona,10208,Manzana golden Hacendado,2.44,2.400,kg
+mayonesa-04l,alcampo,10021,Mayonesa Alcampo,4.11,10.750,l
+mayonesa-04l,carrefour,10020,Mayonesa Carrefour,3.99,10.750,l
+mayonesa-04l,mercadona,10019,Mayonesa Hacendado,4.26,10.750,l
+merluza-filetes-400g,alcampo,10237,Merluza en filetes Alcampo,5.25,13.750,kg
+merluza-filetes-400g,carrefour,10236,Merluza en filetes Carrefour,5.26,13.750,kg
+merluza-filetes-400g,mercadona,10235,Merluza en filetes Hacendado,5.51,13.750,kg
+mermelada-fresa-300g,alcampo,10099,Mermelada de fresa Alcampo,2.31,8.000,kg
+mermelada-fresa-300g,carrefour,10098,Mermelada de fresa Carrefour,2.28,8.000,kg
+mermelada-fresa-300g,mercadona,10097,Mermelada de fresa Hacendado,2.42,8.000,kg
+miel-1kg,alcampo,10102,Miel Alcampo,6.32,6.500,kg
+miel-1kg,carrefour,10101,Miel Carrefour,6.18,6.500,kg
+miel-1kg,mercadona,10100,Miel Hacendado,6.58,6.500,kg
+mostaza-025l,alcampo,10024,Mostaza Alcampo,1.81,7.600,l
+mostaza-025l,carrefour,10023,Mostaza Carrefour,1.80,7.600,l
+mostaza-025l,mercadona,10022,Mostaza Hacendado,1.94,7.600,l
+mozzarella-125g,alcampo,10057,Queso mozzarella Alcampo,1.53,12.80,kg
+mozzarella-125g,carrefour,10056,Queso mozzarella Carrefour,1.49,12.80,kg
+mozzarella-125g,mercadona,10055,Queso mozzarella Hacendado,1.63,12.80,kg
+nata-cocinar-500ml,alcampo,10063,Nata para cocinar Alcampo,1.66,3.400,l
+nata-cocinar-500ml,carrefour,10062,Nata para cocinar Carrefour,1.57,3.400,l
+nata-cocinar-500ml,mercadona,10061,Nata para cocinar Hacendado,1.69,3.400,l
+pan-molde-blanco-600g,alcampo,10078,Pan de molde blanco Alcampo,1.77,3.000,kg
+pan-molde-blanco-600g,carrefour,10077,Pan de molde blanco Carrefour,1.68,3.000,kg
+pan-molde-blanco-600g,mercadona,10076,Pan de molde blanco Hacendado,1.78,3.000,kg
+pan-molde-integral-600g,alcampo,10072,Pan de molde integral Alcampo,2.33,4.000,kg
+pan-molde-integral-600g,carrefour,10071,Pan de molde integral Carrefour,2.22,4.000,kg
+pan-molde-integral-600g,mercadona,10070,Pan de molde integral Hacendado,2.37,4.000,kg
+papel-higienico-12ud,alcampo,10192,Papel higiénico Alcampo,3.09,0.267,ud
+papel-higienico-12ud,carrefour,10191,Papel higiénico Carrefour,3.00,0.267,ud
+papel-higienico-12ud,mercadona,10190,Papel higiénico Hacendado,3.14,0.267,ud
+patatas-25kg,alcampo,10219,Patatas Alcampo,1.91,0.800,kg
+patatas-25kg,carrefour,10218,Patatas Carrefour,1.86,0.800,kg
+patatas-25kg,mercadona,10217,Patatas Hacendado,2.03,0.800,kg
+patatas-fritas-150g,alcampo,10153,Patatas fritas Alcampo,1.66,11.333,kg
+patatas-fritas-150g,carrefour,10152,Patatas fritas Carrefour,1.60,11.333,kg
+patatas-fritas-150g,mercadona,10151,Patatas fritas Hacendado,1.68,11.333,kg
+patatas-prefritas-1kg,alcampo,10243,Patatas prefritas congeladas Alcampo,3.11,3.200,kg
+patatas-prefritas-1kg,carrefour,10242,Patatas prefritas congeladas Carrefour,3.02,3.200,kg
+patatas-prefritas-1kg,mercadona,10241,Patatas prefritas congeladas Hacendado,3.18,3.200,kg
+pizza-cuatro-quesos-350g,alcampo,10240,Pizza cuatro quesos Alcampo,2.87,8.286,kg
+pizza-cuatro-quesos-350g,carrefour,10239,Pizza cuatro quesos Carrefour,2.68,8.286,kg
+pizza-cuatro-quesos-350g,mercadona,10238,Pizza cuatro quesos Hacendado,2.93,8.286,kg
+platano-canarias-1kg,alcampo,10207,Plátano de Canarias Alcampo,2.06,2.100,kg
+platano-canarias-1kg,carrefour,10206,Plátano de Canarias Carrefour,2.00,2.100,kg
+platano-canarias-1kg,mercadona,10205,Plátano de Canarias Hacendado,2.09,2.100,kg
+queso-curado-250g,alcampo,10054,Queso curado semicurado Alcampo,4.39,18.000,kg
+queso-curado-250g,carrefour,10053,Queso curado semicurado Carrefour,4.19,18.000,kg
+queso-curado-250g,mercadona,10052,Queso curado semicurado Hacendado,4.46,18.000,kg
+refresco-cola-2l,alcampo,10141,Refresco de cola Alcampo,2.05,1.050,l
+refresco-cola-2l,carrefour,10140,Refresco de cola Carrefour,1.95,1.050,l
+refresco-cola-2l,mercadona,10139,Refresco de cola Hacendado,2.10,1.050,l
+rollo-cocina-2ud,alcampo,10195,Rollo de cocina Alcampo,1.88,0.950,ud
+rollo-cocina-2ud,carrefour,10194,Rollo de cocina Carrefour,1.82,0.950,ud
+rollo-cocina-2ud,mercadona,10193,Rollo de cocina Hacendado,1.91,0.950,ud
+sal-marina-1kg,alcampo,10027,Sal marina fina Alcampo,0.81,0.850,kg
+sal-marina-1kg,carrefour,10026,Sal marina fina Carrefour,0.81,0.850,kg
+sal-marina-1kg,mercadona,10025,Sal marina fina Hacendado,0.83,0.850,kg
+salsa-soja-025l,alcampo,10018,Salsa de soja Alcampo,2.07,8.400,l
+salsa-soja-025l,carrefour,10017,Salsa de soja Carrefour,1.96,8.400,l
+salsa-soja-025l,mercadona,10016,Salsa de soja Hacendado,2.07,8.400,l
+sardinas-aceite-120g,alcampo,10120,Sardinas en aceite de oliva Alcampo,1.73,15.000,kg
+sardinas-aceite-120g,carrefour,10119,Sardinas en aceite de oliva Carrefour,1.70,15.000,kg
+sardinas-aceite-120g,mercadona,10118,Sardinas en aceite de oliva Hacendado,1.80,15.000,kg
+suavizante-1l,alcampo,10183,Suavizante concentrado Alcampo,3.10,3.200,l
+suavizante-1l,carrefour,10182,Suavizante concentrado Carrefour,3.04,3.200,l
+suavizante-1l,mercadona,10181,Suavizante concentrado Hacendado,3.16,3.200,l
+tomate-pera-1kg,alcampo,10213,Tomate pera Alcampo,2.13,2.200,kg
+tomate-pera-1kg,carrefour,10212,Tomate pera Carrefour,2.07,2.200,kg
+tomate-pera-1kg,mercadona,10211,Tomate pera Hacendado,2.21,2.200,kg
+tomate-triturado-400g,alcampo,10111,Tomate triturado Alcampo,1.38,3.500,kg
+tomate-triturado-400g,carrefour,10110,Tomate triturado Carrefour,1.33,3.500,kg
+tomate-triturado-400g,mercadona,10109,Tomate triturado Hacendado,1.40,3.500,kg
+tonica-1l,alcampo,10150,Tónica Alcampo,1.26,1.300,l
+tonica-1l,carrefour,10149,Tónica Carrefour,1.23,1.300,l
+tonica-1l,mercadona,10148,Tónica Hacendado,1.28,1.300,l
+vinagre-vino-1l,alcampo,10015,Vinagre de vino blanco Alcampo,1.55,1.600,l
+vinagre-vino-1l,carrefour,10014,Vinagre de vino blanco Carrefour,1.48,1.600,l
+vinagre-vino-1l,mercadona,10013,Vinagre de vino blanco Hacendado,1.61,1.600,l
+vino-tinto-1l,alcampo,10147,Vino tinto D.O. Alcampo,6.24,6.500,l
+vino-tinto-1l,carrefour,10146,Vino tinto D.O. Carrefour,6.06,6.500,l
+vino-tinto-1l,mercadona,10145,Vino tinto D.O. Hacendado,6.38,6.500,l
+yogur-fresa-125g,alcampo,10051,Yogur de fresa Alcampo,0.62,5.20,kg
+yogur-fresa-125g,carrefour,10050,Yogur de fresa Carrefour,0.60,5.20,kg
+yogur-fresa-125g,mercadona,10049,Yogur de fresa Hacendado,0.65,5.20,kg
+yogur-natural-500g,alcampo,10048,Yogur natural Alcampo,2.15,4.400,kg
+yogur-natural-500g,carrefour,10047,Yogur natural Carrefour,2.05,4.400,kg
+yogur-natural-500g,mercadona,10046,Yogur natural Hacendado,2.21,4.400,kg
+zanahoria-1kg,alcampo,10222,Zanahoria Alcampo,1.65,1.700,kg
+zanahoria-1kg,carrefour,10221,Zanahoria Carrefour,1.61,1.700,kg
+zanahoria-1kg,mercadona,10220,Zanahoria Hacendado,1.69,1.700,kg
+zumo-manzana-1l,alcampo,10138,Zumo de manzana Alcampo,1.34,1.400,l
+zumo-manzana-1l,carrefour,10137,Zumo de manzana Carrefour,1.29,1.400,l
+zumo-manzana-1l,mercadona,10136,Zumo de manzana Hacendado,1.38,1.400,l
+zumo-naranja-1l,alcampo,10135,Zumo de naranja 100% Alcampo,1.81,1.900,l
+zumo-naranja-1l,carrefour,10134,Zumo de naranja 100% Carrefour,1.78,1.900,l
+zumo-naranja-1l,mercadona,10133,Zumo de naranja 100% Hacendado,1.91,1.900,l
