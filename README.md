@@ -136,23 +136,6 @@ además expone un servicio HTTP (`/health`, `/search`, `/ask`, `/ask/stream`, `/
 lo que consumirán la API y la app. El detalle de cada parte está en
 [`flujo-entrada/docs/`](flujo-entrada/docs/) y [`flujo-ia/docs/`](flujo-ia/docs/).
 
-## Riesgos conocidos
-
-- **El mantenimiento del scraping.** Las webs de los supermercados cambian su estructura y
-  tienen sus propias condiciones de uso: cada scraper necesitará mantenimiento periódico. El
-  aislamiento por contenedor limita el impacto de cada cambio. Carrefour está además bloqueado
-  por el challenge de JavaScript de Cloudflare.
-- **La equivalencia entre productos.** Comparar solo es útil si se identifica correctamente el
-  mismo producto en distintas cadenas y se calcula bien el precio por unidad. Es la parte más
-  delicada del sistema.
-- **La frescura de los datos.** La ingesta es periódica (un CronJob nocturno), no en tiempo
-  real: en la práctica será casi tiempo real y dependerá de la frecuencia elegida.
-- **La latencia del RAG.** El objetivo de menos de 100 ms es realista para la consulta con
-  caché, pero no para una respuesta generada por un LLM: ahí conviene *streaming*.
-- **El coste y la fiabilidad del LLM.** Cada pregunta tiene un coste y el modelo debe
-  responder solo con los datos recuperados; los guardrails y el anclaje al contexto son
-  esenciales para no inventar.
-
 ## Ramas
 
 | Rama | Contenido |
