@@ -1,10 +1,10 @@
 """Writer: NATS `scraper.*.clean` → PostgreSQL.
 
-Consumidor durable `api-writer` en modo pull sobre el stream SCRAPERS. Cada mensaje se
-confirma (ack) solo después del commit; si falla la BD se pide reentrega (nak). Como la
-carga es idempotente, una reentrega no duplica datos.
+Consumidor durable `api-writer` en mode pull sobre el stream SCRAPERS. Cada missatge es
+confirma (ack) només després del commit; si falla la BD, se'n demana el reenviament (nak).
+Com que la càrrega és idempotent, un reenviament no duplica dades.
 
-Ejecutar:  python -m app.writer
+Executar:  python -m app.writer
 """
 import asyncio
 import logging
@@ -47,7 +47,7 @@ async def run() -> None:
             try:
                 stats = await asyncio.to_thread(_store, msg.subject, msg.data)
             except ValueError as exc:
-                # Mensaje mal formado: reintentar no lo arreglará.
+                # Missatge mal format: reintentar-ho no ho arreglarà.
                 log.error("descartado %s: %s", msg.subject, exc)
                 await msg.term()
                 continue

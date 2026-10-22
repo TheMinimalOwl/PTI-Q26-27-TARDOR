@@ -1,4 +1,4 @@
-"""Configuración por variables de entorno: se reconfigura sin recompilar."""
+"""Configuració per variables d'entorn: es reconfigura sense recompilar."""
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,15 +9,15 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
     nats_url: str = "nats://localhost:4222"
 
-    # Segundos que vive una respuesta en Redis. Los precios cambian como mucho una vez
-    # al día (CronJob nocturno), y el writer invalida la caché al cargar un lote.
+    # Segons que viu una resposta a Redis. Els preus canvien com a molt un cop
+    # al dia (CronJob nocturn), i el writer invalida la caché en carregar un lot.
     cache_ttl: int = 300
 
-    # Dimensión de los embeddings. Depende del modelo que elija el equipo de IA:
+    # Dimensió dels embeddings. Depèn del model que triï l'equip d'IA:
     # 384 (multilingual-e5-small, MiniLM) o 1536 (OpenAI text-embedding-3-small).
     embedding_dim: int = 384
 
-    # Crea extensiones y tablas al arrancar si no existen.
+    # Crea les extensions i les taules en arrencar si no existeixen.
     auto_create_schema: bool = True
 
 

@@ -1,8 +1,8 @@
-# Entorno local de la API: PostgreSQL (con pgvector) + Redis + API.
-#   docker compose up -d --build          → API en http://localhost:8000/docs
-#   docker compose exec api python -m app.seed   → carga datos de demo
-#   docker compose --profile ingesta up -d writer → writer conectado a NATS (NATS_URL)
-# Credenciales solo para desarrollo local; en el clúster van en un Secret.
+# Entorn local de l'API: PostgreSQL (amb pgvector) + Redis + API.
+#   docker compose up -d --build          → API a http://localhost:8000/docs
+#   docker compose exec api python -m app.seed   → carrega les dades de demo
+#   docker compose --profile ingesta up -d writer → writer connectat a NATS (NATS_URL)
+# Credencials només per a desenvolupament local; al clúster van en un Secret.
 services:
   db:
     image: pgvector/pgvector:pg16

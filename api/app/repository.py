@@ -1,4 +1,4 @@
-"""Consultas a la BD. Los routers no escriben SQL: solo llaman a estas funciones."""
+"""Consultes a la BD. Els routers no escriuen SQL: només criden aquestes funcions."""
 from datetime import date
 
 from sqlalchemy import Select, and_, func, select
@@ -9,7 +9,7 @@ from .schemas import ChainOut, PriceOut, ProductDetail, ProductSummary
 
 
 def _latest_prices() -> Select:
-    """Precio más reciente de cada producto (DISTINCT ON de PostgreSQL)."""
+    """Preu més recent de cada producte (DISTINCT ON de PostgreSQL)."""
     return (
         select(Price)
         .distinct(Price.product_id)
@@ -48,8 +48,8 @@ def _summary(product: Product, price: Price | None, store_code: str | None) -> d
 def search_products(
     session: Session, q: str, chain: str | None, limit: int, offset: int
 ) -> tuple[int, list[ProductSummary]]:
-    """Busca por nombre (sin distinguir mayúsculas ni acentos). Cada palabra de `q`
-    tiene que aparecer. Ordena por precio unitario: lo más barato primero."""
+    """Cerca per nom (sense distingir majúscules ni accents). Cada paraula de `q`
+    hi ha d'aparèixer. Ordena per preu unitari: el més barat primer."""
     latest = aliased(Price, _latest_prices().subquery())
 
     conditions = [

@@ -1,5 +1,5 @@
-# Consume scraper.*.clean del NATS de `messaging` y escribe en PostgreSQL.
-# 1 réplica basta: el consumidor durable `api-writer` guarda la posición en NATS.
+# Consumeix scraper.*.clean del NATS de `messaging` i escriu a PostgreSQL.
+# Amb 1 rèplica n'hi ha prou: el consumidor durable `api-writer` guarda la posició a NATS.
 apiVersion: apps/v1
 kind: Deployment
 metadata:

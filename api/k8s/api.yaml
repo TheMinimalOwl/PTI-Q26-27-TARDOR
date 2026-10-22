@@ -6,7 +6,7 @@ spec:
   selector: {app: api}
   ports: [{port: 80, targetPort: 8000}]
 ---
-# 2 réplicas: el Service reparte las peticiones entre ellas (balanceo de carga).
+# 2 rèpliques: el Service reparteix les peticions entre elles (balanceig de càrrega).
 apiVersion: apps/v1
 kind: Deployment
 metadata:

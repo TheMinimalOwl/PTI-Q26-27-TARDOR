@@ -1,11 +1,11 @@
-"""Esquemas de respuesta de la API (lo que ve la app). Generan el contrato OpenAPI."""
+"""Esquemes de resposta de l'API (el que veu l'app). Generen el contracte OpenAPI."""
 from datetime import date, datetime
 from decimal import Decimal
 from typing import Annotated
 
 from pydantic import BaseModel, ConfigDict, PlainSerializer
 
-# En BD los importes son Decimal; en JSON viajan como número (Pydantic los pasaría a string).
+# A la BD els imports són Decimal; en JSON viatgen com a número (Pydantic els passaria a string).
 Money = Annotated[Decimal, PlainSerializer(float, return_type=float, when_used="json")]
 
 

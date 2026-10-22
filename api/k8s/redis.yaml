@@ -21,7 +21,7 @@ spec:
       containers:
         - name: redis
           image: redis:7.4-alpine
-          # Solo caché: sin persistencia y con expulsión LRU si se llena.
+          # Només caché: sense persistència i amb expulsió LRU si s'omple.
           args: ["--save", "", "--maxmemory", "128mb", "--maxmemory-policy", "allkeys-lru"]
           ports: [{containerPort: 6379}]
           resources:

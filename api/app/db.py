@@ -11,9 +11,9 @@ SessionLocal = sessionmaker(bind=engine, expire_on_commit=False)
 
 
 def init_db() -> None:
-    """Crea las extensiones y las tablas que falten (idempotente)."""
+    """Crea les extensions i les taules que faltin (idempotent)."""
     with engine.begin() as conn:
-        # Varias réplicas arrancan a la vez: solo una crea el esquema, el resto espera.
+        # Diverses rèpliques arrenquen alhora: només una crea l'esquema, la resta s'espera.
         conn.execute(text("SELECT pg_advisory_xact_lock(424242)"))
         conn.execute(text("CREATE EXTENSION IF NOT EXISTS vector"))
         conn.execute(text("CREATE EXTENSION IF NOT EXISTS unaccent"))

@@ -1,10 +1,10 @@
-"""Datos de DEMO para probar la API y la app sin depender de los scrapers.
+"""Dades de DEMO per provar l'API i l'app sense dependre dels scrapers.
 
-Reproduce los ejemplos de la presentación (cesta de 4 productos = 30,79 €) y un historial
-mensual del aceite de oliva virgen extra 1 L desde 2023. Los ids llevan el prefijo
-`demo-` para no chocar con los reales. Se puede ejecutar varias veces (upsert).
+Reprodueix els exemples de la presentació (cistella de 4 productes = 30,79 €) i un historial
+mensual de l'oli d'oliva verge extra 1 L des del 2023. Els ids porten el prefix
+`demo-` per no xocar amb els reals. Es pot executar diverses vegades (upsert).
 
-Ejecutar:  python -m app.seed
+Executar:  python -m app.seed
 """
 from datetime import date, datetime, timezone
 from decimal import Decimal
@@ -15,7 +15,7 @@ from .ingest import Batch, NormalizedItem, upsert_batch
 
 CHAINS = ["mercadona", "carrefour", "alcampo", "ahorramas"]
 
-# id, nombre, categoría, tamaño, unidad, precio total por cadena (mismo orden que CHAINS)
+# id, nom, categoria, mida, unitat, preu total per cadena (mateix ordre que CHAINS)
 CATALOG = [
     ("aceite-ove-1l", "Aceite de oliva virgen extra 1 L", "Aceite, especias y salsas", "1", "l",
      ["4.85", "4.99", "4.79", "4.95"]),
@@ -45,9 +45,9 @@ def _item(pid, name, cat, size, unit, total: Decimal) -> NormalizedItem:
 
 
 def _oil_history(current: Decimal) -> list[tuple[date, Decimal]]:
-    """Subida de 3,99 € a 9,90 € (ene 2023 → sep 2024, +148 %) y bajada hasta `current`."""
+    """Pujada de 3,99 € a 9,90 € (gen 2023 → set 2024, +148 %) i baixada fins a `current`."""
     points = []
-    for i in range(46):  # ene 2023 → oct 2026
+    for i in range(46):  # gen 2023 → oct 2026
         day = date(2023 + i // 12, i % 12 + 1, 15)
         if i <= 20:
             value = 3.99 + (9.90 - 3.99) * (i / 20) ** 1.3
@@ -64,11 +64,11 @@ def seed() -> None:
     today = datetime.now(timezone.utc).replace(hour=2, minute=0, second=0, microsecond=0)
     with SessionLocal() as session, session.begin():
         for c, chain in enumerate(CHAINS):
-            # Precio de hoy de todo el catálogo
+            # Preu d'avui de tot el catàleg
             items = [_item(pid, n, cat, s, u, Decimal(prices[c])) for pid, n, cat, s, u, prices in CATALOG]
             upsert_batch(session, Batch(chain=chain, ts=today, items=items))
 
-            # Historial del aceite 1 L (ligeramente distinto por cadena)
+            # Historial de l'oli 1 L (lleugerament diferent per cadena)
             pid, n, cat, s, u, prices = CATALOG[0]
             factor = Decimal(prices[c]) / Decimal(prices[0])
             for day, value in _oil_history(Decimal(prices[0]))[:-1]:

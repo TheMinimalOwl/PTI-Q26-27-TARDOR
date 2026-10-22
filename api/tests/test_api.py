@@ -1,5 +1,5 @@
-"""Pruebas de la API contra PostgreSQL y Redis reales (docker compose up -d db redis).
-Se saltan si la BD no está levantada."""
+"""Proves de l'API contra PostgreSQL i Redis reals (docker compose up -d db redis).
+Es salten si la BD no està en marxa."""
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import text
@@ -53,7 +53,8 @@ def test_detalle_e_historial(client):
     detail = client.get(f"/products/{first['id']}").json()
     assert detail["unit"] == "l"
     history = client.get(f"/products/{first['id']}/prices", params={"from": "2023-01-01"}).json()
-    assert len(history["points"]) == 46
+    # 45 mesos d'historial + el preu d'avui; si la demo s'ha carregat altres dies, n'hi ha un més per dia.
+    assert len(history["points"]) >= 46
     assert history["points"][0]["total"] == 3.99
 
 

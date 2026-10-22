@@ -1,6 +1,6 @@
-"""Exporta el contrato OpenAPI a api/openapi.json (no necesita BD ni Redis).
+"""Exporta el contracte OpenAPI a api/openapi.json (no necessita BD ni Redis).
 
-Ejecutar desde api/:  python scripts/export_openapi.py
+Executar des d'api/:  python scripts/export_openapi.py
 """
 import json
 import sys

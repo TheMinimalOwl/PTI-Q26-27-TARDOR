@@ -1,10 +1,10 @@
-"""Parseo de los mensajes del normalizador (no necesita BD)."""
+"""Parseig dels missatges del normalitzador (no necessita BD)."""
 import json
 from decimal import Decimal
 
 from app.ingest import parse_clean_line, parse_message
 
-# Ejemplo real de flujo-entrada/docs/03-contratos-datos.md
+# Exemple real de flujo-entrada/docs/03-contratos-datos.md
 LINE = ("4241 | Aceite de oliva 0,4º Hacendado | 17.25EUR total | 3.45EUR/l | 5.0l | "
         "Aceite, especias y salsas | https://tienda.mercadona.es/product/4241/x | ref=3.450EUR/L src=fuente")
 

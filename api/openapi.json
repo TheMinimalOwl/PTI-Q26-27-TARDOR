@@ -57,7 +57,7 @@
           "catálogo"
         ],
         "summary": "Search Products",
-        "description": "Productos de todas las cadenas cuyo nombre contiene todas las palabras de `q`,\nordenados por precio unitario (€/kg, €/l…) de menor a mayor.",
+        "description": "Productes de totes les cadenes el nom dels quals conté totes les paraules de `q`,\nordenats per preu unitari (€/kg, €/l…) de menor a major.",
         "operationId": "search_products_products_search_get",
         "parameters": [
           {
@@ -190,7 +190,7 @@
           "precios"
         ],
         "summary": "Get Price History",
-        "description": "Evolución del precio de un producto, del más antiguo al más reciente.",
+        "description": "Evolució del preu d'un producte, del més antic al més recent.",
         "operationId": "get_price_history_products__product_id__prices_get",
         "parameters": [
           {

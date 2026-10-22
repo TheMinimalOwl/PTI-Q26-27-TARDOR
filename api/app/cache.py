@@ -1,11 +1,11 @@
 """Caché L1 en Redis.
 
-Invalidación por versión: cada clave lleva delante la versión del catálogo
-(`catalog:version`). Cuando el writer carga un lote incrementa la versión y todas las
-claves antiguas dejan de usarse (y caducan solas por TTL). Así no hay que buscar ni
-borrar claves.
+Invalidació per versió: cada clau porta al davant la versió del catàleg
+(`catalog:version`). Quan el writer carrega un lot incrementa la versió i totes les
+claus antigues deixen de fer-se servir (i caduquen soles per TTL). Així no cal buscar ni
+esborrar claus.
 
-Si Redis no está disponible la API sigue funcionando contra PostgreSQL.
+Si Redis no està disponible, l'API continua funcionant contra PostgreSQL.
 """
 import json
 import logging

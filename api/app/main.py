@@ -1,7 +1,7 @@
-"""API del comparador de precios.
+"""API del comparador de preus.
 
-Flujo de consulta: app → API → Redis (L1) → PostgreSQL (L2).
-Documentación interactiva en /docs; contrato en /openapi.json.
+Flux de consulta: app → API → Redis (L1) → PostgreSQL (L2).
+Documentació interactiva a /docs; contracte a /openapi.json.
 """
 from contextlib import asynccontextmanager
 from datetime import date
@@ -30,11 +30,11 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
 )
-# La app móvil en desarrollo (Expo web) llama desde otro origen.
+# L'app mòbil en desenvolupament (Expo web) crida des d'un altre origen.
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET"], allow_headers=["*"])
 
 
-@app.get("/health", response_model=Health, tags=["sistema"])
+@app.get("/health", response_model=Health, tags=["sistema"])  # Comprova si la BD i Redis responen. Kubernetes el fa servir per saber si el contenidor està bé.
 def health(session: Session = Depends(get_session), cache: Cache = Depends(get_cache)):
     try:
         db_ok = session.execute(text("SELECT 1")).scalar() == 1
@@ -59,8 +59,8 @@ def search_products(
     session: Session = Depends(get_session),
     cache: Cache = Depends(get_cache),
 ):
-    """Productos de todas las cadenas cuyo nombre contiene todas las palabras de `q`,
-    ordenados por precio unitario (€/kg, €/l…) de menor a mayor."""
+    """Productes de totes les cadenes el nom dels quals conté totes les paraules de `q`,
+    ordenats per preu unitari (€/kg, €/l…) de menor a major."""
     q = " ".join(q.lower().split())
     key = f"search:{q}:{chain or ''}:{limit}:{offset}"
     if (cached := cache.get(key)) is not None:
@@ -111,7 +111,7 @@ def get_price_history(
     until: date | None = Query(None, alias="to", description="Hasta (YYYY-MM-DD)"),
     session: Session = Depends(get_session),
 ):
-    """Evolución del precio de un producto, del más antiguo al más reciente."""
+    """Evolució del preu d'un producte, del més antic al més recent."""
     product = repository.get_product(session, product_id)
     if product is None:
         raise HTTPException(status_code=404, detail="Producto no encontrado")

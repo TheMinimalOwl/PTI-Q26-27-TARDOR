@@ -1,11 +1,11 @@
-"""Carga de lotes limpios del normalizador en la BD.
+"""Càrrega a la BD dels lots nets del normalitzador.
 
-Entrada: mensajes de `scraper.<cadena>.clean` (ver flujo-entrada/docs/03-contratos-datos.md).
-Acepta los dos formatos del contrato:
-  - JSON estructurado `CleanBatch` (`items: NormalizedProduct[]`), el preferido;
-  - texto plano (`clean: "..."`), el que publica hoy el consumer, parseado por ` | `.
+Entrada: missatges de `scraper.<cadena>.clean` (vegeu flujo-entrada/docs/03-contratos-datos.md).
+Accepta els dos formats del contracte:
+  - JSON estructurat `CleanBatch` (`items: NormalizedProduct[]`), el preferit;
+  - text pla (`clean: "..."`), el que publica avui el consumer, parsejat per ` | `.
 
-La carga es idempotente (upsert): reprocesar un mensaje no duplica nada.
+La càrrega és idempotent (upsert): reprocessar un missatge no duplica res.
 """
 import json
 import logging
@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
 
 
 class NormalizedItem(BaseModel):
-    """Espejo tolerante de `NormalizedProduct` del normalizador."""
+    """Mirall tolerant de `NormalizedProduct` del normalitzador."""
     model_config = ConfigDict(extra="ignore")
 
     id: str
@@ -53,7 +53,7 @@ class Batch(BaseModel):
     items: list[NormalizedItem]
 
 
-# ---------------------------------------------------------------- formato texto
+# ---------------------------------------------------------------- format text
 
 _NUM = r"-?\d+(?:[.,]\d+)?"
 _TOTAL = re.compile(rf"^({_NUM})\s*EUR total$")
@@ -71,10 +71,10 @@ def _dec(text: str) -> Decimal | None:
 
 
 def parse_clean_line(line: str) -> NormalizedItem | None:
-    """`{pid} | {nombre} | {total}EUR total | {up}EUR/{unidad} | {size}{fmt} | {cat} | {url} | ref=... src=...`
+    """`{pid} | {nom} | {total}EUR total | {up}EUR/{unitat} | {size}{fmt} | {cat} | {url} | ref=... src=...`
 
-    Los 6 últimos campos son fijos, así que se cortan desde la derecha: un ` | ` dentro
-    del nombre no rompe el parseo. Devuelve None para cabeceras y líneas `ERROR`."""
+    Els 6 últims camps són fixos, així que es tallen des de la dreta: un ` | ` dins
+    del nom no trenca el parseig. Retorna None per a capçaleres i línies `ERROR`."""
     parts = [p.strip() for p in line.split(" | ")]
     if len(parts) < 8 or line.startswith("ERROR"):
         return None
@@ -102,7 +102,7 @@ def parse_clean_line(line: str) -> NormalizedItem | None:
 
 
 def parse_message(subject: str, data: bytes) -> Batch:
-    """Convierte un mensaje NATS en un lote. La cadena sale del subject."""
+    """Converteix un missatge NATS en un lot. La cadena surt del subject."""
     chain = subject.split(".")[1]
     payload = json.loads(data)
     ts = payload.get("ts") or datetime.now(timezone.utc).isoformat()
@@ -117,7 +117,7 @@ def parse_message(subject: str, data: bytes) -> Batch:
     return Batch(chain=chain, wh=wh, ts=ts, items=items)
 
 
-# ---------------------------------------------------------------- escritura
+# ---------------------------------------------------------------- escriptura
 
 CHAIN_NAMES = {"ahorramas": "Ahorramás"}
 
@@ -143,7 +143,7 @@ def _get_or_create_store(session: Session, chain_id: int, code: str) -> int:
 
 
 def upsert_batch(session: Session, batch: Batch) -> dict[str, int]:
-    """Inserta o actualiza productos y el precio del día. No hace commit."""
+    """Insereix o actualitza els productes i el preu del dia. No fa commit."""
     chain_id = _get_or_create_chain(session, batch.chain)
     store_id = _get_or_create_store(session, chain_id, batch.wh)
     stats = {"products": 0, "prices": 0, "without_price": 0}
