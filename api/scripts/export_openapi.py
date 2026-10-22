@@ -11,5 +11,8 @@ sys.path.insert(0, str(ROOT))
 
 from app.main import app  # noqa: E402
 
-(ROOT / "openapi.json").write_text(json.dumps(app.openapi(), indent=2, ensure_ascii=False) + "\n", encoding="utf-8")
+# Salts de línia LF fins i tot a Windows: la CI el regenera a Linux i el compara byte a byte.
+(ROOT / "openapi.json").write_text(
+    json.dumps(app.openapi(), indent=2, ensure_ascii=False) + "\n", encoding="utf-8", newline="\n"
+)
 print("openapi.json actualizado")
