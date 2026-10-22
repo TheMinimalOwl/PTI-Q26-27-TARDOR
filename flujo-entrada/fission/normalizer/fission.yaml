@@ -1,0 +1,28 @@
+# Disparador HTTP de la funcion `normalizer`.
+#
+# OJO (corregido 17/10/2026): la Function de Fission NO tiene los campos
+# `entrypoint` ni `functionSource`, y el CRD del paquete no se puede versionar
+# aqui con un nombre fijo (el CLI genera `normalizer-<uuid>`). Por eso la Function
+# y su paquete los crea/actualiza `deploy.sh` con el CLI:
+#
+#   fission fn create --name normalizer --env python --code normalizer.py --entrypoint normalizer.main
+#   fission fn update --name normalizer --code normalizer.py --entrypoint normalizer.main
+#
+# El paquete se crea con el codigo fuente (`--code`), asi que `requirements.txt`
+# (pydantic) tiene que venir resuelto en la imagen del entorno: ver `Dockerfile.env`.
+#
+# `functionref.type` solo admite `name` o `function-weights` (lo dijo el API server
+# al rechazar `Function`), y `method` esta deprecado en favor de `methods`.
+# `deploy.sh` solo aplica este manifiesto si el trigger no existe todavia.
+apiVersion: fission.io/v1
+kind: HTTPTrigger
+metadata:
+  name: normalizer-http
+  namespace: default
+spec:
+  functionref:
+    type: name
+    name: normalizer
+  methods:
+    - POST
+  relativeurl: /normalize

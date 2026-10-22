@@ -1,0 +1,24 @@
+config:
+  cluster:
+    enabled: false
+  jetstream:
+    enabled: true
+    fileStore:
+      enabled: true
+      pvc:
+        enabled: true
+        size: 1Gi
+        storageClassName: standard
+    memoryStore:
+      enabled: true
+      maxSize: 256Mi
+
+container:
+  image:
+    tag: "2.10-alpine"
+
+natsBox:
+  enabled: true
+
+service:
+  type: ClusterIP

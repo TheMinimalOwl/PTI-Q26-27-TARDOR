@@ -1,0 +1,9 @@
+# Los scripts de shell deben viajar con LF: con core.autocrlf=true (Windows) se
+# convertirian a CRLF y el shebang romperia al ejecutarlos en la VM Linux.
+*.sh text eol=lf
+
+# Dockerfiles y manifiestos: sin normalizar a CRLF tampoco hace falta, pero se
+# dejan explicitos como texto.
+Dockerfile* text
+*.yaml text
+*.yml text
