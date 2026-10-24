@@ -1,0 +1,25 @@
+# Consumeix scraper.*.clean del NATS de `messaging` i escriu a PostgreSQL.
+# Amb 1 rèplica n'hi ha prou: el consumidor durable `api-writer` guarda la posició a NATS.
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: writer
+spec:
+  replicas: 1
+  selector:
+    matchLabels: {app: writer}
+  template:
+    metadata:
+      labels: {app: writer}
+    spec:
+      containers:
+        - name: writer
+          image: pti/api:dev
+          imagePullPolicy: IfNotPresent
+          command: ["python", "-m", "app.writer"]
+          envFrom:
+            - secretRef: {name: api-secrets}
+            - configMapRef: {name: api-config}
+          resources:
+            requests: {cpu: 50m, memory: 128Mi}
+            limits: {memory: 256Mi}

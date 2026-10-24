@@ -1,0 +1,51 @@
+name: api
+
+on:
+  push:
+    paths: ["api/**", ".github/workflows/api.yml"]
+  pull_request:
+    paths: ["api/**", ".github/workflows/api.yml"]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: api
+
+    services:
+      db:
+        image: pgvector/pgvector:pg16
+        env:
+          POSTGRES_USER: pti
+          POSTGRES_PASSWORD: pti
+          POSTGRES_DB: precios
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U pti -d precios"
+          --health-interval 3s --health-retries 20
+      redis:
+        image: redis:7.4-alpine
+        ports: ["6379:6379"]
+
+    env:
+      DATABASE_URL: postgresql+psycopg://pti:pti@localhost:5432/precios
+      REDIS_URL: redis://localhost:6379/0
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: api/requirements.txt
+      - run: pip install -r requirements.txt
+      - run: pytest -q
+
+      - name: openapi.json al día con el código
+        run: |
+          python scripts/export_openapi.py
+          git diff --exit-code openapi.json
+
+      - name: La imagen Docker construye
+        run: docker build -t api:ci .

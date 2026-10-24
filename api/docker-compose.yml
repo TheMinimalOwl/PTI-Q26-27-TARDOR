@@ -1,0 +1,44 @@
+# Entorn local de l'API: PostgreSQL (amb pgvector) + Redis + API.
+#   docker compose up -d --build          → API a http://localhost:8000/docs
+#   docker compose exec api python -m app.seed   → carrega les dades de demo
+#   docker compose --profile ingesta up -d writer → writer connectat a NATS (NATS_URL)
+# Credencials només per a desenvolupament local; al clúster van en un Secret.
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: pti
+      POSTGRES_PASSWORD: pti
+      POSTGRES_DB: precios
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pti -d precios"]
+      interval: 3s
+      retries: 20
+
+  redis:
+    image: redis:7.4-alpine
+    ports: ["6379:6379"]
+
+  api:
+    build: .
+    environment: &env
+      DATABASE_URL: postgresql+psycopg://pti:pti@db:5432/precios
+      REDIS_URL: redis://redis:6379/0
+      NATS_URL: ${NATS_URL:-nats://host.docker.internal:4222}
+    ports: ["8000:8000"]
+    depends_on:
+      db: {condition: service_healthy}
+      redis: {condition: service_started}
+
+  writer:
+    build: .
+    command: ["python", "-m", "app.writer"]
+    environment: *env
+    depends_on:
+      db: {condition: service_healthy}
+    profiles: ["ingesta"]
+
+volumes:
+  pgdata:
