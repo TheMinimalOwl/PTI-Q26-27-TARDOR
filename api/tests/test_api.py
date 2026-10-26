@@ -29,10 +29,28 @@ def test_health(client):
 
 def test_busqueda_ordena_por_precio_unitario(client):
     page = client.get("/products/search", params={"q": "aceite"}).json()
-    assert page["total"] >= 8
-    unit_prices = [i["price"]["unit_price"] for i in page["items"]]
+    assert page["total"] >= 12
+    assert page["unit"] == "l"
+    oils = [i for i in page["items"] if i["unit"] == "l"]
+    unit_prices = [i["price"]["unit_price"] for i in oils]
     assert unit_prices == sorted(unit_prices)
     assert page["items"][0]["name"] == "Aceite de oliva 0,4º garrafa 5 L"  # 3,45 €/l
+
+
+def test_busqueda_no_mezcla_unidades(client):
+    # La tonyina (≈1 €/ud) és "més barata" que l'oli (3,45 €/l), però no són comparables:
+    # primer van tots els €/l i després els €/ud.
+    items = client.get("/products/search", params={"q": "aceite oliva"}).json()["items"]
+    units = [i["unit"] for i in items]
+    assert units == sorted(units, key=lambda u: u != "l")
+    assert units[-1] == "ud"
+
+
+def test_busqueda_filtra_por_unidad(client):
+    page = client.get("/products/search", params={"q": "aceite", "unit": "ud"}).json()
+    assert page["unit"] == "ud"
+    assert page["total"] == 4
+    assert all("Atún" in i["name"] for i in page["items"])
 
 
 def test_busqueda_sin_acentos_y_varias_palabras(client):

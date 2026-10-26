@@ -1,7 +1,7 @@
 """Consultes a la BD. Els routers no escriuen SQL: només criden aquestes funcions."""
 from datetime import date
 
-from sqlalchemy import Select, and_, func, select
+from sqlalchemy import Select, and_, case, func, select
 from sqlalchemy.orm import Session, aliased, joinedload
 
 from .models import Chain, Price, Product, Store
@@ -46,10 +46,15 @@ def _summary(product: Product, price: Price | None, store_code: str | None) -> d
 
 
 def search_products(
-    session: Session, q: str, chain: str | None, limit: int, offset: int
-) -> tuple[int, list[ProductSummary]]:
+    session: Session, q: str, chain: str | None, unit: str | None, limit: int, offset: int
+) -> tuple[int, str | None, list[ProductSummary]]:
     """Cerca per nom (sense distingir majúscules ni accents). Cada paraula de `q`
-    hi ha d'aparèixer. Ordena per preu unitari: el més barat primer."""
+    hi ha d'aparèixer. Ordena per preu unitari: el més barat primer.
+
+    Els preus unitaris només es poden comparar dins d'una mateixa unitat (una llauna
+    a 0,52 €/ud no és més barata que un oli a 3,45 €/l). Per això primer van els
+    productes de la unitat principal (`unit` o, si no se'n demana cap, la més
+    freqüent entre els resultats) i després la resta. Retorna també aquesta unitat."""
     latest = aliased(Price, _latest_prices().subquery())
 
     conditions = [
@@ -58,21 +63,35 @@ def search_products(
     ]
     if chain:
         conditions.append(Chain.slug == chain)
+    if unit:
+        conditions.append(Product.unit == unit)
 
     base = select(Product).join(Product.chain).where(and_(*conditions))
     total = session.scalar(select(func.count()).select_from(base.subquery()))
+
+    main_unit = unit or session.scalar(
+        select(Product.unit)
+        .join(Product.chain)
+        .where(and_(*conditions), Product.unit.is_not(None))
+        .group_by(Product.unit)
+        .order_by(func.count().desc(), Product.unit)
+        .limit(1)
+    )
+    order = [latest.unit_price.asc().nulls_last(), Product.name]
+    if main_unit:
+        order.insert(0, case((Product.unit == main_unit, 0), else_=1))
 
     rows = session.execute(
         base.add_columns(latest, Store.code)
         .outerjoin(latest, latest.product_id == Product.id)
         .outerjoin(Store, Store.id == latest.store_id)
         .options(joinedload(Product.chain))
-        .order_by(latest.unit_price.asc().nulls_last(), Product.name)
+        .order_by(*order)
         .limit(limit)
         .offset(offset)
     ).all()
 
-    return total, [ProductSummary(**_summary(p, price, code)) for p, price, code in rows]
+    return total, main_unit, [ProductSummary(**_summary(p, price, code)) for p, price, code in rows]
 
 
 def get_product(session: Session, product_id: int) -> ProductDetail | None:

@@ -31,6 +31,9 @@ CATALOG = [
      ["0.80", "0.85", "0.78", "0.82"]),
     ("huevos-l-12", "Huevos frescos L 12 unidades", "Huevos, leche y mantequilla", "12", "ud",
      ["2.70", "2.85", "2.65", "2.79"]),
+    # Surt cercant "aceite" però en €/ud: no ha de passar per davant dels olis en €/l.
+    ("atun-aceite-3", "Atún claro en aceite de oliva pack 3 x 80 g", "Conservas", "3", "ud",
+     ["3.10", "2.95", "3.05", "3.20"]),
 ]
 
 Q = Decimal("0.0001")

@@ -99,7 +99,7 @@ Contrato completo: [`api/openapi.json`](../openapi.json) (generado desde el cód
 |---|---|
 | `GET /health` | Estado de BD y Redis |
 | `GET /chains` | Cadenas disponibles |
-| `GET /products/search?q=&chain=&limit=&offset=` | Productos cuyo nombre contiene todas las palabras de `q` (sin distinguir mayúsculas ni acentos), ordenados por **precio unitario** ascendente |
+| `GET /products/search?q=&chain=&unit=&limit=&offset=` | Productos cuyo nombre contiene todas las palabras de `q` (sin distinguir mayúsculas ni acentos), ordenados por **precio unitario** ascendente. Primero los de la unidad principal (`unit` de la respuesta: la pedida o, si no, la más frecuente) y después el resto, porque €/l y €/ud no se comparan |
 | `GET /products/{id}` | Detalle del producto con su precio actual |
 | `GET /products/{id}/prices?from=&to=` | Historial de precios (para la gráfica de tendencias) |
 
@@ -107,7 +107,7 @@ Ejemplo de `GET /products/search?q=aceite&limit=1`:
 
 ```json
 {
-  "query": "aceite", "total": 8, "limit": 1, "offset": 0,
+  "query": "aceite", "unit": "l", "total": 12, "limit": 1, "offset": 0,
   "items": [{
     "id": 2, "name": "Aceite de oliva 0,4º garrafa 5 L",
     "chain": {"slug": "mercadona", "name": "Mercadona"},

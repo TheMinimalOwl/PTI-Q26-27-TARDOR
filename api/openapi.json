@@ -57,7 +57,7 @@
           "catálogo"
         ],
         "summary": "Search Products",
-        "description": "Productes de totes les cadenes el nom dels quals conté totes les paraules de `q`,\nordenats per preu unitari (€/kg, €/l…) de menor a major.",
+        "description": "Productes de totes les cadenes el nom dels quals conté totes les paraules de `q`,\nordenats per preu unitari (€/kg, €/l…) de menor a major. Primer els de la unitat\nprincipal (`unit` a la resposta) i després la resta, perquè €/l i €/ud no es comparen.",
         "operationId": "search_products_products_search_get",
         "parameters": [
           {
@@ -90,6 +90,24 @@
               "title": "Chain"
             },
             "description": "Filtra por cadena (slug), p. ej. 'mercadona'"
+          },
+          {
+            "name": "unit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Solo productos con esta unidad: kg, l, ud, m o lavado",
+              "title": "Unit"
+            },
+            "description": "Solo productos con esta unidad: kg, l, ud, m o lavado"
           },
           {
             "name": "limit",
@@ -543,6 +561,17 @@
             "type": "string",
             "title": "Query"
           },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
           "total": {
             "type": "integer",
             "title": "Total"
@@ -566,6 +595,7 @@
         "type": "object",
         "required": [
           "query",
+          "unit",
           "total",
           "limit",
           "offset",
