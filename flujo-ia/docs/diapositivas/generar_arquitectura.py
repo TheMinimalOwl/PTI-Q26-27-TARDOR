@@ -109,7 +109,7 @@ def main() -> int:
     # Cabecera (igual que las diapositivas)
     piezas.append(f"""
   <text x="{MARGEN}" y="92" font-family="{FUENTE}" font-size="26" fill="{AZUL}"
-        letter-spacing="1">Equipo IA · Joel Forcadell</text>
+        letter-spacing="1">Equipo IA</text>
   <text x="{MARGEN}" y="152" font-family="{FUENTE}" font-size="54" fill="{TEXTO}">Arquitectura del flujo IA (RAG)</text>
   <rect x="{MARGEN}" y="214" width="150" height="8" rx="4" fill="{AZUL}"/>""")
 
