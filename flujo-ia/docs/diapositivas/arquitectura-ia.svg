@@ -1,0 +1,100 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+<defs><marker id="p-34D399" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#34D399"/></marker><marker id="p-38BDF8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#38BDF8"/></marker><marker id="p-818CF8" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#818CF8"/></marker></defs>
+<rect width="1920" height="1080" fill="#0F172A"/>
+  <text x="110" y="92" font-family="Arial, Helvetica, sans-serif" font-size="26" fill="#38BDF8"
+        letter-spacing="1">Equipo IA · Joel Forcadell</text>
+  <text x="110" y="152" font-family="Arial, Helvetica, sans-serif" font-size="54" fill="#F8FAFC">Arquitectura del flujo IA (RAG)</text>
+  <rect x="110" y="214" width="150" height="8" rx="4" fill="#38BDF8"/>
+  <text x="110" y="284" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="bold" letter-spacing="1.5" fill="#34D399">ÍNDICE · una vez por cadena</text>
+  <rect x="110" y="300" width="388" height="150" rx="14"
+        fill="#1E293B" stroke="#34D399" stroke-width="2.5"/>
+  <text x="132" y="352" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="bold"
+        fill="#F8FAFC">Líneas limpias</text>
+  <text x="132" y="394" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#94A3B8">salida del normalizador</text>
+  <text x="132" y="426" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#64748B">equipo de ingesta</text>
+  <line x1="504" y1="375.0" x2="538" y2="375.0" stroke="#34D399" stroke-width="3" marker-end="url(#p-34D399)"/>
+  <rect x="548" y="300" width="388" height="150" rx="14"
+        fill="#1E293B" stroke="#34D399" stroke-width="2.5"/>
+  <text x="570" y="352" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="bold"
+        fill="#F8FAFC">Parser</text>
+  <text x="570" y="394" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#94A3B8">1 chunk = 1 producto</text>
+  <text x="570" y="426" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#64748B">campos + metadatos</text>
+  <line x1="942" y1="375.0" x2="976" y2="375.0" stroke="#34D399" stroke-width="3" marker-end="url(#p-34D399)"/>
+  <rect x="986" y="300" width="388" height="150" rx="14"
+        fill="#1E293B" stroke="#34D399" stroke-width="2.5"/>
+  <text x="1008" y="352" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="bold"
+        fill="#F8FAFC">Embeddings</text>
+  <text x="1008" y="394" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#94A3B8">e5-small · 384 d</text>
+  <text x="1008" y="426" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#64748B">local, 471 MB</text>
+  <line x1="1380" y1="375.0" x2="1414" y2="375.0" stroke="#34D399" stroke-width="3" marker-end="url(#p-34D399)"/>
+  <rect x="1424" y="300" width="388" height="150" rx="14"
+        fill="#1E293B" stroke="#34D399" stroke-width="2.5"/>
+  <text x="1446" y="352" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="bold"
+        fill="#F8FAFC">Índice vectorial</text>
+  <text x="1446" y="394" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#94A3B8">coseno + filtros</text>
+  <text x="1446" y="426" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#64748B">NumPy hoy · pgvector luego</text>
+  <text x="110" y="524" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="bold" letter-spacing="1.5" fill="#38BDF8">CONSULTA · cada petición</text>
+  <rect x="110" y="540" width="388" height="150" rx="14"
+        fill="#1E293B" stroke="#38BDF8" stroke-width="2.5"/>
+  <text x="132" y="592" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="bold"
+        fill="#F8FAFC">App / API</text>
+  <text x="132" y="634" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#94A3B8">pregunta en lenguaje natural</text>
+  <text x="132" y="666" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#64748B">POST /ask</text>
+  <line x1="504" y1="615.0" x2="538" y2="615.0" stroke="#38BDF8" stroke-width="3" marker-end="url(#p-38BDF8)"/>
+  <rect x="548" y="540" width="388" height="150" rx="14"
+        fill="#1E293B" stroke="#38BDF8" stroke-width="2.5"/>
+  <text x="570" y="592" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="bold"
+        fill="#F8FAFC">Embeddings</text>
+  <text x="570" y="634" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#94A3B8">la consulta → vector</text>
+  <text x="570" y="666" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#64748B">mismo modelo, misma escala</text>
+  <line x1="942" y1="615.0" x2="976" y2="615.0" stroke="#38BDF8" stroke-width="3" marker-end="url(#p-38BDF8)"/>
+  <rect x="986" y="540" width="388" height="150" rx="14"
+        fill="#1E293B" stroke="#38BDF8" stroke-width="2.5"/>
+  <text x="1008" y="592" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="bold"
+        fill="#F8FAFC">Recuperación</text>
+  <text x="1008" y="634" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#94A3B8">coseno + filtros</text>
+  <text x="1008" y="666" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#64748B">cadena · formato · tamaño</text>
+  <line x1="1380" y1="615.0" x2="1414" y2="615.0" stroke="#38BDF8" stroke-width="3" marker-end="url(#p-38BDF8)"/>
+  <rect x="1424" y="540" width="388" height="150" rx="14"
+        fill="#1E293B" stroke="#38BDF8" stroke-width="2.5"/>
+  <text x="1446" y="592" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="bold"
+        fill="#F8FAFC">Cadena LangChain</text>
+  <text x="1446" y="634" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#94A3B8">prompt + contexto</text>
+  <text x="1446" y="666" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#64748B">LCEL sobre langchain-core</text>
+  <text x="110" y="734" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="bold" letter-spacing="1.5" fill="#818CF8">RESPUESTA · salida al usuario</text>
+  <rect x="110" y="780" width="388" height="150" rx="14"
+        fill="#1E293B" stroke="#818CF8" stroke-width="2.5"/>
+  <text x="132" y="832" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="bold"
+        fill="#F8FAFC">LLM</text>
+  <text x="132" y="874" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#94A3B8">Ollama qwen3 · Gemini</text>
+  <text x="132" y="906" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#64748B">mismo cliente, RAG_LLM</text>
+  <line x1="504" y1="855.0" x2="538" y2="855.0" stroke="#818CF8" stroke-width="3" marker-end="url(#p-818CF8)"/>
+  <rect x="548" y="780" width="388" height="150" rx="14"
+        fill="#1E293B" stroke="#818CF8" stroke-width="2.5"/>
+  <text x="570" y="832" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="bold"
+        fill="#F8FAFC">Guardrails</text>
+  <text x="570" y="874" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#94A3B8">citas · cifras · abstención</text>
+  <text x="570" y="906" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#64748B">0 alucinaciones en la muestra</text>
+  <line x1="942" y1="855.0" x2="976" y2="855.0" stroke="#818CF8" stroke-width="3" marker-end="url(#p-818CF8)"/>
+  <rect x="986" y="780" width="388" height="150" rx="14"
+        fill="#1E293B" stroke="#818CF8" stroke-width="2.5"/>
+  <text x="1008" y="832" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="bold"
+        fill="#F8FAFC">JSON Schema</text>
+  <text x="1008" y="874" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#94A3B8">respuesta validada</text>
+  <text x="1008" y="906" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#64748B">answer + sources + confidence</text>
+  <line x1="1380" y1="855.0" x2="1414" y2="855.0" stroke="#818CF8" stroke-width="3" marker-end="url(#p-818CF8)"/>
+  <rect x="1424" y="780" width="388" height="150" rx="14"
+        fill="#1E293B" stroke="#818CF8" stroke-width="2.5"/>
+  <text x="1446" y="832" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="bold"
+        fill="#F8FAFC">App</text>
+  <text x="1446" y="874" font-family="Arial, Helvetica, sans-serif" font-size="23" fill="#94A3B8">JSON o streaming SSE</text>
+  <text x="1446" y="906" font-family="Arial, Helvetica, sans-serif" font-size="21" fill="#64748B">eventos: fuentes · token · fin</text>
+  <path d="M 1618.0 450 V 495 H 1180.0 V 532" fill="none" stroke="#34D399" stroke-width="3" marker-end="url(#p-34D399)"/>
+  <text x="1204.0" y="483" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#34D399">vectores + metadatos del índice</text>
+  <path d="M 1618.0 690 V 750 H 304.0 V 772" fill="none" stroke="#818CF8" stroke-width="3" marker-end="url(#p-818CF8)"/>
+  <rect x="110" y="975" width="1700" height="64" rx="12" fill="#1E293B"/>
+  <text x="140" y="1016" font-family="Arial, Helvetica, sans-serif" font-size="25">
+    <tspan fill="#38BDF8" font-weight="bold">Tres pipelines — catálogo, equivalencia, QA — </tspan>
+    <tspan fill="#94A3B8">comparten el mismo índice: solo cambia la consulta y los filtros.</tspan>
+  </text>
+</svg>
