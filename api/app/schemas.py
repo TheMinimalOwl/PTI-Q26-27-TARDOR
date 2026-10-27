@@ -43,6 +43,7 @@ class ProductDetail(ProductSummary):
 
 class SearchPage(BaseModel):
     query: str
+    unit: str | None  # unitat que va primer a `items`: els preus unitaris només es comparen dins d'ella
     total: int
     limit: int
     offset: int

@@ -54,21 +54,23 @@ def search_products(
     response: Response,
     q: str = Query(min_length=2, max_length=100, description="Texto a buscar, p. ej. 'aceite oliva'"),
     chain: str | None = Query(None, description="Filtra por cadena (slug), p. ej. 'mercadona'"),
+    unit: str | None = Query(None, description="Solo productos con esta unidad: kg, l, ud, m o lavado"),
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     session: Session = Depends(get_session),
     cache: Cache = Depends(get_cache),
 ):
     """Productes de totes les cadenes el nom dels quals conté totes les paraules de `q`,
-    ordenats per preu unitari (€/kg, €/l…) de menor a major."""
+    ordenats per preu unitari (€/kg, €/l…) de menor a major. Primer els de la unitat
+    principal (`unit` a la resposta) i després la resta, perquè €/l i €/ud no es comparen."""
     q = " ".join(q.lower().split())
-    key = f"search:{q}:{chain or ''}:{limit}:{offset}"
+    key = f"search:{q}:{chain or ''}:{unit or ''}:{limit}:{offset}"
     if (cached := cache.get(key)) is not None:
         response.headers["X-Cache"] = "HIT"
         return cached
 
-    total, items = repository.search_products(session, q, chain, limit, offset)
-    page = SearchPage(query=q, total=total, limit=limit, offset=offset, items=items)
+    total, main_unit, items = repository.search_products(session, q, chain, unit, limit, offset)
+    page = SearchPage(query=q, unit=main_unit, total=total, limit=limit, offset=offset, items=items)
     cache.set(key, page.model_dump(mode="json"))
     response.headers["X-Cache"] = "MISS"
     return page
