@@ -7,8 +7,12 @@ Contratos de la frontera de ingesta. Cualquier cambio aquí afecta al equipo de 
 ```mermaid
 flowchart LR
   P["scrapper_mercadona<br/>publish.py"] -->|"1 msg = 1 producto"| RAW["scraper.mercadona.raw"]
+  P2["scrapper_consum<br/>publish.py"] -->|"1 msg = 1 producto"| RAW2["scraper.consum.raw"]
   RAW --> C["normalizer-consumer"]
+  RAW2 --> C
   C -->|"1 msg = 1 lote"| CLEAN["scraper.mercadona.clean"]
+  C -->|"1 msg = 1 lote"| CLEAN2["scraper.consum.clean"]
+  CLEAN2 --> API
   CLEAN -->|"durable api-writer (pull)"| API["writer de API/BD<br/>→ PostgreSQL"]
   RAW -.->|stream| S[("SCRAPERS<br/>subjects scraper.&gt;")]
   CLEAN -.->|stream| S
@@ -16,8 +20,14 @@ flowchart LR
 
 | Subject | Productor | Consumidor | Granularidad |
 |---|---|---|---|
-| `scraper.mercadona.raw` | scraper | `normalizer-consumer` (durable `normalizer`) | 1 mensaje por producto |
+| `scraper.mercadona.raw` | scraper de Mercadona | `normalizer-consumer` (durable `normalizer`) | 1 mensaje por producto |
+| `scraper.consum.raw` | scraper de Consum | `normalizer-consumer` (durable `normalizer`) | 1 mensaje por producto |
 | `scraper.mercadona.clean` | `normalizer-consumer` | writer de API/BD (durable `api-writer`) | 1 mensaje por lote |
+| `scraper.consum.clean` | `normalizer-consumer` | writer de API/BD (durable `api-writer`) | 1 mensaje por lote |
+
+El consumer agrupa los lotes **por cadena** (nunca mezcla dos cadenas en un lote) y publica
+cada uno en el `clean` de la cadena de la que vino: `scraper.<cadena>.raw` →
+`scraper.<cadena>.clean`.
 
 Ambos viven en el **mismo** stream `SCRAPERS` (subjects `scraper.>`): no hay un stream
 aparte para la salida. Lo crea Terraform con NACK (`infra/terraform/nats.tf`) o
@@ -41,7 +51,7 @@ Consumidores durables del stream:
 
 | Durable | Tipo | Filtro | Quién lo crea | Ack |
 |---|---|---|---|---|
-| `normalizer` | push → `deliver.normalizer` | `scraper.mercadona.raw` | Ingesta (NACK, `nats.tf`) | Explícito, `AckWait 30s`, `MaxAckPending 1000` |
+| `normalizer` | push → `deliver.normalizer` | `scraper.*.raw` | Ingesta (NACK, `nats.tf`) | Explícito, `AckWait 30s`, `MaxAckPending 1000` |
 | `api-writer` | pull (`fetch(10)`) | `scraper.*.clean` | API/BD (`js.pull_subscribe`) | Tras el commit en BD; `nak(delay=10)` si falla la BD; `term()` si el mensaje está mal formado |
 
 Garantías que da la frontera:
@@ -71,6 +81,40 @@ kubectl -n messaging exec deploy/nats-box -- nats -s nats://nats:4222 stream sub
 kubectl -n messaging exec deploy/nats-box -- nats -s nats://nats:4222 consumer info SCRAPERS api-writer
 ```
 
+## Código postal y tienda
+
+Las dos cadenas deciden **qué productos** se venden según el código postal del cliente: cada
+código postal lo sirve una tienda o almacén con su propio surtido. En las pruebas
+(11/11/2026) el precio de un mismo producto **no** cambiaba entre zonas, pero el catálogo sí
+(Consum: 8.611 productos en Barcelona, 9.581 en Valencia).
+
+Por eso los scrapers no recorren "el catálogo", sino **el catálogo de la tienda que sirve
+cada código postal**:
+
+| Cadena | Código postal → tienda | Cómo se pide el catálogo de esa tienda | Ejemplo con 08016 |
+|---|---|---|---|
+| Mercadona | `PUT /api/postal-codes/actions/change-pc/` `{"new_postal_code": "08016"}` → cabecera `x-customer-wh` | `?lang=es&wh=bcn1` en cada petición | `wh=bcn1` |
+| Consum | `GET /api/rest/V1.0/shipping/area?zipCode=08016` → zona de reparto a domicilio | Cabeceras `X-TOL-ZONE: 378` y `X-TOL-SHIPPING-ZONE: 378D` | `wh=378` (tienda "Centro 378", Barcelona) |
+
+- Varios códigos postales que caen en la misma tienda se recorren **una sola vez**.
+- Si una cadena no da servicio en un código postal (Consum no reparte en Madrid ni Sevilla),
+  ese código se salta con un aviso en el log; no es un error.
+- `wh` es el código de tienda **de cada cadena**: en la BD de la API es `stores.code`, único
+  por cadena (`bcn1` de Mercadona y `378` de Consum son dos tiendas distintas).
+
+**De dónde salen los códigos postales.** La idea es que los dé la app: el usuario indica su
+código postal y la API lo guarda. Mientras eso no existe, se usa **08016** de ejemplo:
+
+- Con Terraform: variable `postal_codes` (lista, por defecto `["08016"]`), que se copia a la
+  variable de entorno `SCRAPER_POSTAL_CODES` de los dos CronJobs.
+- Sin Terraform: `SCRAPER_POSTAL_CODES` en cada `cronjob.yaml` (separados por comas).
+
+Propuesta de contrato para cuando la API lo implemente (a acordar con el equipo de API/BD):
+un endpoint interno, p. ej. `GET /internal/postal-codes` → `["08016", "46001"]`, con los
+códigos postales distintos de los usuarios. Los scrapers lo leerían al empezar cada pasada
+en lugar de la variable de entorno. Cada código postal nuevo que aparezca significa, como
+mucho, una tienda más por cadena y por noche.
+
 ## Envelope de entrada (raw)
 
 Publicado por `publish.build_envelope()`:
@@ -78,7 +122,8 @@ Publicado por `publish.build_envelope()`:
 ```json
 {
   "source": "mercadona",
-  "wh": "default",
+  "wh": "bcn1",
+  "postal_code": "08016",
   "ts": "2026-10-15T19:20:07+00:00",
   "product_id": "12345",
   "product": { "...": "objeto tal cual lo devuelve la API de Mercadona" }
@@ -88,7 +133,8 @@ Publicado por `publish.build_envelope()`:
 | Campo | Tipo | Origen | Notas |
 |---|---|---|---|
 | `source` | string | constante | Cadena de origen |
-| `wh` | string | `SCRAPER_WH` | Almacén/tienda; hoy siempre `default` |
+| `wh` | string | resuelto desde el código postal | Tienda o almacén de la cadena que sirve ese código postal: `bcn1` (Mercadona), `378` (Consum). Ver [Código postal y tienda](#código-postal-y-tienda) |
+| `postal_code` | string | `SCRAPER_POSTAL_CODES` | Código postal del que salió `wh` |
 | `ts` | string | UTC, `isoformat(timespec="seconds")` | Formato `...+00:00` |
 | `product_id` | string | `str(product["id"])` | Duplicado del id para indexar sin abrir `product` |
 | `product` | object | crudo de la fuente | **Sin tocar**: el normalizador decide qué hacer |
@@ -103,7 +149,8 @@ Publicado por `consumer.flush()`:
 ```json
 {
   "source": "normalizer",
-  "wh": "default",
+  "wh": "bcn1",
+  "postal_code": "08016",
   "ts": "2026-10-15T19:22:31+00:00",
   "batch": 50,
   "clean": "Items: 50\nUnitarios: 50 (fuente 48, calculado 2) | Incompletos: 0\n---\n12345 | Aceite de oliva 0,5 l | 4.10EUR total | 8.20EUR/l | 0.5l | Aceite | https://... | ref=8.200EUR/L src=fuente\n..."
@@ -113,7 +160,8 @@ Publicado por `consumer.flush()`:
 | Campo | Tipo | Notas |
 |---|---|---|
 | `source` | string | Siempre `normalizer` |
-| `wh` | string | **Heredado** del primer producto del lote: un lote asume un único almacén |
+| `wh` | string | Tienda/almacén del lote. El consumer agrupa por cadena **y** `wh`, así que un lote nunca mezcla tiendas |
+| `postal_code` | string | Código postal del que salió `wh` (trazabilidad; el writer de API/BD puede ignorarlo) |
 | `ts` | string | UTC, mismo formato que el envelope |
 | `batch` | number | Nº de productos crudos del lote |
 | `clean` | string | Texto plano completo del lote (cabecera + una línea por producto) |
@@ -234,6 +282,40 @@ Reglas, en orden:
 > (`test_unit_price.py`) comprueba que, en productos simples, el cálculo reproduce
 > la fuente en el **99,1%** de los casos (las diferencias restantes son redondeo de
 > la fuente o incoherencias propias).
+
+## Mapeo de campos de Consum
+
+Consum no tiene la forma de Mercadona. En vez de cambiar el resto del normalizador, una
+función `from_consum()` traduce el crudo a la forma común (la de Mercadona) y todo lo demás
+(precio unitario canónico, línea limpia, contrato Pydantic) es igual. La cadena se detecta
+por la forma del objeto (`productData` + `priceData`), así que el scraper publica el crudo
+tal cual.
+
+| Forma común | Consum | Ejemplo |
+|---|---|---|
+| `id` | `code` (id público, el de la URL; `id` es interno) | `"1669"` |
+| `display_name` | `productData.name` | `Rabanito Bolsa` |
+| `price_instructions.unit_price` | `centAmount` del precio vigente: `OFFER_PRICE` si hay oferta, si no `PRICE` (en euros, pese al nombre) | `1.3` |
+| `price_instructions.reference_price` | `centUnitAmount` del mismo precio | `5.2` |
+| `price_instructions.reference_format` | `unitPriceUnitType` sin el `1 ` inicial | `1 Kg` → `Kg` |
+| `price_instructions.unit_size` / `size_format` | Final de `productData.description`; `N x tamaño` en packs; si no hay, se omite (`-`) | `250 Gr` → `250` / `Gr` |
+| `share_url` | `productData.url` | `https://tienda.consum.es/es/p/rabanito-bolsa/1669` |
+| `categories[0].name` | `categories[0].name` | `Zanahorias y otras raíces` |
+
+Formatos de `unitPriceUnitType` vistos (11/11/2026, 9.354 productos) y su unidad base:
+`1 Kg` (4.758) → kg, `1 L` (1.695) → l, `1 U` (1.614) → ud, `100 ml` (942) → l,
+`100 Gr` (204) → kg, `1 Lv` (111) → lavado, `1 Dc` (14) → ud (docena), `1 M` (8) → m y
+`1 Do` (8, dosis: pastillas de lavavajillas, bolsitas) → ud.
+
+Todos traen precio por unidad, así que **el 100 % sale con `src=fuente`** y ninguno queda
+incompleto. Ejemplo de línea limpia:
+
+```
+1669 | Rabanito Bolsa | 1.30EUR total | 5.20EUR/kg | 250Gr | Zanahorias y otras raíces | https://tienda.consum.es/es/p/rabanito-bolsa/1669 | ref=5.2EUR/Kg src=fuente
+```
+
+`ean` viaja en el crudo pero **no** en la línea limpia: añadirlo cambia el contrato con
+API/BD (ver [`05-pendientes.md`](05-pendientes.md)).
 
 ## Mapeo de campos de Mercadona
 

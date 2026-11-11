@@ -82,11 +82,11 @@ Es idempotente: si se vuelve a ejecutar, solo se reconstruye lo que haya cambiad
 
 | Fichero | Recursos | Antes lo hacía |
 |---|---|---|
-| `images.tf` | `scrapper-mercadona`, `normalizer-env` y `normalizer-consumer`: `docker build` + `minikube image load`, y comprueba con `minikube image ls` que han llegado al nodo | Lo mismo, a mano |
+| `images.tf` | `scrapper-mercadona`, `scrapper-consum`, `normalizer-env` y `normalizer-consumer`: `docker build` + `minikube image load`, y comprueba con `minikube image ls` que han llegado al nodo | Lo mismo, a mano |
 | `namespaces.tf` | `scrappers`, `messaging` y `fission` (a partir de `cluster/namespace.yaml`) | `kubectl apply -k cluster/` |
 | `nats.tf` | Chart de NATS (con `messaging/nats-values.yaml`), **NACK**, y los CRD `Stream SCRAPERS` y `Consumer normalizer` | `helm install` + `kubectl exec nats-box -- nats request $JS.API...` |
 | `fission.tf` | Chart `fission-all` 1.27, `Environment python` con pydantic, `Package` + `Function normalizer`, `HTTPTrigger` (`fission.yaml`) y `normalizer-consumer` (`consumer.yaml`) | `helm install` + `fission env/fn create` + `deploy.sh` |
-| `scraper.tf` | `scraper-secrets`, PVC `scraper-out` y CronJob `scrapper-mercadona` | `kubectl apply -k scrappers/...` |
+| `scraper.tf` | `scraper-secrets`, PVC `scraper-out` y CronJobs `scrapper-mercadona` y `scrapper-consum` (02:00, hora de Madrid) | `kubectl apply -k scrappers/...` |
 
 Los YAML de siempre siguen siendo la fuente de verdad: Terraform los lee tal cual y solo
 cambia la etiqueta de la imagen.
@@ -103,7 +103,7 @@ Todo lo de la ingesta vive en namespaces propios y no toca `default`:
 
 | Namespace | Qué hay |
 |---|---|
-| `scrappers` | CronJob `scrapper-mercadona`, `scraper-secrets`, PVC `scraper-out` |
+| `scrappers` | CronJobs `scrapper-mercadona` y `scrapper-consum`, `scraper-secrets`, PVC `scraper-out` |
 | `messaging` | NATS (StatefulSet), `nats-box`, NACK, CRDs `Stream SCRAPERS` y `Consumer normalizer` |
 | `fission` | Plano de control de Fission (router, executor…) |
 | `ingesta` | `Environment python`, `Function` y `Package` `normalizer`, `HTTPTrigger`, pods del pool y `normalizer-consumer` |
@@ -115,7 +115,8 @@ pisan; la única conexión es NATS (`nats://nats.messaging.svc.cluster.local:422
 ## Variables
 
 Se cambian con `-var` o con un `terraform/terraform.tfvars` (está en `.gitignore`). Las
-principales son: `minikube_profile`, `fission_namespace_functions` (`ingesta`), las versiones de los charts (`nats_chart_version`,
+principales son: `minikube_profile`, `postal_codes` (códigos postales que recorren los
+scrapers; por defecto `["08016"]`), `fission_namespace_functions` (`ingesta`), las versiones de los charts (`nats_chart_version`,
 `nack_chart_version` y `fission_chart_version`), las de JetStream (`stream_name`,
 `stream_max_age` y `normalizer_*`) y las de Fission (`fission_env_poolsize` y
 `fission_python_base`). Están todas en `terraform/variables.tf`.
@@ -136,7 +137,9 @@ bash flujo-entrada/infra/e2e.sh
 Lanza un Job desde el CronJob, espera a que acabe (máximo 15 min), comprueba en el log que el
 scraper ha publicado más de 0 productos (detecta el fallo silencioso) y espera a que el
 consumidor `normalizer` quede a 0 pendientes y aparezcan lotes nuevos en
-`scraper.mercadona.clean` (máximo 10 min). Sale con 0 solo si se cumple todo.
+`scraper.<cadena>.clean` (máximo 10 min). Lo hace para todas las cadenas a la vez
+(`CHAINS="mercadona consum"`; `CHAINS=consum` para una sola). Sale con 0 solo si se cumple
+todo.
 
 A mano:
 
@@ -163,7 +166,7 @@ principio y los cargará todos.
 | `helm_release.fission` se queda esperando hasta el timeout | El Service `router` es de tipo LoadBalancer y en minikube nunca recibe IP | `routerServiceType: NodePort` |
 | "Error locating chart … 500" | GitHub falla a ratos | `up.sh` reintenta el apply hasta 3 veces. Las releases son `atomic`, así que un intento fallido no deja nada a medias |
 | En un contenedor (sin systemd) `bootstrap.sh` instala Docker pero dice "el demonio de docker no esta en marcha" | No hay systemd que arranque `dockerd` | Solo pasa en contenedores, no en una VM. Arranca `dockerd` a mano y repite `up.sh` |
-| `scrapper-mercadona` termina con `None 0 items` y "dry-run (0 pendientes)" | Fallo de red puntual: el cliente se traga la excepción y el Job acaba con código 0 | Pendiente en el scraper (ver `docs/05-pendientes.md`, "fallo silencioso"). Se arregla relanzando el Job |
+| Un Job de scraper acaba `Failed` con "0 productos" | Fallo de red puntual o la web bloquea | Desde el 11/11 el scraper falla en vez de acabar "bien" sin datos. Kubernetes reintenta 2 veces; si no, relanza el Job a mano |
 
 ## Cómo se ha probado
 
@@ -174,6 +177,9 @@ principio y los cargará todos.
 - **Desde cero en la máquina de desarrollo:** `down.sh && E2E=1 up.sh`, RC=0 (4656 productos
   → 94 lotes).
 - **Idempotencia:** un segundo `up.sh` da `No changes` en unos 20 s.
+- **Con Consum (11/11/2026):** `E2E=1 up.sh` sobre el clúster existente añadió la imagen y el
+  CronJob de Consum y cambió el filtro a `scraper.*.raw`; las dos cadenas a la vez:
+  Mercadona 4659 productos → 94 lotes, Consum 9338 → 187 lotes, 0 errores, RC=0.
 
 ## Relación con `setup-vm.sh`
 

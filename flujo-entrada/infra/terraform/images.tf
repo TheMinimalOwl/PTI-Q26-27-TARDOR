@@ -14,6 +14,13 @@ locals {
       files      = ["Dockerfile", "requirements.txt", "src/**/*.py"]
       build_args = {}
     }
+    scraper_consum = {
+      name       = "scrapper-consum"
+      dir        = "scrappers/scrapper_consum"
+      dockerfile = "Dockerfile"
+      files      = ["Dockerfile", "requirements.txt", "src/**/*.py"]
+      build_args = {}
+    }
     normalizer_env = {
       name       = "normalizer-env"
       dir        = "fission/normalizer"

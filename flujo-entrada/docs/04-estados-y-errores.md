@@ -63,9 +63,11 @@ stateDiagram-v2
 
 ## Riesgos detectados en el diseño actual
 
-1. **Fallo silencioso del scraper.** `main.py` nunca devuelve código de salida distinto de
-   0. Si NATS está caído, el Job se marca como **exitoso** y los datos solo quedan en un
-   `.txt` dentro de un Pod que se destruye. No hay alarma ni reingesta.
+1. **Fallo silencioso del scraper — resuelto el 11/11/2026.** Antes `main.py` nunca
+   devolvía código distinto de 0: si NATS o la web fallaban, el Job salía **exitoso** sin
+   datos. Ahora los dos scrapers salen con error si una tienda da 0 productos o si no se
+   publican todos, y Kubernetes reintenta el Pod (`backoffLimit: 2`). Sigue sin haber
+   alarma: el Job fallido solo se ve con `kubectl get jobs`.
 2. **Búfer y flushes solapados — resuelto el 17/10/2026.** `flush()` se llama desde el
    handler (al llegar a `CONSUMER_BATCH`) y desde el bucle de 5 s; al no haber lock, dos
    llamadas solapaban, publicaban **el mismo lote dos veces** y el segundo `ack` fallaba con
@@ -75,9 +77,8 @@ stateDiagram-v2
    `AckWait`. Esto también evita el crecimiento sin cota del punto anterior.
 3. **Sin idempotencia.** Nada deduplica por `product_id`. Una reentrega del mismo mensaje
    produce líneas repetidas en `scraper.mercadona.clean`.
-4. **`wh` a nivel de lote.** `consumer.flush()` toma el `wh` del **primer** producto del
-   lote y lo aplica a todo. Hoy todos los productos son `default`, pero al introducir
-   multi-tienda el etiquetado sería incorrecto.
+4. **`wh` a nivel de lote — resuelto el 11/11/2026.** El consumer agrupa por cadena, `wh` y
+   código postal, así que un lote nunca mezcla tiendas.
 5. **Sin observabilidad.** No hay métricas ni logs estructurados; solo `print()` en el
    consumer y en el scraper. Los fallos del punto 1 son invisibles.
 
@@ -87,10 +88,11 @@ stateDiagram-v2
 |---|---|
 | Mercadona cambia su JSON | Líneas con `-` en los campos que falten; el lote sigue |
 | Mercadona añade un `size_format`/`reference_format` nuevo | Ese producto queda con precio unitario incompleto (`- (formato_no_comparable:...)`); el resto sigue |
-| Mercadona bloquea temporalmente | `status` != 200 → 0 items → Job "exitoso" sin datos (visto el 17/10: un disparo manual dio `subs=0`) |
+| Mercadona bloquea temporalmente | `status` != 200 → 0 items → el Job **falla** (antes del 11/11 acababa "exitoso" sin datos, visto el 17/10) |
+| Un código postal no tiene tienda de esa cadena | Se salta con un aviso; las demás tiendas siguen |
 | NATS caído durante el CronJob | Datos solo en el `.txt` efímero → se pierden con el Pod |
 | Fission caído un rato | Reentrega por `AckWait` (el búfer ya no crece); duplicados al recuperar |
-| Llegan productos de dos tiendas | El lote entero se etiqueta con el `wh` del primero |
+| Llegan productos de dos tiendas | Van a lotes distintos, cada uno con su `wh` |
 | Un producto sin `id` | Se descarta en `publish` (no se publica); sí aparece en el `.txt` |
 
 ## Verificación end-to-end (17/10/2026)
@@ -115,5 +117,5 @@ Disparo manual del CronJob con el normalizer ya con Pydantic:
 > límites. Efecto útil: los `clean` de los últimos 7 días se pueden reproducir (replay) para
 > cargarlos en BD cuando exista.
 >
-> El consumidor durable `normalizer` filtra solo `scraper.mercadona.raw` (`Max Ack Pending:
+> El consumidor durable `normalizer` filtra `scraper.*.raw`, todas las cadenas (`Max Ack Pending:
 > 1000`, 0 pendientes), por eso los `clean` no se reprocesan: no hay bucle.

@@ -81,10 +81,17 @@ gantt
   axisFormat %H:%M
   section Mercadona
   Job del scraper        :02:00, 15m
+  section Consum
+  Job del scraper        :02:00, 10m
   section Consumer
   Escucha continua       :00:00, 24h
 ```
 
-- **Mercadona**: una ejecución diaria a las 02:00, en serie (`Forbid`).
+- **Mercadona** y **Consum**: una ejecución diaria a las 02:00 **hora de Madrid**
+  (`timeZone: Europe/Madrid`), cada uno en serie consigo mismo (`Forbid`). Corren a la vez:
+  el consumer agrupa los lotes por cadena. Consum tarda unos 8 minutos (95 páginas con 5 s de
+  pausa).
+- El flujo de cada producto es el mismo para las dos cadenas; abajo se usa Mercadona como
+  ejemplo.
 - **normalizer-consumer**: Deployment siempre arriba; no depende del CronJob, solo consume
   lo que llegue a NATS.

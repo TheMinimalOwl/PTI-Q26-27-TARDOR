@@ -1,10 +1,10 @@
 from datetime import datetime
 from pathlib import Path
 
-def dump(url: str, status: int | None, items: list[dict], out_dir: Path) -> Path:
+def dump(url: str, status: int | None, items: list[dict], out_dir: Path, wh: str = "default") -> Path:
     out_dir.mkdir(parents=True, exist_ok=True)
     ts = datetime.now().strftime("%Y%m%d_%H%M%S")
-    path = out_dir / f"mercadona_{ts}.txt"
+    path = out_dir / f"mercadona_{wh}_{ts}.txt"
     lines = [
         f"URL origen: {url}",
         f"Fecha: {datetime.now().isoformat(timespec='seconds')}",

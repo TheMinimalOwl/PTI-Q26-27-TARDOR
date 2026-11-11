@@ -1,0 +1,43 @@
+# Scraper de Consum: todo el catalogo (~9.400 productos, ~95 paginas) una vez al dia.
+# Proyecto academico sin animo de lucro: una sola pasada nocturna, peticiones de una en una
+# y SCRAPER_DELAY segundos entre paginas (con 5 s, unos 8 minutos en total).
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: scrapper-consum
+  namespace: scrappers
+spec:
+  schedule: "0 2 * * *"
+  timeZone: "Europe/Madrid"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      template:
+        spec:
+          restartPolicy: OnFailure
+          volumes:
+            - name: out
+              persistentVolumeClaim:
+                claimName: scraper-out
+          containers:
+            - name: scraper
+              image: scrapper-consum:v1
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: NATS_URL
+                  value: "nats://nats.messaging.svc.cluster.local:4222"
+                # Codigos postales (separados por comas). Los dara la API; de momento uno de ejemplo.
+                # Con Terraform se sobrescribe con la variable `postal_codes`.
+                - name: SCRAPER_POSTAL_CODES
+                  value: "08016"
+                - name: SCRAPER_DELAY
+                  value: "5"
+              volumeMounts:
+                - name: out
+                  mountPath: /app/out
+              resources:
+                requests: { cpu: "100m", memory: "256Mi" }
+                limits:   { cpu: "500m", memory: "768Mi" }

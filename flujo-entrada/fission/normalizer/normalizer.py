@@ -20,6 +20,7 @@ empaqueta como una unica fuente inline (`fission.yaml`), y el consumer reutiliza
 el modulo (`from normalizer import to_clean_txt`).
 """
 
+import re
 from datetime import datetime, timezone
 from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
 from typing import Annotated, Any, Literal
@@ -69,6 +70,9 @@ ALIASES: dict[str, str] = {
     "100ml": "100 ml", "100g": "100 g",
     "100 gramos": "100 g", "100 gramo": "100 g",
     "100 mililitros": "100 ml", "100 mililitro": "100 ml",
+    # Consum: Gr, 100 Gr y Do (dosis: pastillas de lavavajillas, bolsitas de infusion)
+    "gr": "g", "100 gr": "100 g",
+    "do": "ud", "dosis": "ud",
 }
 
 
@@ -214,6 +218,72 @@ class CleanBatch(BaseModel):
 
 
 # ---------------------------------------------------------------------------
+# Adaptadores de cadena -> forma comun
+# ---------------------------------------------------------------------------
+#
+# El normalizador trabaja sobre la forma de Mercadona (`id`, `display_name`,
+# `price_instructions`, `share_url`, `categories`). Cada cadena nueva solo necesita una
+# funcion que traduzca su crudo a esa forma; el resto (precio unitario canonico, linea
+# limpia, contrato Pydantic) es comun. La cadena se detecta por la forma del objeto, asi
+# que el scraper sigue publicando el crudo tal cual.
+
+# "Lentejas Bote 425 Gr", "Yogur Pack de 4 4 x 120 Gr", "Cerveza 12 x 0,25 L"
+_CONSUM_SIZE = re.compile(r"(?:(\d+)\s*x\s*)?(\d+(?:[.,]\d+)?)\s*(Gr|Kg|ml|cl|L|U|Lv|Dc|M|Do)\s*$", re.I)
+
+
+def _consum_price(price_data: dict) -> dict:
+    """Precio vigente: el de oferta si lo hay (es lo que paga el cliente), si no el normal."""
+    prices = {x.get("id"): (x.get("value") or {}) for x in price_data.get("prices") or []}
+    return prices.get("OFFER_PRICE") or prices.get("PRICE") or {}
+
+
+def from_consum(p: dict) -> dict:
+    """Producto crudo de la API de Consum -> forma comun.
+
+    - `id`: `code`, el id publico (el de la URL); `id` de Consum es interno.
+    - precio: `centAmount` (en euros, pese al nombre) y `centUnitAmount` por
+      `unitPriceUnitType` ("1 Kg", "1 L", "100 ml", "1 U"...), que se trata como el
+      `reference_price`/`reference_format` de Mercadona: la fuente manda.
+    - tamano: no viene estructurado; se saca del final de `description`
+      ("... 425 Gr", "... 4 x 120 Gr"). Solo se usa si faltara el precio de la fuente.
+    """
+    pd = p.get("productData") or {}
+    price_data = p.get("priceData") or {}
+    value = _consum_price(price_data)
+    ref_fmt = re.sub(r"^1\s+", "", str(price_data.get("unitPriceUnitType") or "").strip())
+
+    size, size_fmt = None, ""
+    m = _CONSUM_SIZE.search(str(pd.get("description") or ""))
+    if m:
+        n, amount, size_fmt = m.groups()
+        size = _dec(amount)
+        if size is not None and n:
+            size = size * int(n)
+
+    pi = {
+        "unit_price": value.get("centAmount"),
+        "reference_price": value.get("centUnitAmount"),
+        "reference_format": ref_fmt,
+    }
+    if size is not None:  # sin tamano, la linea muestra "-" como en Mercadona
+        pi.update(unit_size=size, size_format=size_fmt)
+    return {
+        "id": str(p.get("code") or p.get("id", "-")),
+        "display_name": pd.get("name", ""),
+        "price_instructions": pi,
+        "share_url": pd.get("url", ""),
+        "categories": [{"name": c.get("name", "")} for c in p.get("categories") or [] if isinstance(c, dict)],
+    }
+
+
+def to_common(p):
+    """Traduce el crudo de cualquier cadena a la forma comun (Mercadona pasa tal cual)."""
+    if isinstance(p, dict) and "priceData" in p and "productData" in p:
+        return from_consum(p)
+    return p
+
+
+# ---------------------------------------------------------------------------
 # Calculo y normalizacion
 # ---------------------------------------------------------------------------
 
@@ -226,6 +296,7 @@ def unit_price(p: dict) -> tuple[Decimal | None, str | None, str, str]:
       unit_price/tamano) o `"-"` (incompleto).
     - `motivo` describe por que falta el valor cuando `valor is None`.
     """
+    p = to_common(p)
     pi = p.get("price_instructions") or {}
 
     ref = _dec(pi.get("reference_price"))
@@ -260,6 +331,7 @@ def unit_price(p: dict) -> tuple[Decimal | None, str | None, str, str]:
 
 def normalize_record(p: dict) -> dict:
     """Campos normalizados de un producto (base de la linea y del JSON)."""
+    p = to_common(p)
     pi = p.get("price_instructions") or {}
     cats = p.get("categories") or []
     up, base, src, motivo = unit_price(p)
@@ -302,6 +374,7 @@ def to_clean_json(
     for p in items:
         if not isinstance(p, dict) or "_errors" in p:
             continue
+        p = to_common(p)
         RawProduct.model_validate(p)  # entrada: el camino estructurado no tolera crudos rotos
         productos.append(normalize_model(p))
     batch = CleanBatch(
@@ -342,6 +415,7 @@ def to_clean_txt(items: list[dict]) -> str:
     for p in items:
         if "_errors" in p:
             continue
+        p = to_common(p)
         try:
             r = normalize_record(p)
             NormalizedProduct.model_validate(r)  # contrato Pydantic: deja rastro si no cuadra

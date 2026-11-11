@@ -54,17 +54,19 @@ flowchart LR
 flowchart TB
   subgraph ext["Internet"]
     MD["API Mercadona<br/>tienda.mercadona.es/api"]
+    CS["API Consum<br/>tienda.consum.es/api"]
   end
 
   subgraph k8s["Cluster Minikube (local)"]
     subgraph nsScr["ns: scrappers"]
-      CJMD["CronJob scrapper-mercadona<br/>0 2 * * *"]
+      CJMD["CronJob scrapper-mercadona<br/>0 2 * * * (Madrid)"]
+      CJCS["CronJob scrapper-consum<br/>0 2 * * * (Madrid)"]
       SEC["Secret scraper-secrets"]
     end
 
     subgraph nsMsg["ns: messaging · stream SCRAPERS"]
-      RAW["canal de ENTRADA<br/>scraper.mercadona.raw"]
-      CLEAN["canal de SALIDA<br/>scraper.mercadona.clean"]
+      RAW["canal de ENTRADA<br/>scraper.&lt;cadena&gt;.raw"]
+      CLEAN["canal de SALIDA<br/>scraper.&lt;cadena&gt;.clean"]
     end
 
     subgraph nsFis["ns: fission"]
@@ -83,13 +85,15 @@ flowchart TB
   CJMD -->|"GET (JSON)"| MD
   SEC -.-> CJMD
   CJMD -->|"publica"| RAW
+  CJCS -->|"GET (JSON)"| CS
+  CJCS -->|"publica"| RAW
   RAW -->|"consumer deliver.normalizer"| CONS
   CONS -->|"POST /normalize"| ROUTER
   ROUTER --> TRIG
   TRIG --> FN
   FN -->|"text/plain"| CONS
   CONS -->|"publica"| CLEAN
-  CLEAN -.->|"sin consumidor todavía"| XBD
+  CLEAN -.->|"durable api-writer"| XBD
 
   classDef cExt fill:#e3f2fd,stroke:#1e88e5,stroke-width:2px,color:#0d47a1,font-weight:bold
   classDef cScraper fill:#e8f5e9,stroke:#43a047,stroke-width:2px,color:#1b5e20,font-weight:bold
@@ -133,17 +137,23 @@ flowchart TB
 
 ## 🧩 Componentes
 
-### 1 · 🕷️ `scrapper_mercadona` — recolector
+### 1 · 🕷️ `scrapper_mercadona` y `scrapper_consum` — recolectores
+
+Hay un recolector por cadena, con la misma estructura. Abajo, el de Mercadona. El de Consum
+(`scrappers/scrapper_consum/`, ver su README) recorre la API paginada de Consum
+(`catalog/product?limit=100&offset=N`) con `SCRAPER_DELAY` segundos entre páginas, publica en
+`scraper.consum.raw`. Los dos salen con código ≠ 0 si no consiguen productos o no los
+publican, y los dos recorren la tienda que sirve cada código postal (`SCRAPER_POSTAL_CODES`).
 
 | Fichero | Responsabilidad |
 |---|---|
 | `src/client.py` | `fetch_json(url)` → `(status, dict)`; `requests` con `User-Agent`, timeout 15 s |
 | `src/extractor.py` | `collect_raw(category_json)` → aplana `categories[].products[]` en una lista |
-| `src/dump_txt.py` | `dump(...)` → volcado crudo a `out/mercadona_<ts>.txt` |
+| `src/dump_txt.py` | `dump(...)` → volcado crudo a `out/mercadona_<wh>_<ts>.txt` |
 | `src/publish.py` | `publish(items, wh)` → 1 mensaje NATS por producto (envelope) |
-| `src/main.py` | Orquesta: categorías → subcategorías → extracción → volcado → publicación |
+| `src/main.py` | Orquesta: código postal → almacén (`wh`) → categorías → subcategorías → extracción → volcado → publicación |
 | `Dockerfile` | `python:3.13-slim`, `CMD ["python", "src/main.py"]` |
-| `cronjob.yaml` | CronJob en `scrappers`, `schedule: "0 2 * * *"`, `concurrencyPolicy: Forbid` |
+| `cronjob.yaml` | CronJob en `scrappers`, `schedule: "0 2 * * *"`, `timeZone: Europe/Madrid`, `concurrencyPolicy: Forbid` |
 
 > [!IMPORTANT]
 > **Principio de diseño.** El scraper **no normaliza**: solo extrae y publica datos crudos
@@ -225,7 +235,8 @@ Fission por HTTP.
 | `cluster/namespace.yaml` | Namespace ×3 | — | `scrappers`, `fission`, `messaging` |
 | `messaging/nats-values.yaml` | Helm values | messaging | JetStream + PVC 1 Gi |
 | `scrappers/k8s/secrets.yaml` | Secret | scrappers | `scraper-secrets` (`USER_AGENT`; hoy solo lo lee el scraper de Carrefour) |
-| `scrapper_mercadona/cronjob.yaml` | CronJob | scrappers | `0 2 * * *`; monta el PVC en `/app/out` |
+| `scrapper_mercadona/cronjob.yaml` | CronJob | scrappers | `0 2 * * *` (Europe/Madrid); monta el PVC en `/app/out` |
+| `scrapper_consum/cronjob.yaml` | CronJob | scrappers | `0 2 * * *` (Europe/Madrid), `SCRAPER_DELAY=5`; mismo PVC |
 | `scrapper_mercadona/pvc.yaml` | PersistentVolumeClaim | scrappers | `scraper-out`, 1 Gi: guarda los `.txt` de depuración |
 | `fission/normalizer/fission.yaml` | HTTPTrigger | ingesta | POST `/normalize` (a `Function` `normalizer`) |
 | `fission/normalizer/consumer.yaml` | Deployment | ingesta | `normalizer-consumer` |
@@ -249,7 +260,7 @@ Fission por HTTP.
 | `NATS_STREAM` | `SCRAPERS` | Stream destino |
 | `NATS_SUBJECT` | `scraper.mercadona.raw` | Subject de publicación |
 | `NATS_DRY_RUN` | `0` | `1` = no publica (solo volcado txt) |
-| `SCRAPER_WH` | `default` | Etiqueta de almacén (`wh`) |
+| `SCRAPER_POSTAL_CODES` | `08016` | Códigos postales (separados por comas). Cada uno se traduce a su tienda (`wh`); ver [`03`](03-contratos-datos.md#código-postal-y-tienda) |
 
 ### 📥 Consumer
 
@@ -257,7 +268,7 @@ Fission por HTTP.
 |---|---|---|
 | `NATS_URL` | `nats://nats.messaging.svc.cluster.local:4222` | Servidor NATS |
 | `NATS_DELIVER` | `deliver.normalizer` | Cola a la que se suscribe |
-| `NATS_SUBJECT_OUT` | `scraper.mercadona.clean` | Subject de salida limpia |
+| `NATS_SUBJECT_OUT` | `scraper.mercadona.clean` | Solo de reserva: la salida se deriva del subject de entrada (`scraper.<cadena>.raw` → `scraper.<cadena>.clean`) |
 | `NORMALIZE_URL` | `http://router.fission/normalize` | Si vacío → normaliza en proceso |
 | `CONSUMER_BATCH` | `50` | Tamaño de lote antes de volcar |
 
@@ -283,7 +294,7 @@ Fission por HTTP.
 >
 > ```bash
 > bash flujo-entrada/infra/up.sh         # instala lo que falte, crea el perfil `ingesta` y aplica
-> E2E=1 bash flujo-entrada/infra/up.sh   # y además una pasada real hasta scraper.mercadona.clean
+> E2E=1 bash flujo-entrada/infra/up.sh   # y además una pasada real de cada cadena hasta scraper.<cadena>.clean
 > bash flujo-entrada/infra/down.sh       # lo borra
 > ```
 >

@@ -13,6 +13,8 @@ spec:
 
   schedule: "0 2 * * *"
 
+  timeZone: "Europe/Madrid"
+
   concurrencyPolicy: Forbid
 
   successfulJobsHistoryLimit: 2
@@ -59,9 +61,11 @@ spec:
 
                   value: "nats://nats.messaging.svc.cluster.local:4222"
 
-                - name: SCRAPER_WH
+                # Codigos postales (separados por comas). Los dara la API; de momento uno de ejemplo.
+                # Con Terraform se sobrescribe con la variable `postal_codes`.
+                - name: SCRAPER_POSTAL_CODES
 
-                  value: "default"
+                  value: "08016"
 
               volumeMounts:
 

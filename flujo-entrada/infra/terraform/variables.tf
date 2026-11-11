@@ -10,6 +10,19 @@ variable "kubeconfig" {
   default     = "~/.kube/config"
 }
 
+# --- Scrapers ---
+
+variable "postal_codes" {
+  description = "Codigos postales que recorren los scrapers. Mas adelante los dara la API (los de los usuarios de la app); de momento, uno de ejemplo."
+  type        = list(string)
+  default     = ["08016"]
+
+  validation {
+    condition     = length(var.postal_codes) > 0 && alltrue([for c in var.postal_codes : can(regex("^[0-9]{5}$", c))])
+    error_message = "postal_codes tiene que tener al menos un codigo postal de 5 cifras."
+  }
+}
+
 # --- Charts (versiones fijadas: las mismas que se montaron a mano en la VM) ---
 
 variable "nats_chart_version" {
@@ -53,8 +66,9 @@ variable "normalizer_durable" {
 }
 
 variable "normalizer_filter_subject" {
-  type    = string
-  default = "scraper.mercadona.raw"
+  description = "Crudos que lee el normalizador: todas las cadenas (scraper.<cadena>.raw)."
+  type        = string
+  default     = "scraper.*.raw"
 }
 
 variable "normalizer_deliver_subject" {

@@ -22,14 +22,16 @@ Casi cerrada. La cola de salida ya está conectada: el equipo de API/BD consume
 
 | Hueco | Impacto | Nota |
 |---|---|---|
-| Fallo silencioso del scraper (exit 0 con NATS caído) | Alto | No hay alerta ni reingesta |
+| Códigos postales desde la API | Alto | Hoy `postal_codes = ["08016"]` fijo. Falta el endpoint de la API con los códigos de los usuarios (propuesta en [`03`](03-contratos-datos.md#código-postal-y-tienda)) |
+| Sin alerta si falla un scraper | Medio | Desde el 11/11 el Job falla de forma visible, pero nadie avisa |
 | Sin idempotencia / deduplicación | Medio | Duplicados en reentrega |
-| `wh` a nivel de lote | Medio | Bloquea multi-tienda correctamente etiquetada |
 | Validar el respaldo `calculado` con una 2ª cadena sin `reference_price` | Medio | Alcampo/Ahorramás; es donde el cálculo trabaja de verdad (ver [`03`](03-contratos-datos.md#precio-unitario-canónico-€kg--€l--€ud--€m--€lavado)) |
 | Sin `Service` para los `.txt` | Bajo | El volcado es solo para depurar; ya se guarda en el PVC `scraper-out` |
 | Sin monitorización ni logs estructurados | Alto | Tarea 8 del plan |
 | Sin `schema_version` en el envelope | Bajo | Necesario si el formato evoluciona |
-| 2ª cadena (Carrefour) **bloqueada** | Medio | Challenge JS de Cloudflare desde el 15/10/2026; requiere navegador real. Código en `scrappers/scrapper_carrefour/` (no lo despliega `setup-vm.sh`) |
+| `ean` fuera de la línea limpia | Medio | Consum lo trae y serviría para emparejar el mismo producto entre cadenas; añadirlo cambia el contrato con API/BD |
+| Consum pierde ~0,8 % por paginar con `offset` | Bajo | El catálogo se mueve durante la pasada; se deduplica pero no se recupera lo desplazado |
+| Carrefour **bloqueada** (la 2ª cadena acabó siendo Consum) | Medio | Challenge JS de Cloudflare desde el 15/10/2026; requiere navegador real. Código en `scrappers/scrapper_carrefour/` (no lo despliega `setup-vm.sh`) |
 | Embeddings (coordinado con el equipo de IA) | Alto | Tarea 5; no existe nada |
 
 ## Roadmap alineado con el plan
