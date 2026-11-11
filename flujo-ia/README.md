@@ -16,6 +16,8 @@ prototipo lo consume sin tocar una linea.
 | [`docs/01-decision-modelos.md`](docs/01-decision-modelos.md) | **Que modelo de embeddings y que LLM, y por que** |
 | [`docs/02-prototipo-rag.md`](docs/02-prototipo-rag.md) | Como funciona: chunking, que se embebe, prompts, degradacion |
 | [`docs/03-evaluacion.md`](docs/03-evaluacion.md) | Metricas, resultados medidos y como reproducirlos |
+| [`docs/04-despliegue.md`](docs/04-despliegue.md) | Despliegue en la VM: systemd, API y verificacion |
+| [`docs/05-demo.md`](docs/05-demo.md) | **Preguntas de demo que funcionan siempre** (tarea del plan) |
 
 ## Arranque rapido
 

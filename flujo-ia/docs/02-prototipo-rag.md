@@ -42,8 +42,14 @@ que el prototipo consume el dato real sin adaptadores: se copia el `.txt` a
 | `rag/retriever.py` | Busqueda con filtros de metadatos |
 | `rag/llm.py` | Clientes Ollama / Gemini / sin-LLM con la misma interfaz |
 | `rag/pipelines.py` | Los tres pipelines: catalogo, equivalencia, QA |
+| `rag/chain.py` | Cadenas **LangChain (LCEL)**: recuperacion -> prompt -> LLM -> parseo |
+| `rag/guardrails.py` | Lo que se comprueba antes de responder + construccion del JSON |
+| `rag/schemas/` | JSON Schema de la respuesta (`respuesta-asistente.schema.json`) |
 | `rag/evaluate.py` | Las tres evaluaciones y el informe |
+| `rag/serve.py` | API Flask: `/health`, `/search`, `/equiv`, `/ask`, `/ask/stream` |
 | `rag/cli.py` | Interfaz de linea de comandos |
+| `scripts/verificar.sh` | Checklist de verificacion: entorno -> tests -> servicios -> API -> CLI |
+| `tests/` | 75 tests (`pytest`): store, guardrails, chain, serve, pipelines... |
 | `data/generate_dataset.py` | Genera el dataset de prueba y el ground truth |
 
 ## Decisiones del pipeline
@@ -131,8 +137,18 @@ tanto las fuentes) sobreviven a la cadena. Se invoca con
 
 ### 6. Prompts
 
-El prompt es corto a proposito: el modelo local por defecto es un 4B, que
-responde peor cuanto mas se le alarga. Reglas que se siguen:
+Hay **tres prompts**, todos en [`rag/chain.py`](../rag/chain.py) como
+`ChatPromptTemplate` (sistema + humano):
+
+| Prompt | Pipeline | Lo que exige en la salida |
+|---|---|---|
+| `PROMPT_CATALOGO` | catálogo | `MEJOR: [id] ... - motivo` y `ALTERNATIVAS: [id] ...` |
+| `PROMPT_EQUIVALENCIA` | equivalencia | **SOLO** JSON `{"pid", "confianza", "motivo"}` con criterios negativos explícitos |
+| `PROMPT_QA` | asistente | `RESPUESTA: ...` (con cifras) + `FUENTES: [id] ... - motivo` |
+
+El prompt es corto a proposito: el modelo local por defecto es un `qwen3:4b`
+(en la VM se evaluó con `qwen3:8b`), que responde peor cuanto mas se le
+alarga. Reglas que se siguen:
 
 - **El contexto lleva el `id` entre corchetes** (`[10001]`) para que el modelo
   cite y para que la evaluacion pueda comprobar que no inventa ids.
