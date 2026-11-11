@@ -2,27 +2,28 @@
 #
 # Prueba de extremo a extremo de la ingesta ya desplegada (con up.sh):
 #
-#   bash flujo-entrada/infra/e2e.sh                  # todas las cadenas (mercadona consum)
-#   CHAINS=consum bash flujo-entrada/infra/e2e.sh    # solo una
+#   bash flujo-entrada/infra/e2e.sh                       # todos los scrapers
+#   SCRAPERS=consum bash flujo-entrada/infra/e2e.sh       # solo uno
 #
-# Para cada cadena, a la vez:
-# 1. Lanza un Job desde su CronJob (como el de las 02:00) y espera a que acabe.
-# 2. Comprueba en su log que ha publicado productos en scraper.<cadena>.raw (> 0).
-# Despues:
+# SCRAPERS son los CronJobs (scrapper-<nombre>). Las cadenas publicadas se sacan del log de
+# cada Job ("nats: N -> scraper.<cadena>.raw").
+#
+# 1. Lanza un Job desde cada CronJob (como el de las 02:00), a la vez, y espera a que acaben.
+# 2. Comprueba en sus logs que cada uno ha publicado productos (> 0).
 # 3. Espera a que el consumidor `normalizer` lo procese todo y a que aparezcan lotes nuevos
-#    en scraper.<cadena>.clean de cada cadena, que es la salida hacia API/BD.
+#    en scraper.<cadena>.clean de cada cadena publicada: la salida hacia API/BD.
 #
 # Sale con 0 solo si todo eso se cumple. Necesita internet (baja los catalogos).
 #
-# Variables: CHAINS ("mercadona consum")  MINIKUBE_PROFILE (ingesta)  FN_NAMESPACE (ingesta)
-#            JOB_TIMEOUT (1200 s)  DRAIN_TIMEOUT (600 s)  KEEP_JOB (0)
+# Variables: SCRAPERS ("mercadona consum caprabo condis")  MINIKUBE_PROFILE (ingesta)
+#            FN_NAMESPACE (ingesta)  JOB_TIMEOUT (5400 s)  DRAIN_TIMEOUT (900 s)  KEEP_JOB (0)
 set -euo pipefail
 
-CHAINS="${CHAINS:-mercadona consum}"
+SCRAPERS="${SCRAPERS:-${CHAINS:-mercadona consum caprabo condis}}"
 PROFILE="${MINIKUBE_PROFILE:-ingesta}"
 FN_NS="${FN_NAMESPACE:-ingesta}"
-JOB_TIMEOUT="${JOB_TIMEOUT:-1200}"
-DRAIN_TIMEOUT="${DRAIN_TIMEOUT:-600}"
+JOB_TIMEOUT="${JOB_TIMEOUT:-5400}"
+DRAIN_TIMEOUT="${DRAIN_TIMEOUT:-900}"
 STREAM="SCRAPERS"
 STAMP="$(date +%Y%m%d%H%M%S)"
 
@@ -47,62 +48,64 @@ consumer_field() {
 
 cleanup() {
   [ "${KEEP_JOB:-0}" = 1 ] && return
-  local c
-  for c in $CHAINS; do k -n scrappers delete job "$(job "$c")" --ignore-not-found >/dev/null 2>&1 || true; done
+  local s
+  for s in $SCRAPERS; do k -n scrappers delete job "$(job "$s")" --ignore-not-found >/dev/null 2>&1 || true; done
 }
 trap cleanup EXIT
 
-declare -A CLEAN0 PUBLISHED
 say "estado inicial"
-for c in $CHAINS; do
-  k -n scrappers get cronjob "scrapper-$c" >/dev/null 2>&1 || die "no existe el CronJob scrapper-$c"
-  CLEAN0[$c]="$(count "scraper.$c.clean")"
-  echo "   $c: raw=$(count "scraper.$c.raw") clean=${CLEAN0[$c]}"
+declare -A BEFORE PUBLISHED
+while IFS='=' read -r subj n; do [ -n "$subj" ] && BEFORE[$subj]="$n"; done < <(counts)
+for s in $SCRAPERS; do
+  k -n scrappers get cronjob "scrapper-$s" >/dev/null 2>&1 || die "no existe el CronJob scrapper-$s"
 done
+for subj in $(printf '%s\n' "${!BEFORE[@]}" | sort); do echo "   $subj=${BEFORE[$subj]}"; done
 
-say "scrapers: lanzando $(echo $CHAINS | wc -w) Jobs (timeout ${JOB_TIMEOUT}s)"
-for c in $CHAINS; do
-  k -n scrappers create job --from="cronjob/scrapper-$c" "$(job "$c")" >/dev/null
-  echo "   $(job "$c")"
+say "scrapers: lanzando $(echo $SCRAPERS | wc -w) Jobs (timeout ${JOB_TIMEOUT}s)"
+for s in $SCRAPERS; do
+  k -n scrappers create job --from="cronjob/scrapper-$s" "$(job "$s")" >/dev/null
+  echo "   $(job "$s")"
 done
 
 # Espera a que todos acaben (Complete o Failed).
 deadline=$((SECONDS + JOB_TIMEOUT))
-pending="$CHAINS"
+pending="$SCRAPERS"
 while [ -n "$pending" ]; do
   still=""
-  for c in $pending; do
-    j="$(job "$c")"
+  for s in $pending; do
+    j="$(job "$s")"
     st="$(k -n scrappers get job "$j" -o jsonpath='{range .status.conditions[?(@.status=="True")]}{.type}{" "}{end}')"
     case "$st" in
-      *Complete*) echo "   $c: terminado" ;;
-      *Failed*)   k -n scrappers logs "job/$j" --tail=30 || true; die "el Job de $c ha fallado" ;;
-      *)          still="$still $c" ;;
+      *Complete*) echo "   $s: terminado ($(( SECONDS / 60 )) min)" ;;
+      *Failed*)   k -n scrappers logs "job/$j" --tail=30 || true; die "el Job de $s ha fallado" ;;
+      *)          still="$still $s" ;;
     esac
   done
   pending="${still# }"
   [ -z "$pending" ] && break
   [ "$SECONDS" -lt "$deadline" ] || die "no han acabado en ${JOB_TIMEOUT}s: $pending"
-  sleep 15
+  sleep 30
 done
 
-for c in $CHAINS; do
-  log="$(k -n scrappers logs "job/$(job "$c")")"
-  printf '%s\n' "$log" | grep -E '^(200|nats:|   [0-9]{5}:)' | sed "s/^ */   $c: /"
-  # Mercadona acaba con 0 aunque no haya bajado nada (fallo silencioso conocido): se mira el log.
-  # Una linea "nats: N -> ..." por tienda (codigo postal): se suman.
-  n="$(printf '%s\n' "$log" | sed -n "s/^nats: \([0-9]*\) -> scraper\.$c\.raw.*/\1/p" | awk '{s+=$1} END {print s+0}')"
-  [ -n "$n" ] && [ "$n" -gt 0 ] || die "$c no ha publicado nada (fallo de red puntual: relanza e2e.sh)"
-  PUBLISHED[$c]="$n"
+for s in $SCRAPERS; do
+  log="$(k -n scrappers logs "job/$(job "$s")")"
+  printf '%s\n' "$log" | grep -E '^(200|nats:|   [0-9]{5}:|   [a-z]+: (tienda|no reparte))' | sed "s/^ */   $s: /"
+  # Una linea "nats: N -> scraper.<cadena>.raw" por tienda: se suman por cadena.
+  found=0
+  while read -r n chain; do
+    PUBLISHED[$chain]=$(( ${PUBLISHED[$chain]:-0} + n )); found=$(( found + n ))
+  done < <(printf '%s\n' "$log" | sed -n 's/^nats: \([0-9]*\) -> scraper\.\([a-z0-9-]*\)\.raw.*/\1 \2/p')
+  [ "$found" -gt 0 ] || die "$s no ha publicado nada (fallo de red puntual: relanza e2e.sh)"
 done
+CHAINS_OUT="$(printf '%s\n' "${!PUBLISHED[@]}" | sort | tr '\n' ' ')"
 
 say "normalizador: esperando a que procese todo (timeout ${DRAIN_TIMEOUT}s)"
 deadline=$((SECONDS + DRAIN_TIMEOUT))
 while :; do
   pend="$(consumer_field num_pending)"; acks="$(consumer_field num_ack_pending)"
   ok=1; line=""
-  for c in $CHAINS; do
-    new=$(( $(count "scraper.$c.clean") - CLEAN0[$c] ))
+  for c in $CHAINS_OUT; do
+    new=$(( $(count "scraper.$c.clean") - ${BEFORE[scraper.$c.clean]:-0} ))
     line="$line $c=+$new"
     [ "$new" -gt 0 ] || ok=0
   done
@@ -115,11 +118,11 @@ while :; do
   sleep 10
 done
 
-errores="$(k -n "$FN_NS" logs deploy/normalizer-consumer --since=1h 2>/dev/null | grep -c 'ERROR' || true)"
+errores="$(k -n "$FN_NS" logs deploy/normalizer-consumer --since=2h 2>/dev/null | grep -c 'ERROR' || true)"
 say "OK"
-for c in $CHAINS; do
-  new=$(( $(count "scraper.$c.clean") - CLEAN0[$c] ))
+for c in $CHAINS_OUT; do
+  new=$(( $(count "scraper.$c.clean") - ${BEFORE[scraper.$c.clean]:-0} ))
   echo "   $c: ${PUBLISHED[$c]} productos -> $new lotes nuevos en scraper.$c.clean (~$(( (PUBLISHED[$c] + 49) / 50 )) esperados con lotes de 50)"
 done
-echo "   lineas ERROR en el log del consumer (ultima hora): $errores"
+echo "   lineas ERROR en el log del consumer (ultimas 2 h): $errores"
 echo "   la salida queda en el stream $STREAM para el writer de API/BD (durable api-writer)"

@@ -25,7 +25,7 @@ Casi cerrada. La cola de salida ya está conectada: el equipo de API/BD consume
 | Códigos postales desde la API | Alto | Hoy `postal_codes = ["08016"]` fijo. Falta el endpoint de la API con los códigos de los usuarios (propuesta en [`03`](03-contratos-datos.md#código-postal-y-tienda)) |
 | Sin alerta si falla un scraper | Medio | Desde el 11/11 el Job falla de forma visible, pero nadie avisa |
 | Sin idempotencia / deduplicación | Medio | Duplicados en reentrega |
-| Validar el respaldo `calculado` con una 2ª cadena sin `reference_price` | Medio | Alcampo/Ahorramás; es donde el cálculo trabaja de verdad (ver [`03`](03-contratos-datos.md#precio-unitario-canónico-€kg--€l--€ud--€m--€lavado)) |
+| ~~Validar el respaldo `calculado` con una cadena sin `reference_price`~~ | Hecho | Con Caprabo (11/11/2026): donde la web da el precio por unidad, el calculado coincide en el 98 % ([`03`](03-contratos-datos.md#mapeo-de-campos-de-caprabo)) |
 | Sin `Service` para los `.txt` | Bajo | El volcado es solo para depurar; ya se guarda en el PVC `scraper-out` |
 | Sin monitorización ni logs estructurados | Alto | Tarea 8 del plan |
 | Sin `schema_version` en el envelope | Bajo | Necesario si el formato evoluciona |

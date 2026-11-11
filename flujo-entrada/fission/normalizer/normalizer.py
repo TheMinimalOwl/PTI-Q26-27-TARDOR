@@ -73,6 +73,11 @@ ALIASES: dict[str, str] = {
     # Consum: Gr, 100 Gr y Do (dosis: pastillas de lavavajillas, bolsitas de infusion)
     "gr": "g", "100 gr": "100 g",
     "do": "ud", "dosis": "ud",
+    # Caprabo: "1 KILO A 2,00 €", "brik 1 litro", "12 uds."
+    "grs": "g", "cc": "ml", "mililitros": "ml", "mililitro": "ml", "centilitros": "cl",
+    "ud.": "ud", "uds.": "ud", "unid.": "ud", "unid": "ud", "unidad.": "ud",
+    # Condis: "5,28€/Kilo", "0,23€/100 ml", "3,69€/Docena", "1,99€/Bandeja"
+    "bandeja": "ud",
 }
 
 
@@ -276,10 +281,117 @@ def from_consum(p: dict) -> dict:
     }
 
 
+# Tamano dentro del nombre: "brik 1 litro", "pack 4x125 g", "malla 2 kg", "12 uds.",
+# "rollo 30 m", "40 lavados". Se usa la ULTIMA coincidencia del nombre.
+_GE_SIZE = re.compile(
+    r"(?:(\d+)\s*[x×]\s*)?(\d+(?:[.,]\d+)?)\s*"
+    r"(kilos?|kg|gramos?|grs?|g|litros?|l|mililitros?|ml|centilitros?|cl|cc|"
+    r"unidades|unid\.?|uds?\.?|u|metros?|m|lavados?|dosis|docenas?)(?![a-záéíóúñ])",
+    re.I,
+)
+_GE_HALF_DOZEN = re.compile(r"(\d+)\s*/\s*(\d+)\s*docena", re.I)   # "1/2 docena"
+# Sin cantidad: "Coco, unidad", "Cebolleta, manojo", "Lechuga, 1 pieza" -> 1 ud.
+_GE_ONE_UNIT = re.compile(r"(?:^|[\s,])(?:1\s+)?(unidad|pieza|manojo)(?![a-záéíóúñ])", re.I)
+# "1 KILO A 2,00 €", "1 LITRO A 0,95 €", "100 GRAMOS A 1,20 €"
+_GE_UNIT_PRICE = re.compile(r"^\s*([0-9]+(?:[.,][0-9]+)?)?\s*([A-Za-zÁÉÍÓÚáéíóúÑñ.]+(?:\s[A-Za-z.]+)?)\s+A\s+([0-9.,]+)\s*€")
+
+
+def _ge_size(name: str) -> tuple[Decimal | None, str]:
+    half = _GE_HALF_DOZEN.search(name)
+    if half and int(half.group(2)):
+        return Decimal(int(half.group(1)) * 12) / int(half.group(2)), "ud"
+    matches = list(_GE_SIZE.finditer(name))
+    if not matches:
+        return (Decimal(1), "ud") if _GE_ONE_UNIT.search(name) else (None, "")
+    n, amount, unit = matches[-1].groups()
+    size = _dec(amount)
+    if size is not None and n:
+        size = size * int(n)
+    return size, unit
+
+
+def from_caprabo(p: dict) -> dict:
+    """Producto crudo de Caprabo (HTML de capraboacasa.com) -> forma comun.
+
+    - precio: `price` (vigente, el de la analitica de la web); si faltara, `price_now`.
+    - precio por unidad de la fuente: `unit_price_text` ("1 KILO A 2,00 €") cuando la web lo
+      da; se trata como el reference_price/reference_format de Mercadona.
+    - tamano: del nombre ("brik 1 litro", "pack 4x125 g", "1/2 docena"). Con el, si la web
+      no da precio por unidad, se calcula (`src=calculado`). En los productos al peso
+      ("al peso, compra minima 500 g") el precio es el de esa cantidad.
+    """
+    total = p.get("price")
+    if total in (None, "") and p.get("price_now"):
+        total = p["price_now"]
+    pi = {"unit_price": total}
+
+    m = _GE_UNIT_PRICE.match(str(p.get("unit_price_text") or ""))
+    if m:
+        qty, word, value = m.groups()
+        pi["reference_price"] = value.replace(".", "").replace(",", ".")  # "1.234,50" -> "1234.50"
+        pi["reference_format"] = word if not qty or _dec(qty) == 1 else f"{qty} {word}"
+
+    size, size_fmt = _ge_size(str(p.get("name") or ""))
+    if size is not None:
+        pi.update(unit_size=size, size_format=size_fmt)
+
+    cat = p.get("category") or ""
+    return {
+        "id": str(p.get("id", "-")),
+        "display_name": p.get("name", ""),
+        "price_instructions": pi,
+        "share_url": p.get("url", ""),
+        "categories": [{"name": cat}] if cat else [],
+    }
+
+
+# "5,28€/Kilo", "0,23€/100 ml", "12,10€/Kilo PNE" (peso neto escurrido)
+_CONDIS_ZERO = re.compile(r"\s+0\s*(?:kg|g|l|ml|cl|u)\s*$", re.I)
+_CONDIS_PUM = re.compile(r"^\s*([0-9.,]+)\s*€\s*/\s*(.+?)\s*(?:PNE)?\s*$", re.I)
+
+
+def from_condis(p: dict) -> dict:
+    """Producto crudo de Condis (API del buscador Empathy.co) -> forma comun.
+
+    - precio: `price.current` (ya es el de oferta si la hay; `regular` es el de siempre).
+    - precio por unidad de la fuente: `pum` ("5,28€/Kilo", "0,23€/100 ml"), en el 99 % de
+      los productos; se trata como el reference_price/reference_format de Mercadona.
+    - tamano: del final de `description` ("... 320 G", "... 6 UNIDADES"), como en Caprabo.
+      Solo se usa si falta `pum`.
+    """
+    price = p.get("price") or {}
+    pi = {"unit_price": price.get("current", price.get("regular"))}
+    m = _CONDIS_PUM.match(str(p.get("pum") or ""))
+    if m:
+        pi["reference_price"] = m.group(1).replace(".", "").replace(",", ".")
+        pi["reference_format"] = m.group(2)
+
+    # Algunos nombres van truncados y acaban en un "0 KG" de relleno ("TAHIN INTEG RAL
+    # 225GRS VER 0 KG"): se quita para que cuente el tamano de verdad, si lo hay.
+    size, size_fmt = _ge_size(_CONDIS_ZERO.sub("", str(p.get("description") or "")))
+    if size:
+        pi.update(unit_size=size, size_format=size_fmt.lower())
+
+    cats = p.get("category") or []
+    cat = p.get("family") or (cats[-1] if cats else "")
+    url = str(p.get("url") or "")
+    return {
+        "id": str(p.get("id", "-")),
+        "display_name": p.get("description", ""),
+        "price_instructions": pi,
+        "share_url": f"https://compraonline.condis.es{url}" if url.startswith("/") else url,
+        "categories": [{"name": cat}] if cat else [],
+    }
+
+
 def to_common(p):
     """Traduce el crudo de cualquier cadena a la forma comun (Mercadona pasa tal cual)."""
     if isinstance(p, dict) and "priceData" in p and "productData" in p:
         return from_consum(p)
+    if isinstance(p, dict) and p.get("platform") == "caprabo":
+        return from_caprabo(p)
+    if isinstance(p, dict) and "description" in p and isinstance(p.get("price"), dict) and "current" in p["price"]:
+        return from_condis(p)
     return p
 
 

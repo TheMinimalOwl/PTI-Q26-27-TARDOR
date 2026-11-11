@@ -82,11 +82,11 @@ Es idempotente: si se vuelve a ejecutar, solo se reconstruye lo que haya cambiad
 
 | Fichero | Recursos | Antes lo hacía |
 |---|---|---|
-| `images.tf` | `scrapper-mercadona`, `scrapper-consum`, `normalizer-env` y `normalizer-consumer`: `docker build` + `minikube image load`, y comprueba con `minikube image ls` que han llegado al nodo | Lo mismo, a mano |
+| `images.tf` | `scrapper-mercadona`, `scrapper-consum`, `scrapper-caprabo`, `scrapper-condis`, `normalizer-env` y `normalizer-consumer`: `docker build` + `minikube image load`, y comprueba con `minikube image ls` que han llegado al nodo | Lo mismo, a mano |
 | `namespaces.tf` | `scrappers`, `messaging` y `fission` (a partir de `cluster/namespace.yaml`) | `kubectl apply -k cluster/` |
 | `nats.tf` | Chart de NATS (con `messaging/nats-values.yaml`), **NACK**, y los CRD `Stream SCRAPERS` y `Consumer normalizer` | `helm install` + `kubectl exec nats-box -- nats request $JS.API...` |
 | `fission.tf` | Chart `fission-all` 1.27, `Environment python` con pydantic, `Package` + `Function normalizer`, `HTTPTrigger` (`fission.yaml`) y `normalizer-consumer` (`consumer.yaml`) | `helm install` + `fission env/fn create` + `deploy.sh` |
-| `scraper.tf` | `scraper-secrets`, PVC `scraper-out` y CronJobs `scrapper-mercadona` y `scrapper-consum` (02:00, hora de Madrid) | `kubectl apply -k scrappers/...` |
+| `scraper.tf` | `scraper-secrets`, PVC `scraper-out` y CronJobs `scrapper-mercadona`, `scrapper-consum`, `scrapper-caprabo` y `scrapper-condis` (02:00, hora de Madrid) | `kubectl apply -k scrappers/...` |
 
 Los YAML de siempre siguen siendo la fuente de verdad: Terraform los lee tal cual y solo
 cambia la etiqueta de la imagen.
@@ -103,7 +103,7 @@ Todo lo de la ingesta vive en namespaces propios y no toca `default`:
 
 | Namespace | Qué hay |
 |---|---|
-| `scrappers` | CronJobs `scrapper-mercadona` y `scrapper-consum`, `scraper-secrets`, PVC `scraper-out` |
+| `scrappers` | CronJobs `scrapper-mercadona`, `scrapper-consum`, `scrapper-caprabo` y `scrapper-condis`, `scraper-secrets`, PVC `scraper-out` |
 | `messaging` | NATS (StatefulSet), `nats-box`, NACK, CRDs `Stream SCRAPERS` y `Consumer normalizer` |
 | `fission` | Plano de control de Fission (router, executor…) |
 | `ingesta` | `Environment python`, `Function` y `Package` `normalizer`, `HTTPTrigger`, pods del pool y `normalizer-consumer` |
@@ -134,11 +134,12 @@ Automática:
 bash flujo-entrada/infra/e2e.sh
 ```
 
-Lanza un Job desde el CronJob, espera a que acabe (máximo 15 min), comprueba en el log que el
+Lanza un Job desde cada CronJob, espera a que acaben (máximo 90 min), comprueba en el log que el
 scraper ha publicado más de 0 productos (detecta el fallo silencioso) y espera a que el
 consumidor `normalizer` quede a 0 pendientes y aparezcan lotes nuevos en
-`scraper.<cadena>.clean` (máximo 10 min). Lo hace para todas las cadenas a la vez
-(`CHAINS="mercadona consum"`; `CHAINS=consum` para una sola). Sale con 0 solo si se cumple
+`scraper.<cadena>.clean` (máximo 15 min). Lo hace para todas las cadenas a la vez
+(`SCRAPERS="mercadona consum caprabo condis"`, los CronJobs; `SCRAPERS=consum` para uno solo).
+Con Caprabo la pasada dura unos 60 minutos. Sale con 0 solo si se cumple
 todo.
 
 A mano:
@@ -180,6 +181,9 @@ principio y los cargará todos.
 - **Con Consum (11/11/2026):** `E2E=1 up.sh` sobre el clúster existente añadió la imagen y el
   CronJob de Consum y cambió el filtro a `scraper.*.raw`; las dos cadenas a la vez:
   Mercadona 4659 productos → 94 lotes, Consum 9338 → 187 lotes, 0 errores, RC=0.
+- **Con código postal y Caprabo (11/11/2026):** `E2E=1 up.sh`, los tres scrapers a la vez
+  con 08016: Mercadona `bcn1` 4652 → 94 lotes, Consum `378` 8611 → 173, Caprabo `8284` 13068
+  → 263 (59 min), 0 errores, RC=0.
 
 ## Relación con `setup-vm.sh`
 

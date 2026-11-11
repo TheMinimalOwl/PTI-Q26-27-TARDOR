@@ -83,11 +83,15 @@ gantt
   Job del scraper        :02:00, 15m
   section Consum
   Job del scraper        :02:00, 10m
+  section Caprabo
+  Job del scraper        :02:00, 60m
+  section Condis
+  Job del scraper        :02:00, 2m
   section Consumer
   Escucha continua       :00:00, 24h
 ```
 
-- **Mercadona** y **Consum**: una ejecución diaria a las 02:00 **hora de Madrid**
+- **Mercadona**, **Consum**, **Caprabo** y **Condis**: una ejecución diaria a las 02:00 **hora de Madrid**
   (`timeZone: Europe/Madrid`), cada uno en serie consigo mismo (`Forbid`). Corren a la vez:
   el consumer agrupa los lotes por cadena. Consum tarda unos 8 minutos (95 páginas con 5 s de
   pausa).

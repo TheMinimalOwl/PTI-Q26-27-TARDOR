@@ -82,7 +82,7 @@ Referencia: hoja **Samuel** de `Plan_tareas_PTI.xlsx` (15 tareas).
 | 2. Scraper publicando + router Fission + esqueleto del normalizador | Hecha (con cambio de diseño: NATS en vez de HTTP POST) | [`01`](01-arquitectura.md), [`03`](03-contratos-datos.md) |
 | 3. Normalizador con Pydantic + cálculo €/L·€/kg + escritura en BD + CronJob | Hecha (la salida `scraper.*.clean` la carga en BD el writer de API/BD; queda abierto texto vs JSON) | [`03`](03-contratos-datos.md), [`05`](05-pendientes.md) |
 | Despliegue reproducible (Terraform) | Hecho: `infra/up.sh` monta la ingesta desde una VM vacía | [`infra/README.md`](../infra/README.md) |
-| 5–6. Más cadenas | **Consum** activo (11/11, API JSON pública). Carrefour, Alcampo y Dia bloqueados por antibots; Ahorramás y Eroski viables por HTML (ver [`scrappers/README.md`](../scrappers/README.md)) | [`03`](03-contratos-datos.md#mapeo-de-campos-de-consum) |
+| 5–6. Más cadenas | **Consum** (API JSON), **Caprabo** (HTML) y **Condis** (API JSON del buscador) activos desde el 11/11. Carrefour, Alcampo, Dia y Bonpreu bloqueados por antibots; Veritas viable (ver [`scrappers/README.md`](../scrappers/README.md)) | [`03`](03-contratos-datos.md#mapeo-de-campos-de-consum) |
 | 4, 7–15. Presentación de progreso, calidad de datos, ingesta, demos, memoria | No iniciadas | [`05`](05-pendientes.md) |
 
 ## Convenciones
@@ -91,7 +91,8 @@ Referencia: hoja **Samuel** de `Plan_tareas_PTI.xlsx` (15 tareas).
   de Fission), `ingesta` (función `normalizer`, entorno, trigger, pods del pool y consumer).
   Con el montaje a mano (`setup-vm.sh`) esto último sigue en `default`.
 - **Nombres de subject**: `<recurso>.<cadena>.<estado>` → `scraper.mercadona.raw`,
-  `scraper.mercadona.clean`, `scraper.consum.raw`, `scraper.consum.clean`.
+  `scraper.mercadona.clean`, `scraper.consum.raw`, `scraper.consum.clean`,
+  `scraper.caprabo.raw`, `scraper.caprabo.clean`, `scraper.condis.raw`, `scraper.condis.clean`.
 - **`wh`**: tienda o almacén de la cadena que sirve un código postal (`bcn1` en Mercadona,
   `378` en Consum para 08016). Viaja en el envelope y en el lote limpio junto a
   `postal_code`. Los códigos postales los dará la app; de momento, 08016 de ejemplo.

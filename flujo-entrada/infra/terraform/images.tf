@@ -21,6 +21,20 @@ locals {
       files      = ["Dockerfile", "requirements.txt", "src/**/*.py"]
       build_args = {}
     }
+    scraper_condis = {
+      name       = "scrapper-condis"
+      dir        = "scrappers/scrapper_condis"
+      dockerfile = "Dockerfile"
+      files      = ["Dockerfile", "requirements.txt", "src/**/*.py"]
+      build_args = {}
+    }
+    scraper_caprabo = {
+      name       = "scrapper-caprabo"
+      dir        = "scrappers/scrapper_caprabo"
+      dockerfile = "Dockerfile"
+      files      = ["Dockerfile", "requirements.txt", "src/**/*.py"]
+      build_args = {}
+    }
     normalizer_env = {
       name       = "normalizer-env"
       dir        = "fission/normalizer"

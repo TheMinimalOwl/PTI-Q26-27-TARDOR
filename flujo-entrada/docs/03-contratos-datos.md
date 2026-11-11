@@ -22,8 +22,12 @@ flowchart LR
 |---|---|---|---|
 | `scraper.mercadona.raw` | scraper de Mercadona | `normalizer-consumer` (durable `normalizer`) | 1 mensaje por producto |
 | `scraper.consum.raw` | scraper de Consum | `normalizer-consumer` (durable `normalizer`) | 1 mensaje por producto |
+| `scraper.caprabo.raw` | scraper de Caprabo | `normalizer-consumer` (durable `normalizer`) | 1 mensaje por producto |
+| `scraper.condis.raw` | scraper de Condis | `normalizer-consumer` (durable `normalizer`) | 1 mensaje por producto |
 | `scraper.mercadona.clean` | `normalizer-consumer` | writer de API/BD (durable `api-writer`) | 1 mensaje por lote |
 | `scraper.consum.clean` | `normalizer-consumer` | writer de API/BD (durable `api-writer`) | 1 mensaje por lote |
+| `scraper.caprabo.clean` | `normalizer-consumer` | writer de API/BD (durable `api-writer`) | 1 mensaje por lote |
+| `scraper.condis.clean` | `normalizer-consumer` | writer de API/BD (durable `api-writer`) | 1 mensaje por lote |
 
 El consumer agrupa los lotes **por cadena** (nunca mezcla dos cadenas en un lote) y publica
 cada uno en el `clean` de la cadena de la que vino: `scraper.<cadena>.raw` →
@@ -95,6 +99,8 @@ cada código postal**:
 |---|---|---|---|
 | Mercadona | `PUT /api/postal-codes/actions/change-pc/` `{"new_postal_code": "08016"}` → cabecera `x-customer-wh` | `?lang=es&wh=bcn1` en cada petición | `wh=bcn1` |
 | Consum | `GET /api/rest/V1.0/shipping/area?zipCode=08016` → zona de reparto a domicilio | Cabeceras `X-TOL-ZONE: 378` y `X-TOL-SHIPPING-ZONE: 378D` | `wh=378` (tienda "Centro 378", Barcelona) |
+| Caprabo | Sin login no se puede elegir: la web enseña su tienda online por defecto. Solo se comprueba que el código postal sea de Cataluña (08, 17, 25, 43), donde reparte | — | `wh=8284` ("Caprabo_Plataforma") |
+| Condis | La web elige la tienda en su servidor al pedir (no hay API pública). Se usa la que ve sin iniciar sesión (`SCRAPER_STORE`) y se comprueba que el código postal sea de Cataluña | `store=718` en cada petición al buscador | `wh=718` |
 
 - Varios códigos postales que caen en la misma tienda se recorren **una sola vez**.
 - Si una cadena no da servicio en un código postal (Consum no reparte en Madrid ni Sevilla),
@@ -316,6 +322,52 @@ incompleto. Ejemplo de línea limpia:
 
 `ean` viaja en el crudo pero **no** en la línea limpia: añadirlo cambia el contrato con
 API/BD (ver [`05-pendientes.md`](05-pendientes.md)).
+
+## Mapeo de campos de Condis
+
+El catálogo sale de la API del buscador de la web (Empathy.co; ver
+`scrappers/scrapper_condis/README.md`) y `from_condis()` lo traduce a la forma común. Se
+detecta por `description` + `price.current`.
+
+| Forma común | Condis | Ejemplo |
+|---|---|---|
+| `id` | `id` | `"116335"` |
+| `display_name` | `description` | `TORTILLAS ZANUY TRIGO 8 UNIDADES 320 G` |
+| `price_instructions.unit_price` | `price.current` (ya es el de oferta; `regular` es el de siempre) | `1.69` |
+| `price_instructions.reference_price` / `reference_format` | De `pum` | `5,28€/Kilo` → `5.28` / `Kilo` |
+| `price_instructions.unit_size` / `size_format` | Del final del nombre, como en Caprabo; se ignora el `0 KG` de relleno de los nombres truncados | `320 G` → `320` / `g` |
+| `share_url` | `https://compraonline.condis.es` + `url` | `https://compraonline.condis.es/tortillas-.../p/116335/es_ES` |
+| `categories[0].name` | `family` (si no, el último de `category`) | `Platos preparados` |
+
+Formatos de `pum` vistos: `€/Kilo`, `€/Kg`, `€/Kilo PNE` (peso neto escurrido), `€/Litro`,
+`€/100 ml`, `€/100 g`, `€/Unidad`, `€/Docena`, `€/Dosis`, `€/M`, `€/Bandeja`, `€/Pieza`.
+Catálogo completo (11/11/2026, tienda 718, 7.810 productos): 7.742 con precio por unidad de la
+web, 38 calculados y 30 incompletos (0,4 %, nombres truncados sin cantidad: "CUÑA QUESO SEMI
+SA CANOVA 0 KG").
+
+## Mapeo de campos de Caprabo
+
+No hay API: el scraper saca los campos del HTML tal como los enseña la web (ver
+`scrappers/scrapper_caprabo/README.md`) y `from_caprabo()` los traduce a la forma común.
+Se detecta por `platform: "caprabo"`.
+
+| Forma común | Caprabo | Ejemplo |
+|---|---|---|
+| `id` | `id` (de la analítica de la web) | `"13899893"` |
+| `display_name` | `name` | `Naranja de zumo PREMIER, malla 2 kg` |
+| `price_instructions.unit_price` | `price` (vigente; ya es el de oferta si la hay) | `3.99` |
+| `price_instructions.reference_price` / `reference_format` | De `unit_price_text` cuando la web lo da | `1 KILO A 2,00 €` → `2.00` / `KILO` |
+| `price_instructions.unit_size` / `size_format` | Del nombre: última cantidad con unidad; `NxM` en packs; `1/2 docena`; `unidad`, `pieza`, `manojo` sin número = 1 ud | `malla 2 kg` → `2` / `kg` |
+| `share_url` | `url` | `https://www.capraboacasa.com/es/productdetail/13899893-.../` |
+| `categories[0].name` | `category` (título de la página de categoría) | `Naranjas y otros cítricos` |
+
+Aquí el **cálculo de respaldo trabaja de verdad**: la web da el precio por unidad en ~78 % de
+los productos (`src=fuente`); para el resto se calcula con el tamaño del nombre
+(`src=calculado`). Catálogo completo de Caprabo (11/11/2026, 13.068 productos): 10.162
+fuente, 2.821 calculado y 85 incompletos (0,7 %, productos sin cantidad en el nombre: "pack 1
+par", "al corte", estuches); en una muestra, donde hay las dos cosas, el cálculo coincide con
+la web en el 98 %. Formatos de
+`unit_price_text` vistos: `1 KILO`, `1 LITRO`, `1 DOCENA`, `1 UNIDAD`.
 
 ## Mapeo de campos de Mercadona
 

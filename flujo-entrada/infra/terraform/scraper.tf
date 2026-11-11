@@ -1,5 +1,6 @@
 # Scrapers: secreto, PVC de volcados (compartido) y un CronJob por cadena, leidos de los YAML
-# de scrappers/. Activos: Mercadona y Consum, los dos a las 02:00 (hora de Madrid).
+# de scrappers/. Activos: Mercadona, Consum, Caprabo y Condis,
+# todos a las 02:00 (hora de Madrid).
 # Carrefour no se despliega: esta bloqueado por Cloudflare (ver docs/05-pendientes.md).
 
 locals {
@@ -49,6 +50,36 @@ resource "kubectl_manifest" "scraper_consum_cronjob" {
 
   depends_on = [
     terraform_data.image["scraper_consum"],
+    kubectl_manifest.scraper_pvc,
+    kubectl_manifest.stream,
+  ]
+}
+
+resource "kubectl_manifest" "scraper_condis_cronjob" {
+  yaml_body = replace(replace(
+    file("${local.ingesta}/scrappers/scrapper_condis/cronjob.yaml"),
+    "/image: scrapper-condis:\\S+/",
+    "image: ${local.image.scraper_condis}",
+  ), local.postal_codes_re, local.postal_codes_val)
+  override_namespace = "scrappers"
+
+  depends_on = [
+    terraform_data.image["scraper_condis"],
+    kubectl_manifest.scraper_pvc,
+    kubectl_manifest.stream,
+  ]
+}
+
+resource "kubectl_manifest" "scraper_caprabo_cronjob" {
+  yaml_body = replace(replace(
+    file("${local.ingesta}/scrappers/scrapper_caprabo/cronjob.yaml"),
+    "/image: scrapper-caprabo:\\S+/",
+    "image: ${local.image.scraper_caprabo}",
+  ), local.postal_codes_re, local.postal_codes_val)
+  override_namespace = "scrappers"
+
+  depends_on = [
+    terraform_data.image["scraper_caprabo"],
     kubectl_manifest.scraper_pvc,
     kubectl_manifest.stream,
   ]
