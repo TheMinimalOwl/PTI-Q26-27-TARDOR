@@ -15,7 +15,7 @@ config:
 
 container:
   image:
-    tag: "2.10-alpine"
+    tag: "2.10.29-alpine"
 
 natsBox:
   enabled: true

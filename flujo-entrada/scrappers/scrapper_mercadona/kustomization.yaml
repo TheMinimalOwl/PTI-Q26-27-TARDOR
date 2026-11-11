@@ -3,5 +3,6 @@ namespace: scrappers
 
 resources:
 
+  - pvc.yaml
   - cronjob.yaml
 

@@ -3,7 +3,7 @@
 Documentación de diseño del **flujo de entrada** del comparador de precios: scrapers,
 cluster Kubernetes, mensajería NATS JetStream y normalización con Fission.
 
-> Estado: rama `scrapping` (documentado el 19/10/2026). Los esquemas describen lo que hay
+> Estado: rama `develop` (actualizado el 11/11/2026). Los esquemas describen lo que hay
 > **implementado** en el repo, no lo que se desearía tener.
 
 ## Alcance
@@ -12,7 +12,7 @@ cluster Kubernetes, mensajería NATS JetStream y normalización con Fission.
 equipo de API/BD:
 
 ```
-web del súper  →  scraper (CronJob)  →  NATS raw  →  normalizer  →  NATS clean  →  [ API/BD ]
+web del súper  →  scraper (CronJob)  →  NATS raw  →  normalizer  →  NATS clean  →  [ writer API/BD → PostgreSQL ]
 ```
 
 **No cubre** (es de otros compañeros): esquema de BD, API REST, Redis, app móvil,
@@ -34,7 +34,7 @@ flowchart LR
         subgraph N2["messaging"]
             C["📨 NATS<br/>raw · clean"]
         end
-        subgraph N3["default"]
+        subgraph N3["fission · ingesta"]
             D["⚙️ Fission"]
         end
         B --> C
@@ -69,7 +69,8 @@ flowchart LR
 | [`02-flujo-datos.md`](02-flujo-datos.md) | Secuencia end-to-end, ciclo de vida de un producto y cadencia temporal |
 | [`03-contratos-datos.md`](03-contratos-datos.md) | Subjects, envelopes, formato de línea limpia con precio unitario canónico, mapeo de Mercadona y contrato Pydantic |
 | [`04-estados-y-errores.md`](04-estados-y-errores.md) | Estados, tipos de fallo, reintentos y escenarios límite |
-| [`05-pendientes.md`](05-pendientes.md) | Huecos detectados y siguiente trabajo previsto en el plan |
+| [`05-pendientes.md`](05-pendientes.md) | Huecos detectados, plan para separar ingesta y API/BD, y siguiente trabajo previsto |
+| [`../infra/README.md`](../infra/README.md) | Despliegue con un comando (`up.sh` + Terraform), versiones fijadas y problemas conocidos |
 
 ## Relación con el plan de tareas
 
@@ -79,13 +80,15 @@ Referencia: hoja **Samuel** de `Plan_tareas_PTI.xlsx` (15 tareas).
 |---|---|---|
 | 1. Clúster K8s local, repo y Dockerfile base + scraper Mercadona | Hecha | [`01`](01-arquitectura.md), [`02`](02-flujo-datos.md) |
 | 2. Scraper publicando + router Fission + esqueleto del normalizador | Hecha (con cambio de diseño: NATS en vez de HTTP POST) | [`01`](01-arquitectura.md), [`03`](03-contratos-datos.md) |
-| 3. Normalizador con Pydantic + cálculo €/L·€/kg + escritura en BD + CronJob | Parcial (cálculo €/L·€/kg, contrato Pydantic y despliegue en la VM **hechos**; falta conectar la BD) | [`03`](03-contratos-datos.md), [`05`](05-pendientes.md) |
+| 3. Normalizador con Pydantic + cálculo €/L·€/kg + escritura en BD + CronJob | Hecha (la salida `scraper.*.clean` la carga en BD el writer de API/BD; queda abierto texto vs JSON) | [`03`](03-contratos-datos.md), [`05`](05-pendientes.md) |
+| Despliegue reproducible (Terraform) | Hecho: `infra/up.sh` monta la ingesta desde una VM vacía | [`infra/README.md`](../infra/README.md) |
 | 4–15. Presentación de progreso, Alcampo/Ahorramás, calidad de datos, ingesta, demos, memoria | No iniciadas (Carrefour, 2ª cadena, quedó **bloqueada** por Cloudflare el 15/10) | [`05`](05-pendientes.md) |
 
 ## Convenciones
 
 - **Namespaces**: `scrappers` (recolectores), `messaging` (NATS), `fission` (instalación
-  de Fission), `default` (función `normalizer`, trigger y consumer).
+  de Fission), `ingesta` (función `normalizer`, entorno, trigger, pods del pool y consumer).
+  Con el montaje a mano (`setup-vm.sh`) esto último sigue en `default`.
 - **Nombres de subject**: `<recurso>.<cadena>.<estado>` → `scraper.mercadona.raw`,
   `scraper.mercadona.clean`.
 - **`wh`**: etiqueta de almacén/tienda que viaja en el envelope. Hoy siempre `default`;

@@ -1,0 +1,6 @@
+terraform/.terraform/
+terraform/terraform.tfstate
+terraform/terraform.tfstate.*
+terraform/*.tfvars
+terraform/tfplan
+terraform/last-plan.txt

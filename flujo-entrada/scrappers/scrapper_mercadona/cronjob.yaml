@@ -31,6 +31,14 @@ spec:
 
           restartPolicy: OnFailure
 
+          volumes:
+
+            - name: out
+
+              persistentVolumeClaim:
+
+                claimName: scraper-out
+
           containers:
 
             - name: scraper
@@ -54,6 +62,12 @@ spec:
                 - name: SCRAPER_WH
 
                   value: "default"
+
+              volumeMounts:
+
+                - name: out
+
+                  mountPath: /app/out
 
               resources:
 

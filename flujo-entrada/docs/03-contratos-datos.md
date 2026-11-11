@@ -9,19 +9,67 @@ flowchart LR
   P["scrapper_mercadona<br/>publish.py"] -->|"1 msg = 1 producto"| RAW["scraper.mercadona.raw"]
   RAW --> C["normalizer-consumer"]
   C -->|"1 msg = 1 lote"| CLEAN["scraper.mercadona.clean"]
-  CLEAN --> API["API/BD"]
+  CLEAN -->|"durable api-writer (pull)"| API["writer de API/BD<br/>→ PostgreSQL"]
   RAW -.->|stream| S[("SCRAPERS<br/>subjects scraper.&gt;")]
+  CLEAN -.->|stream| S
 ```
 
 | Subject | Productor | Consumidor | Granularidad |
 |---|---|---|---|
-| `scraper.mercadona.raw` | scraper | normalizer-consumer | 1 mensaje por producto |
-| `scraper.mercadona.clean` | normalizer-consumer | **nadie todavía** | 1 mensaje por lote |
+| `scraper.mercadona.raw` | scraper | `normalizer-consumer` (durable `normalizer`) | 1 mensaje por producto |
+| `scraper.mercadona.clean` | `normalizer-consumer` | writer de API/BD (durable `api-writer`) | 1 mensaje por lote |
 
-Ambos viven en el stream `SCRAPERS` (subjects `scraper.>`). `publish.py` lo crea de forma
-defensiva si falta (`js.add_stream`) y `setup-vm.sh` garantiza la configuración buena:
-retiene los mensajes **7 días** (`Maximum Age: 7d`, `Discard Old`) con
-`Duplicate Window: 2m`. Los `clean` de esa ventana se pueden reproducir para cargarlos en BD.
+Ambos viven en el **mismo** stream `SCRAPERS` (subjects `scraper.>`): no hay un stream
+aparte para la salida. Lo crea Terraform con NACK (`infra/terraform/nats.tf`) o
+`setup-vm.sh` en el montaje a mano; `publish.py` además lo crea de forma defensiva si falta
+(`js.add_stream`). Retiene los mensajes **7 días** (`Maximum Age: 7d`, `Discard Old`) con
+`Duplicate Window: 2m`, así que la salida aguanta 7 días aunque nadie la lea.
+
+## Cola de salida (frontera con API/BD)
+
+La salida de la ingesta es el subject `scraper.<cadena>.clean` dentro de `SCRAPERS`. Cada
+lado es dueño de una parte:
+
+| Pieza | Dueño | Dónde se define |
+|---|---|---|
+| Stream `SCRAPERS` (nombre, subjects `scraper.>`, retención 7 d) | Ingesta | `infra/terraform/nats.tf` (`kubectl_manifest.stream`) |
+| Publicar `scraper.<cadena>.clean` con el formato de [Mensaje de salida](#mensaje-de-salida-clean) | Ingesta | `fission/normalizer/consumer.py` (`NATS_SUBJECT_OUT`) |
+| Consumidor durable `api-writer` sobre `scraper.*.clean` | API/BD | Lo crea el propio writer al arrancar (`api/app/writer.py`) |
+| Escribir en PostgreSQL | API/BD | `api/app/ingest.py` (`upsert_batch`) |
+
+Consumidores durables del stream:
+
+| Durable | Tipo | Filtro | Quién lo crea | Ack |
+|---|---|---|---|---|
+| `normalizer` | push → `deliver.normalizer` | `scraper.mercadona.raw` | Ingesta (NACK, `nats.tf`) | Explícito, `AckWait 30s`, `MaxAckPending 1000` |
+| `api-writer` | pull (`fetch(10)`) | `scraper.*.clean` | API/BD (`js.pull_subscribe`) | Tras el commit en BD; `nak(delay=10)` si falla la BD; `term()` si el mensaje está mal formado |
+
+Garantías que da la frontera:
+
+- **No se pierde nada si el writer arranca tarde o cae.** El durable guarda su posición en
+  NATS y el stream conserva los lotes 7 días. Por eso el orden de despliegue entre ingesta y
+  API no importa, siempre que el stream exista.
+- **Entrega at-least-once.** Un lote puede llegar dos veces (reentrega del normalizador o
+  del writer). La carga en BD es idempotente: el precio tiene clave única
+  `(product_id, store_id, observed_on)` y se hace *upsert*, así que una reentrega el mismo
+  día no duplica filas.
+- **La cadena sale del subject**, no del cuerpo: `scraper.mercadona.clean` → `mercadona`.
+  Una cadena nueva solo tiene que publicar en `scraper.<cadena>.clean`; el filtro
+  `scraper.*.clean` del writer ya la recoge.
+- **Punto de conexión:** `nats://nats.messaging.svc.cluster.local:4222` (dentro del clúster,
+  `api/k8s/configmap.yaml`).
+
+Qué rompería el contrato y hay que avisar antes al equipo de API/BD: renombrar el stream,
+cambiar el patrón de subjects, quitar `clean` o `items` del mensaje, cambiar el orden de los
+campos de la línea limpia o bajar la retención por debajo del tiempo que el writer pueda
+estar parado.
+
+Para mirar la cola de salida a mano:
+
+```bash
+kubectl -n messaging exec deploy/nats-box -- nats -s nats://nats:4222 stream subjects SCRAPERS
+kubectl -n messaging exec deploy/nats-box -- nats -s nats://nats:4222 consumer info SCRAPERS api-writer
+```
 
 ## Envelope de entrada (raw)
 
@@ -73,8 +121,14 @@ Publicado por `consumer.flush()`:
 **Decisión relevante:** `clean` viaja como **texto plano**, no como JSON estructurado. Es lo
 más rápido de producir y de leer, pero obliga al consumidor a parsear por ` | `. La variante
 estructurada existe ya como **opt-in** (`POST /normalize?format=json` → `CleanBatch` con
-`NormalizedProduct[]`); cambiar el mensaje de `clean` a JSON es decisión del equipo de
-API/BD (Prioridad 3 de [`05-pendientes.md`](05-pendientes.md#prioridad-3--contrato-con-apibd)).
+`NormalizedProduct[]`).
+
+El writer de API/BD (`api/app/ingest.py`, `parse_message`) **ya acepta las dos formas**: si
+el mensaje trae `items` lo usa directamente (la preferida), y si trae `clean` lo parsea línea
+a línea por ` | `. Así que pasar la salida a `CleanBatch` no rompe al writer, pero sí cambia
+el contrato: se acuerda antes con API/BD (ver
+[`05-pendientes.md`](05-pendientes.md#prioridad-3--contrato-con-apibd)). Si se hace, conviene
+publicar los dos campos (`clean` e `items`) durante una transición.
 
 ## Contrato de entrada de `POST /normalize`
 

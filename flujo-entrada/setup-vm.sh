@@ -104,7 +104,7 @@ step_base() {
   echo "   minikube: $(minikube status 2>/dev/null | head -1)"
   echo "   contexto de kubectl: $(kubectl config current-context)"
 
-  add_repo nats https://nats-io.github.io/k8s/helm-charts/
+  add_repo nats https://nats-io.github.io/k8s/helm/charts/
   add_repo fission-charts https://fission.github.io/fission-charts/
   helm repo update >/dev/null
   echo "   repos: $(helm repo list 2>/dev/null | awk 'NR>1 {printf "%s ", $1}')"

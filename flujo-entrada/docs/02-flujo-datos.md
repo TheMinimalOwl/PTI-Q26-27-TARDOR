@@ -57,7 +57,7 @@ stateDiagram-v2
   EnBuffer --> EnBuffer: publish falla → sin ack → reentrega (AckWait)
   EnBuffer --> Normalizado: POST /normalize (lote de hasta 50)
   Normalizado --> Limpio: publish scraper.mercadona.clean
-  Limpio --> [*]: lo consume API/BD (frontera con otro equipo)
+  Limpio --> [*]: durable api-writer → PostgreSQL (equipo de API/BD)
 ```
 
 Estados y su significado:

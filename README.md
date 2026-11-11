@@ -124,8 +124,8 @@ construye el índice; el LLM es opcional y se puede trabajar en modo *solo recup
 
 ```bash
 # Ingesta: monta y verifica el clúster completo
-bash flujo-entrada/setup-vm.sh
-bash flujo-entrada/setup-vm.sh verify
+bash flujo-entrada/infra/up.sh          # todo con Terraform en un perfil de minikube propio
+# (alternativa manual: bash flujo-entrada/setup-vm.sh && bash flujo-entrada/setup-vm.sh verify)
 
 # RAG: entorno + dataset + índice
 cd flujo-ia && bash setup.sh

@@ -53,7 +53,8 @@ stateDiagram-v2
 
 | Mecanismo | Configuración | Efecto |
 |---|---|---|
-| NATS JetStream | `AckWait` de 30 s (`setup-vm.sh`) | Redelivery de lotes no confirmados |
+| NATS JetStream | `AckWait` de 30 s (`infra/terraform/nats.tf` o `setup-vm.sh`) | Redelivery de lotes no confirmados |
+| Cola de salida | Retención 7 d en `SCRAPERS` + durable `api-writer` | Si el writer de API/BD cae, los lotes `clean` esperan y se cargan al volver; la carga es idempotente (*upsert*) |
 | `consumer` | `CONSUMER_BATCH=50`, flush cada 5 s | Cotas del búfer en condiciones normales |
 | `consumer` | `ack` tras publicar | Entrega **at-least-once** → posibles duplicados |
 | CronJob | `concurrencyPolicy: Forbid` | Sin solape de ejecuciones |

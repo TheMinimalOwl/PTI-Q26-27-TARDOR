@@ -1,0 +1,25 @@
+
+# Volumen para los volcados txt del scraper: /app/out del CronJob pasa a ser
+# persistente, asi cada pasada (incluida la de las 02:00) deja su
+# mercadona_<fecha>.txt en disco. ReadWriteOnce vale: el CronJob usa
+# concurrencyPolicy=Forbid (un solo pod escribiendo a la vez) y minikube es
+# single-node.
+apiVersion: v1
+
+kind: PersistentVolumeClaim
+
+metadata:
+
+  name: scraper-out
+
+spec:
+
+  accessModes:
+
+    - ReadWriteOnce
+
+  resources:
+
+    requests:
+
+      storage: 1Gi

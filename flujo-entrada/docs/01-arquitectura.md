@@ -16,7 +16,7 @@ flowchart LR
         subgraph N2["messaging"]
             C["📨 NATS<br/>raw · clean"]
         end
-        subgraph N3["default"]
+        subgraph N3["fission · ingesta"]
             D["⚙️ Fission"]
         end
         B --> C
@@ -71,7 +71,7 @@ flowchart TB
       ROUTER["Router Fission<br/>router.fission"]
     end
 
-    subgraph nsDef["ns: default"]
+    subgraph nsDef["ns: ingesta"]
       TRIG["HTTPTrigger normalizer-http<br/>POST /normalize"]
       FN["Function normalizer<br/>(Flask)"]
       CONS["Deployment normalizer-consumer"]
@@ -160,9 +160,13 @@ flowchart TB
 
 - `jetstream.enabled: true`, `fileStore` con PVC de 1 Gi (`storageClassName: standard`),
   `memoryStore` de 256 Mi.
-- Imagen `2.10-alpine`, `service.type: ClusterIP`, `natsBox` habilitado (para depurar).
-- Stream `SCRAPERS` con subjects `scraper.>` (creado por el publisher de forma
-  defensiva con `js.add_stream`, ignorando el error si ya existe).
+- Imagen `nats:2.10.29-alpine`, `service.type: ClusterIP`, `natsBox` habilitado (para depurar).
+- Stream `SCRAPERS` con subjects `scraper.>`: guarda **la entrada (`raw`) y la salida
+  (`clean`)**. Con Terraform lo declara un CRD de **NACK** (`infra/terraform/nats.tf`), igual
+  que el durable `normalizer`. El publisher además lo crea de forma defensiva con
+  `js.add_stream`, ignorando el error si ya existe.
+- La salida `scraper.<cadena>.clean` la lee el writer del equipo de API/BD con su durable
+  `api-writer` (ver [`03`](03-contratos-datos.md#cola-de-salida-frontera-con-apibd)).
 
 > [!NOTE]
 > **Por qué JetStream y no pub/sub básico.** Persistencia y `ack` explícito: si el
@@ -173,7 +177,7 @@ flowchart TB
 | Fichero | Responsabilidad |
 |---|---|
 | `normalizer.py` | Limpieza, formateo **y contrato Pydantic** (`RawProduct`, `NormalizedProduct`, `CleanBatch`) |
-| `requirements.txt` | `pydantic>=2` — lo necesitan la función y el consumer |
+| `requirements.txt` | `pydantic==2.14.3` — lo necesitan la función y el consumer |
 | `fission.yaml` | `HTTPTrigger` POST `/normalize` (la `Function` la crea `deploy.sh`: el CRD no tiene `entrypoint` ni `functionSource`) |
 | `deploy.sh` | Despliegue reproducible **en la VM del clúster**: entorno con pydantic + función + consumer + humo |
 | `consumer.py` | Puente alternativo: NATS → HTTP Fission → NATS |
@@ -216,13 +220,19 @@ Fission por HTTP.
 
 | Manifiesto | Kind | Namespace | Notas |
 |---|---|---|---|
-| `../setup-vm.sh` | Script | — | Montaje completo e idempotente en la VM (ver *Orden de despliegue*) |
+| `../infra/up.sh` + `../infra/terraform/` | Script + Terraform | — | **Despliegue recomendado**: un comando, desde una VM vacía (ver [`infra/README.md`](../infra/README.md)) |
+| `../setup-vm.sh` | Script | — | Montaje a mano, idempotente, en el perfil `minikube` (ver *Orden de despliegue*) |
 | `cluster/namespace.yaml` | Namespace ×3 | — | `scrappers`, `fission`, `messaging` |
 | `messaging/nats-values.yaml` | Helm values | messaging | JetStream + PVC 1 Gi |
 | `scrappers/k8s/secrets.yaml` | Secret | scrappers | `scraper-secrets` (`USER_AGENT`; hoy solo lo lee el scraper de Carrefour) |
-| `scrapper_mercadona/cronjob.yaml` | CronJob | scrappers | `0 2 * * *` |
-| `fission/normalizer/fission.yaml` | HTTPTrigger | default | POST `/normalize` (a `Function` `normalizer`) |
-| `fission/normalizer/consumer.yaml` | Deployment | default | `normalizer-consumer` |
+| `scrapper_mercadona/cronjob.yaml` | CronJob | scrappers | `0 2 * * *`; monta el PVC en `/app/out` |
+| `scrapper_mercadona/pvc.yaml` | PersistentVolumeClaim | scrappers | `scraper-out`, 1 Gi: guarda los `.txt` de depuración |
+| `fission/normalizer/fission.yaml` | HTTPTrigger | ingesta | POST `/normalize` (a `Function` `normalizer`) |
+| `fission/normalizer/consumer.yaml` | Deployment | ingesta | `normalizer-consumer` |
+
+> [!NOTE]
+> Los YAML dicen `namespace: default` porque es lo que usa el montaje a mano. Terraform los
+> aplica en `ingesta` (`override_namespace`) e instala Fission con `defaultNamespace: ingesta`.
 
 > [!NOTE]
 > `scrappers/scrapper_carrefour/` (CronJob `*/30 * * * *`) está en el repo pero
@@ -267,6 +277,24 @@ Fission por HTTP.
    barato si NATS falla o si se quiere probar en local sin cluster.
 
 ## 🚀 Orden de despliegue
+
+> [!TIP]
+> **Forma recomendada: un solo comando con Terraform.**
+>
+> ```bash
+> bash flujo-entrada/infra/up.sh         # instala lo que falte, crea el perfil `ingesta` y aplica
+> E2E=1 bash flujo-entrada/infra/up.sh   # y además una pasada real hasta scraper.mercadona.clean
+> bash flujo-entrada/infra/down.sh       # lo borra
+> ```
+>
+> `up.sh` instala docker, kubectl, minikube, helm y terraform si faltan (`bootstrap.sh`),
+> arranca un perfil de minikube propio y aplica `infra/terraform/`, que crea todo lo de esta
+> sección como recursos declarativos: el stream y el durable con NACK, la `Function` y el
+> `Package` de Fission sin CLI, e imágenes etiquetadas por hash de su contenido. Detalle y
+> problemas conocidos en [`infra/README.md`](../infra/README.md).
+>
+> Lo de abajo es el montaje **a mano** con `setup-vm.sh`, que sigue funcionando contra el
+> perfil `minikube`. No conviene mezclar los dos en el mismo clúster.
 
 > [!IMPORTANT]
 > **Todo el montaje está scriptado e idempotente** en `flujo-entrada/setup-vm.sh`.

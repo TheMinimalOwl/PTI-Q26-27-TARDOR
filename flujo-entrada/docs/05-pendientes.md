@@ -7,16 +7,16 @@ listan huecos y decisiones abiertas.
 
 ## Prioridad 3 — Contrato con API/BD
 
-La única prioridad abierta. Quién cierra esto: **el equipo de API/BD** (dueño de la API y la
-BD). El plan ya lo marca: *"cierra el esquema de BD y el contrato de API antes del 20/10"*.
+Casi cerrada. La cola de salida ya está conectada: el equipo de API/BD consume
+`scraper.*.clean` con su propio durable `api-writer` (ver
+[`03`](03-contratos-datos.md#cola-de-salida-frontera-con-apibd)).
 
-Decisiones a acordar:
-
-- ¿El destino `scraper.mercadona.clean` se queda en texto plano o pasa a **JSON
-  estructurado** (`NormalizedProduct[]`, ver [`03`](03-contratos-datos.md#lote-limpio-variante-estructurada-de-clean))?
-- ¿Quién escribe en BD: el consumer, o un servicio del equipo de API/BD que consume el subject?
-- ¿Se necesita deduplicar por `product_id` + `wh` + fecha? (hoy no se hace)
-- Subject y nombre de stream definitivos para todo el equipo.
+| Decisión | Estado |
+|---|---|
+| ¿Quién escribe en BD? | **Resuelta:** el writer de API/BD (`api/app/writer.py`), no el consumer de la ingesta |
+| ¿Deduplicar por producto + tienda + fecha? | **Resuelta en BD:** clave única `(product_id, store_id, observed_on)` con *upsert* |
+| Subject y stream definitivos | **Resuelta:** stream `SCRAPERS`, salida `scraper.<cadena>.clean` |
+| ¿`clean` en texto plano o JSON (`CleanBatch`)? | **Abierta.** El writer ya acepta las dos formas y prefiere `items`; falta acordar el cambio y una transición publicando ambos campos ([`03`](03-contratos-datos.md#mensaje-de-salida-clean)) |
 
 ## Otros huecos técnicos
 
@@ -26,7 +26,7 @@ Decisiones a acordar:
 | Sin idempotencia / deduplicación | Medio | Duplicados en reentrega |
 | `wh` a nivel de lote | Medio | Bloquea multi-tienda correctamente etiquetada |
 | Validar el respaldo `calculado` con una 2ª cadena sin `reference_price` | Medio | Alcampo/Ahorramás; es donde el cálculo trabaja de verdad (ver [`03`](03-contratos-datos.md#precio-unitario-canónico-€kg--€l--€ud--€m--€lavado)) |
-| Sin `Service`/PVC para los `.txt` | Bajo | El volcado es solo para depurar |
+| Sin `Service` para los `.txt` | Bajo | El volcado es solo para depurar; ya se guarda en el PVC `scraper-out` |
 | Sin monitorización ni logs estructurados | Alto | Tarea 8 del plan |
 | Sin `schema_version` en el envelope | Bajo | Necesario si el formato evoluciona |
 | 2ª cadena (Carrefour) **bloqueada** | Medio | Challenge JS de Cloudflare desde el 15/10/2026; requiere navegador real. Código en `scrappers/scrapper_carrefour/` (no lo despliega `setup-vm.sh`) |
@@ -36,7 +36,7 @@ Decisiones a acordar:
 
 | Tarea | Fechas (plan) | Qué queda por hacer en diseño/código |
 |---|---|---|
-| 3 (cierre) | 22–26 oct | Conectar la ingesta con la BD del equipo de API/BD (el cálculo €/L·€/kg y el contrato Pydantic ya están cerrados) |
+| 3 (cierre) | 22–26 oct | **Hecho:** la salida `scraper.*.clean` la consume el writer de API/BD. Solo queda decidir texto vs JSON |
 | 4 | 26 oct | Presentación de progreso — estos documentos son la base |
 | 5 | 29 oct – 9 nov | Segundo scraper + `publish` + embeddings con el equipo de IA (Carrefour, intentado, quedó bloqueado por Cloudflare) |
 | 6 | 10–11 nov | 3º y 4º scraper (Alcampo, Ahorramás) + equivalencia de productos |
@@ -48,7 +48,7 @@ Decisiones a acordar:
 ```mermaid
 timeline
   title Parte de ingesta: pendiente según el plan
-  22–26 oct : conexión con la BD del equipo de API/BD
+  22–26 oct : conexión con la BD del equipo de API/BD (hecha)
   26 oct : presentación de progreso
   29 oct – 9 nov : segundo scraper + embeddings
   10–16 nov : 3º y 4º scraper + calidad de datos
@@ -56,6 +56,24 @@ timeline
   19–25 nov : congelar + demos
   26 nov – 20 dic : cierre, memoria y presentación final
 ```
+
+## Despliegue: separar ingesta y API/BD
+
+Hoy `infra/` (Terraform) despliega solo la ingesta en el perfil de minikube `ingesta`. La
+idea es tener **dos despliegues independientes en el mismo clúster**: uno de ingesta y otro
+de API/BD. La parte de la ingesta está hecha (pasos 2 y 3); el resto depende del equipo de
+API/BD:
+
+| Paso | Dueño | Qué |
+|---|---|---|
+| 1 | Ambos | Cuando exista el stack de API: sacar `bootstrap.sh` y el arranque de minikube a una carpeta común. Mientras tanto, el otro stack puede desplegar en el mismo perfil (`MINIKUBE_PROFILE`, contexto `ingesta`) |
+| 2 | Ingesta | **Hecho:** el pool de Fission y `normalizer-consumer` viven en el namespace `ingesta`, y Fission solo vigila ese namespace |
+| 3 | Ambos | **Hecho:** contrato `nats://nats.messaging.svc.cluster.local:4222`, stream `SCRAPERS`, subject `scraper.<cadena>.clean`, durable `api-writer` (ver [`03`](03-contratos-datos.md#cola-de-salida-frontera-con-apibd)). `infra/e2e.sh` comprueba que la salida se llena |
+| 4 | API/BD | Su propio stack de Terraform (`api/infra/`) con estado propio; recibe `nats_url` como variable, sin leer el estado de la ingesta |
+| 5 | Ambos | `up.sh` en la raíz que encadene bootstrap → clúster → ingesta → API, y prueba end-to-end hasta filas en PostgreSQL |
+
+Por qué un clúster y no dos: la API llega a NATS por DNS interno; con dos clústeres habría
+que exponer NATS fuera, se duplica la RAM y vuelve el problema de inotify.
 
 ## Definición de «hecho» por componente
 
@@ -67,8 +85,8 @@ timeline
 
 ## Preguntas abiertas
 
-1. **Equipo de API/BD**: ¿el contrato final es texto plano o JSON estructurado? ¿Escribe su
-   servicio en BD?
+1. **Equipo de API/BD**: ¿pasamos `clean` a JSON estructurado (`CleanBatch`)? Su servicio
+   ya escribe en BD y acepta ambos formatos.
 2. **Equipo de IA**: ¿quién genera los embeddings, el normalizador o su parte de IA?
 3. **Equipo**: ¿el subject `scraper.<cadena>.raw` se mantiene como convención para todas
    las cadenas, o se unifica en un único `scraper.raw` con `source` dentro?
