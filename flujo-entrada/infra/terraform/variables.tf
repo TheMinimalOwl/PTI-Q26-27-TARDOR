@@ -81,6 +81,12 @@ variable "normalizer_max_ack_pending" {
   default = 1000
 }
 
+variable "normalizer_max_deliver" {
+  description = "Entregas maximas de un mismo crudo al normalizador antes de descartarlo."
+  type        = number
+  default     = 100
+}
+
 # --- Fission ---
 
 variable "fission_namespace_functions" {

@@ -1,6 +1,10 @@
 #!/usr/bin/env bash
 #
-# Despliegue del normalizer con Pydantic (tarea 3, sin la parte de BD).
+# HISTORICO: despliegue a mano del normalizer, anterior a Terraform (namespace `default`,
+# imagenes :v1/:v2). Hoy lo hace infra/up.sh (fission.tf), que ademas sube el codigo con un
+# paquete por hash. Se conserva para el montaje de setup-vm.sh.
+#
+# Despliegue del normalizer con Pydantic.
 # Hay que ejecutarlo EN LA VM del cluster: necesita docker, minikube, kubectl y el
 # CLI `fission`. Todo vive en el namespace `default` (el del kubeconfig actual).
 #

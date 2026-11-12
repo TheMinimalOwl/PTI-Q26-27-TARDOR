@@ -27,6 +27,7 @@ flowchart TB
 | `client.fetch_json` | HTTP != 200 | Devuelve `(status, {})` | Sí, esa subcategoría |
 | `main` | Alguna subcategoría falla | Acumula en `errors[]` y añade un pseudo-item `{"_errors": [...]}` | Solo lo fallado |
 | `main` | Todas las subcategorías fallan (0 productos) | Sale con `ERROR: wh=...: 0 productos` y código ≠ 0: el Job falla y Kubernetes lo reintenta | Nada se publica; se reintenta |
+| `main` | Pasada a medias | Mercadona, Caprabo, Condis y bonÀrea fallan si pierden más del 5 % de las categorías; Consum, si trae más de un 3 % menos que su `totalCount` | Lo publicado queda; el Job falla y se ve |
 | `dump_txt` | — | Escribe siempre; es el respaldo | No |
 | `publish` | NATS caído | `try/except` → devuelve `0` y log `ERROR NATS (...), txt intacto`; `main` ve que faltan publicados y sale con código ≠ 0 | No mientras el reintento funcione; el Job queda `Failed` si no |
 | `normalizer` | Campo ausente | `.get()` con defecto `-` | Degrada la línea, no rompe |
@@ -34,6 +35,8 @@ flowchart TB
 | `normalizer` | Sin `reference_price` en la fuente | Calcula el precio unitario desde `unit_price`/tamaño (`src=calculado`) | No (respaldo aproximado) |
 | `normalizer` | Item corrupto | `try/except` → línea `ERROR id=...` | Solo ese item |
 | `consumer` | JSON ilegible | Log `parse-error`, **ack** y descarta | Sí, ese mensaje |
+| `consumer` | NATS caído | Reintenta sin fin; si lleva más de 2 min sin conexión, la `livenessProbe` reinicia el pod | No: los crudos esperan en el stream |
+| `consumer` | Un lote falla siempre | Tras `maxDeliver` (100) entregas, NATS lo descarta y publica un aviso | Sí, ese lote (antes se reintentaba 7 días) |
 | `consumer` | Router Fission caído | Log `flush-error`, **sin ack** → reentrega por `AckWait` | No (puede repetir un lote; la BD no duplica) |
 | `writer` (API/BD) | BD caída | `nak(delay=10)` → NATS lo reentrega | No |
 | `writer` (API/BD) | Mensaje mal formado | `term()`: se descarta para siempre | Sí, ese lote |
@@ -59,6 +62,7 @@ stateDiagram-v2
 | Mecanismo | Configuración | Efecto |
 |---|---|---|
 | NATS JetStream | `AckWait` de 30 s (`infra/terraform/nats.tf` o `setup-vm.sh`) | Redelivery de lotes no confirmados |
+| NATS JetStream | `maxDeliver` 100 en el durable `normalizer` | Un mensaje que falla siempre no se reintenta 7 días |
 | Cola de salida | Retención 7 d en `SCRAPERS` + durable `api-writer` | Si el writer de API/BD cae, los lotes `clean` esperan y se cargan al volver; la carga es idempotente (*upsert*) |
 | `consumer` | `CONSUMER_BATCH=50`, flush cada 5 s | Cotas del búfer en condiciones normales |
 | `consumer` | `ack` tras publicar | Entrega **at-least-once** → posibles lotes repetidos en `clean` (la BD los absorbe con *upsert*) |
@@ -66,6 +70,8 @@ stateDiagram-v2
 | CronJob | `backoffLimit: 2` (Caprabo 1, porque tarda ~1 h) | Reintentos del Pod antes de marcar el Job fallido |
 | CronJob | `activeDeadlineSeconds: 7200` (Caprabo y bonÀrea) | Un Job colgado no pasa de 2 h |
 | CronJob | `restartPolicy: OnFailure` | Reinicio del contenedor dentro del Pod |
+| CronJob | `startingDeadlineSeconds: 21600` | Si el clúster estaba parado a las 02:00, la pasada se lanza al volver (hasta 6 h) |
+| VM | `infra/autostart.sh` | Tras un reinicio, `minikube start -p ingesta` sin intervención |
 
 ## Riesgos detectados en el diseño actual
 
@@ -89,6 +95,12 @@ stateDiagram-v2
    código postal, así que un lote nunca mezcla tiendas.
 5. **Sin observabilidad.** No hay métricas ni logs estructurados; solo `print()` en el
    consumer y en el scraper. Los Jobs fallidos del punto 1 solo se ven si alguien mira.
+6. **Consumer sordo — resuelto el 12/11/2026.** Con los valores por defecto de nats-py (60
+   reintentos cada 2 s), si NATS caía más de ~2 min la conexión se cerraba y el pod seguía
+   `Running` sin procesar nada. Ahora reintenta sin fin y tiene `livenessProbe`.
+7. **Pasadas a medias como `Complete` — resuelto el 12/11/2026** en Mercadona y Consum, que
+   solo fallaban con 0 productos (los otros tres ya tenían umbral).
+8. **La VM se reinicia — resuelto con `autostart.sh`** (instalado y probado con un reinicio real el 12/11).
 
 ## Escenarios límite
 
@@ -132,19 +144,25 @@ Disparo manual del CronJob con el normalizer ya con Pydantic:
 > El consumidor durable `normalizer` filtra `scraper.*.raw`, todas las cadenas (`Max Ack Pending:
 > 1000`, 0 pendientes), por eso los `clean` no se reprocesan: no hay bucle.
 
-## Verificación end-to-end hasta la BD (11/11/2026)
+## Verificación end-to-end hasta la BD (pasada nocturna del 12/11/2026)
 
-Cinco cadenas con el código postal 08016 (`e2e.sh`) y la parte de API/BD desplegada en la
-misma VM con `api-up.sh`. Cero líneas `ERROR` en el consumer y en el writer; el parser del
-writer leyó todas las líneas sin dejar ninguna sin interpretar.
+La primera pasada de las 02:00 con las cinco cadenas y la parte de API/BD en la misma VM,
+revisada a mano después. Se volcaron los 2.268 lotes `clean` del stream: ninguna línea
+`ERROR`, ninguna línea que el parser del writer no entienda y ningún campo más largo que su
+columna. Los durables `normalizer` y `api-writer` quedaron con 0 pendientes y 0 reentregas;
+todos los pods `Running`, sin reinicios ni eventos `Warning`.
 
-| Cadena | Tienda (`wh`) | Productos en BD | Con precio por unidad |
-|---|---|---|---|
-| Mercadona | `bcn1` | 4.389 | 4.389 (100 %) |
-| Consum | `378` | 8.611 | 8.611 (100 %) |
-| Caprabo | `8284` | 13.068 | 12.983 (99,3 %) |
-| Condis | `718` | 7.810 | 7.780 (99,6 %) |
-| bonÀrea | `online` | 6.245 | 5.757 (92,2 %) |
+| Cadena | Tienda (`wh`) | Scrapeados | Lotes `clean` | Precios en BD | Duración |
+|---|---|---|---|---|---|
+| Mercadona | `bcn1` | 4.652 (4.388 únicos) | 94 | 4.388 | 79 s |
+| Consum | `378` | 8.611 | 173 | 8.611 | 8 min |
+| Caprabo | `8284` | 13.068 | 262 | 13.068 | 58 min |
+| Condis | `718` | 7.810 | 157 | 7.810 | 78 s |
+| bonÀrea | `online` | 6.246 | 126 | 6.246 | 17 min |
+
+En Mercadona, la diferencia son productos que salen en dos categorías: la BD los fusiona.
+Con precio por unidad, en la carga del 11/11: Mercadona y Consum 100 %, Caprabo 99,3 %,
+Condis 99,6 % y bonÀrea 92,2 %.
 
 Las tiendas `default` de Mercadona y Consum que también aparecen en la BD son lotes de antes
 del scraping por código postal (ver [`05`](05-pendientes.md#por-hacer-para-el-equipo-de-api-y-bd)).

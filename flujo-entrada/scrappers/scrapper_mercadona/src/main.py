@@ -6,8 +6,9 @@ traduce a su almacen (08016 -> bcn1) y cada almacen se recorre una sola vez.
 
 Cada envelope lleva `wh` = almacen de Mercadona y `postal_code`.
 
-Sale con codigo != 0 si no consigue productos o no los puede publicar (antes acababa con 0
-y el Job parecia correcto aunque no hubiera datos).
+Sale con codigo != 0 si no consigue productos, si falla mas de un MAX_FAILED de las
+subcategorias (pasada a medias) o si no los puede publicar (antes acababa con 0 y el Job
+parecia correcto aunque no hubiera datos).
 """
 from pathlib import Path
 import os
@@ -21,6 +22,7 @@ from publish import DRY_RUN, publish
 CATEGORIES_URL = "https://tienda.mercadona.es/api/categories/"
 SUB_URL = "https://tienda.mercadona.es/api/categories/{}/"
 POSTAL_CODES = [c.strip() for c in os.getenv("SCRAPER_POSTAL_CODES", "08016").split(",") if c.strip()]
+MAX_FAILED = float(os.getenv("SCRAPER_MAX_FAILED", "0.05"))  # fraccion de subcategorias
 
 
 def warehouses(postal_codes: list[str]) -> list[tuple[str, str]]:
@@ -70,10 +72,13 @@ if __name__ == "__main__":
         path = dump(f"full wh={wh} cp={pc} tops={tops} subs={subs}", status, items, base / "out", wh)
         n, info = publish(items, wh, pc)
         real = sum(1 for p in items if "id" in p)
-        print(f"{status} {len(items)} items wh={wh} cp={pc} subs={subs} -> {path}")
+        failed = sum(len(p["_errors"]) for p in items if "_errors" in p)
+        print(f"{status} {len(items)} items wh={wh} cp={pc} subs={subs} fallidas={failed} -> {path}")
         print(f"nats: {info}")
         if real == 0:
             failures.append(f"wh={wh}: 0 productos (status {status})")
+        elif subs and failed / subs > MAX_FAILED:
+            failures.append(f"wh={wh}: {failed} de {subs} subcategorias fallidas")
         elif not DRY_RUN and n != real:
             failures.append(f"wh={wh}: publicados {n} de {real}")
 

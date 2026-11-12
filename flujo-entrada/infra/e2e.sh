@@ -12,18 +12,23 @@
 # 2. Comprueba en sus logs que cada uno ha publicado productos (> 0).
 # 3. Espera a que el consumidor `normalizer` lo procese todo y a que aparezcan lotes nuevos
 #    en scraper.<cadena>.clean de cada cadena publicada: la salida hacia API/BD.
+# 4. Busca errores: en el log del consumer desde que empezo (flush-error, parse-error...) y
+#    dentro de los lotes clean de esta pasada (lineas `ERROR id=...`, ver clean_check.py).
 #
 # Sale con 0 solo si todo eso se cumple. Necesita internet (baja los catalogos).
 #
 # Variables: SCRAPERS ("mercadona consum caprabo condis bonarea")  MINIKUBE_PROFILE (ingesta)
 #            FN_NAMESPACE (ingesta)  JOB_TIMEOUT (5400 s)  DRAIN_TIMEOUT (900 s)  KEEP_JOB (0)
+#            MAX_CLEAN_ERRORS (0: lineas ERROR toleradas en los lotes clean)
 set -euo pipefail
 
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SCRAPERS="${SCRAPERS:-${CHAINS:-mercadona consum caprabo condis bonarea}}"
 PROFILE="${MINIKUBE_PROFILE:-ingesta}"
 FN_NS="${FN_NAMESPACE:-ingesta}"
 JOB_TIMEOUT="${JOB_TIMEOUT:-5400}"
 DRAIN_TIMEOUT="${DRAIN_TIMEOUT:-900}"
+MAX_CLEAN_ERRORS="${MAX_CLEAN_ERRORS:-0}"
 STREAM="SCRAPERS"
 STAMP="$(date +%Y%m%d%H%M%S)"
 
@@ -46,6 +51,12 @@ consumer_field() {
     | python3 -c 'import json,sys; print(json.load(sys.stdin)[sys.argv[1]])' "$1"
 }
 
+# Ultima secuencia del stream: lo que llegue despues es de esta pasada.
+last_seq() {
+  nats stream info "$STREAM" --json 2>/dev/null \
+    | python3 -c 'import json,sys; print(json.load(sys.stdin)["state"]["last_seq"])'
+}
+
 cleanup() {
   [ "${KEEP_JOB:-0}" = 1 ] && return
   local s
@@ -56,6 +67,8 @@ trap cleanup EXIT
 say "estado inicial"
 declare -A BEFORE PUBLISHED
 while IFS='=' read -r subj n; do [ -n "$subj" ] && BEFORE[$subj]="$n"; done < <(counts)
+SEQ0="$(last_seq)"
+SINCE="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
 for s in $SCRAPERS; do
   k -n scrappers get cronjob "scrapper-$s" >/dev/null 2>&1 || die "no existe el CronJob scrapper-$s"
 done
@@ -118,11 +131,28 @@ while :; do
   sleep 10
 done
 
-errores="$(k -n "$FN_NS" logs deploy/normalizer-consumer --since=2h 2>/dev/null | grep -c 'ERROR' || true)"
-say "OK"
+say "comprobando errores"
+fail=0
+# 1) Log del consumer desde que empezo la pasada. Escribe flush-error y parse-error en
+#    minusculas, asi que se busca sin distinguir mayusculas.
+errlog="$(k -n "$FN_NS" logs deploy/normalizer-consumer --since-time="$SINCE" 2>/dev/null \
+          | grep -iE 'flush-error|parse-error|error' || true)"
+errores="$(printf '%s' "$errlog" | grep -c . || true)"
+# 2) Los lotes clean de esta pasada, exactamente los nuevos (con timeout: no se cuelga).
 for c in $CHAINS_OUT; do
   new=$(( $(count "scraper.$c.clean") - ${BEFORE[scraper.$c.clean]:-0} ))
-  echo "   $c: ${PUBLISHED[$c]} productos -> $new lotes nuevos en scraper.$c.clean (~$(( (PUBLISHED[$c] + 49) / 50 )) esperados con lotes de 50)"
+  r="$(timeout 300 kubectl --context "$PROFILE" -n messaging exec deploy/nats-box -- \
+         nats -s nats://nats:4222 sub "scraper.$c.clean" --stream "$STREAM" \
+         --start-sequence "$((SEQ0 + 1))" --count "$new" --raw 2>/dev/null \
+       | python3 "$HERE/clean_check.py" || true)"
+  read -r lotes items err inc <<<"${r:-0 0 0 0}"
+  echo "   $c: ${PUBLISHED[$c]} publicados -> $new lotes nuevos; leidos $lotes lotes ($items productos), lineas ERROR=$err, incompletos=$inc"
+  [ "$lotes" -eq "$new" ] || { echo "   $c: no he podido leer todos los lotes nuevos"; fail=1; }
+  [ "$err" -le "$MAX_CLEAN_ERRORS" ] || fail=1
 done
-echo "   lineas ERROR en el log del consumer (ultimas 2 h): $errores"
+echo "   errores en el log del consumer desde $SINCE: $errores"
+[ "$errores" = 0 ] || { printf '%s\n' "$errlog" | tail -10 | sed 's/^/     /'; fail=1; }
+[ "$fail" = 0 ] || die "la pasada ha dejado errores (ver arriba)"
+
+say "OK"
 echo "   la salida queda en el stream $STREAM para el writer de API/BD (durable api-writer)"

@@ -7,7 +7,7 @@ sequenceDiagram
   autonumber
   participant CJ as CronJob scraper-mercadona
   participant MD as API Mercadona
-  participant FS as out/*.txt (dentro del pod)
+  participant FS as out/*.txt (PVC scraper-out)
   participant NATS as NATS JetStream
   participant CONS as normalizer-consumer
   participant RT as Router Fission
@@ -75,7 +75,7 @@ Estados y su significado:
 |---|---|---|
 | Crudo | Memoria del pod | dict tal cual lo da la API de Mercadona |
 | Extraído | Memoria del pod | lista `items[]` aplanada |
-| Volcado | `out/mercadona_<ts>.txt` (efímero) | texto `raw: {...}` por línea |
+| Volcado | `out/mercadona_<wh>_<ts>.txt` en el PVC `scraper-out` (se borra a los 7 días) | texto `raw: {...}` por línea |
 | Publicado | NATS `scraper.mercadona.raw` | envelope con `product` crudo |
 | En búfer | Memoria del consumer | lista de envelopes |
 | Normalizado | Respuesta HTTP de Fission | texto plano (`to_clean_txt`) con precio unitario canónico |
@@ -90,7 +90,7 @@ gantt
   dateFormat HH:mm
   axisFormat %H:%M
   section Mercadona
-  Job del scraper        :02:00, 15m
+  Job del scraper        :02:00, 2m
   section Consum
   Job del scraper        :02:00, 10m
   section Caprabo

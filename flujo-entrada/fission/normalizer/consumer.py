@@ -16,6 +16,10 @@ NATS_URL = os.getenv("NATS_URL", "nats://nats.messaging.svc.cluster.local:4222")
 NORMALIZE_URL = os.getenv("NORMALIZE_URL", "http://router.fission/normalize")
 BATCH = int(os.getenv("CONSUMER_BATCH", "50"))
 DELIVER = os.getenv("NATS_DELIVER", "deliver.normalizer")
+# Marca de vida para la livenessProbe: se toca cada 5 s mientras haya conexion con NATS.
+# Si NATS cae, nats-py reintenta sin fin; si no vuelve en HEALTH_MAX s (consumer.yaml), la
+# marca envejece y Kubernetes reinicia el pod. Si la conexion se cierra del todo, se sale.
+HEALTH_FILE = os.getenv("HEALTH_FILE", "/tmp/healthy")
 
 
 def subject_out(subject_in: str) -> str:
@@ -51,7 +55,22 @@ async def run() -> None:
     import nats
 
     clean = clean_remote if NORMALIZE_URL else clean_local
-    nc = await nats.connect(NATS_URL)
+    closed = asyncio.Event()
+
+    async def on_closed():
+        closed.set()
+
+    async def on_disconnected():
+        print("nats-disconnected: reintentando", flush=True)
+
+    async def on_reconnected():
+        print("nats-reconnected", flush=True)
+
+    # Reintentos sin fin: si NATS se reinicia, el consumer vuelve solo. Si aun asi la
+    # conexion se cierra, el bucle de abajo sale con error y Kubernetes reinicia el pod.
+    nc = await nats.connect(NATS_URL, max_reconnect_attempts=-1, reconnect_time_wait=2,
+                            closed_cb=on_closed, disconnected_cb=on_disconnected,
+                            reconnected_cb=on_reconnected)
     js = nc.jetstream()
     bufs: dict[tuple[str, str, str], list[tuple]] = {}
     lock = asyncio.Lock()  # flush() se llama desde el handler Y desde el bucle de 5 s: sin
@@ -106,12 +125,18 @@ async def run() -> None:
     try:
         while True:
             await asyncio.sleep(5)
+            if closed.is_set() or nc.is_closed:
+                raise SystemExit("ERROR: conexion con NATS cerrada; salgo para que Kubernetes me reinicie")
+            if nc.is_connected:
+                with open(HEALTH_FILE, "w") as f:
+                    f.write(datetime.now(timezone.utc).isoformat())
             try:
                 await flush()
             except Exception as e:
                 print(f"flush-error: {e} (reintentara por AckWait)", flush=True)
     finally:
-        await nc.close()
+        if not nc.is_closed:
+            await nc.close()
 
 
 if __name__ == "__main__":

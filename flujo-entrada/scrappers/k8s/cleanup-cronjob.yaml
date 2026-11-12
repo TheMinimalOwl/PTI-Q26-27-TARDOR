@@ -1,0 +1,40 @@
+# Rotacion de los volcados de depuracion (out/*.txt) del PVC scraper-out, que comparten todos
+# los scrapers. Cada noche dejan ~47 MB; se guardan SCRAPER_OUT_DAYS dias (7: ~330 MB de 1 GiB).
+# Corre a las 01:30, antes de los scrapers, para no tocar el volcado de la pasada en curso.
+# La imagen es la del scraper de Mercadona (ya esta en el nodo y trae `find`); con Terraform
+# se sustituye por la etiqueta real.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: scraper-out-cleanup
+  namespace: scrappers
+spec:
+  schedule: "30 1 * * *"
+  timeZone: "Europe/Madrid"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          restartPolicy: OnFailure
+          volumes:
+            - name: out
+              persistentVolumeClaim:
+                claimName: scraper-out
+          containers:
+            - name: cleanup
+              image: scrapper-mercadona:v1
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: SCRAPER_OUT_DAYS
+                  value: "7"
+              command: ["sh", "-c", "find /app/out -name '*.txt' -mtime +$SCRAPER_OUT_DAYS -print -delete; du -sh /app/out"]
+              volumeMounts:
+                - name: out
+                  mountPath: /app/out
+              resources:
+                requests: { cpu: "10m", memory: "16Mi" }
+                limits:   { cpu: "200m", memory: "64Mi" }

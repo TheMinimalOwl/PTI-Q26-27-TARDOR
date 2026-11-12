@@ -2,8 +2,9 @@
 #
 # OJO (corregido 17/10/2026): la Function de Fission NO tiene los campos
 # `entrypoint` ni `functionSource`, y el CRD del paquete no se puede versionar
-# aqui con un nombre fijo (el CLI genera `normalizer-<uuid>`). Por eso la Function
-# y su paquete los crea/actualiza `deploy.sh` con el CLI:
+# aqui con un nombre fijo (el CLI genera `normalizer-<uuid>`). Con Terraform
+# (infra/terraform/fission.tf) la Function y un Package `normalizer-<hash>` se crean
+# como recursos, sin CLI. En el montaje a mano los crea/actualiza `deploy.sh`:
 #
 #   fission fn create --name normalizer --env python --code normalizer.py --entrypoint normalizer.main
 #   fission fn update --name normalizer --code normalizer.py --entrypoint normalizer.main
@@ -13,7 +14,8 @@
 #
 # `functionref.type` solo admite `name` o `function-weights` (lo dijo el API server
 # al rechazar `Function`), y `method` esta deprecado en favor de `methods`.
-# `deploy.sh` solo aplica este manifiesto si el trigger no existe todavia.
+# Terraform lo aplica tal cual (en el namespace `ingesta`); `deploy.sh` solo si el
+# trigger no existe todavia.
 apiVersion: fission.io/v1
 kind: HTTPTrigger
 metadata:

@@ -198,6 +198,8 @@ sirve cada código postal (`SCRAPER_POSTAL_CODES`). Abajo, el de Mercadona como 
 > [!TIP]
 > **Idempotencia de ejecución.** `concurrencyPolicy: Forbid` evita que dos ejecuciones se
 > solapen; `successfulJobsHistoryLimit: 2` y `failedJobsHistoryLimit: 2` acotan el histórico.
+> `startingDeadlineSeconds: 21600`: si a las 02:00 el clúster estaba parado, la pasada se lanza
+> al volver (en las 6 h siguientes).
 
 ### 2 · 📨 `messaging` — NATS JetStream
 
@@ -254,6 +256,11 @@ Fission por HTTP.
 - **Batching:** vuelca cuando el búfer llega a `CONSUMER_BATCH` (50) **o** cada 5 s (el bucle
   principal fuerza un `flush` periódico; no se queda esperando a llenar el lote).
 - **`ack` explícito** de todo el lote **solo si** la publicación del resultado tiene éxito.
+- **Conexión con NATS:** reintenta sin fin si NATS se cae. Mientras está conectado toca
+  `/tmp/healthy` cada 5 s, y una `livenessProbe` reinicia el pod si la marca tiene más de
+  2 min. Si la conexión se cierra del todo, el proceso sale y Kubernetes lo reinicia.
+- **Entregas máximas:** el durable `normalizer` tiene `maxDeliver` 100 (~50 min con
+  `AckWait` de 30 s): un lote que falla siempre se descarta en vez de reintentarse 7 días.
 - **Modo local:** si `NORMALIZE_URL` está vacío, normaliza **en proceso** (`clean_local`), sin
   Fission. Útil para depurar el puente sin cluster.
 
@@ -269,13 +276,14 @@ Fission por HTTP.
 | `../setup-vm.sh` | Script | — | Montaje a mano, idempotente, en el perfil `minikube` (ver *Orden de despliegue*) |
 | `cluster/namespace.yaml` | Namespace ×3 | — | `scrappers`, `fission`, `messaging` |
 | `messaging/nats-values.yaml` | Helm values | messaging | JetStream + PVC 1 Gi |
-| `scrappers/k8s/secrets.yaml` | Secret | scrappers | `scraper-secrets` (`USER_AGENT`; lo montan Mercadona y Carrefour, pero solo lo lee Carrefour) |
+| `scrappers/k8s/secrets.yaml` | Secret | scrappers | `scraper-secrets` (`USER_AGENT`, lo leen Mercadona y Carrefour) |
 | `scrapper_mercadona/cronjob.yaml` | CronJob | scrappers | `0 2 * * *` (Europe/Madrid); monta el PVC en `/app/out` |
 | `scrapper_consum/cronjob.yaml` | CronJob | scrappers | `0 2 * * *` (Europe/Madrid), `SCRAPER_DELAY=5`; mismo PVC |
 | `scrapper_caprabo/cronjob.yaml` | CronJob | scrappers | `0 2 * * *` (Europe/Madrid), `SCRAPER_DELAY=3`, máximo 2 h; mismo PVC |
 | `scrapper_condis/cronjob.yaml` | CronJob | scrappers | `0 2 * * *` (Europe/Madrid), `SCRAPER_DELAY=3`, `SCRAPER_STORE=718`; mismo PVC |
 | `scrapper_bonarea/cronjob.yaml` | CronJob | scrappers | `0 2 * * *` (Europe/Madrid), `SCRAPER_DELAY=3`, máximo 2 h; mismo PVC |
-| `scrapper_mercadona/pvc.yaml` | PersistentVolumeClaim | scrappers | `scraper-out`, 1 Gi: guarda los `.txt` de depuración |
+| `scrapper_mercadona/pvc.yaml` | PersistentVolumeClaim | scrappers | `scraper-out`, 1 Gi: guarda los `.txt` de depuración de todos los scrapers |
+| `scrappers/k8s/cleanup-cronjob.yaml` | CronJob | scrappers | `scraper-out-cleanup`, 01:30: borra los `.txt` de más de 7 días |
 | `fission/normalizer/fission.yaml` | HTTPTrigger | ingesta | POST `/normalize` (a `Function` `normalizer`) |
 | `fission/normalizer/consumer.yaml` | Deployment | ingesta | `normalizer-consumer` |
 | `../infra/api-up.sh` → `../../api/k8s/` | StatefulSet, Deployments, Services | api | **Del equipo de API/BD**, aplicado tal cual: PostgreSQL + pgvector, Redis, `api` y `writer` (ver [`infra/README.md`](../infra/README.md#api-y-bd-en-la-misma-vm-api-upsh)) |

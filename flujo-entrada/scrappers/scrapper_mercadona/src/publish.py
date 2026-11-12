@@ -25,10 +25,8 @@ async def _publish_async(envelopes: list[dict], url: str, stream: str, subject: 
     nc = await nats.connect(url, connect_timeout=5)
     try:
         js = nc.jetstream()
-        try:
-            await js.add_stream(name=stream, subjects=[subject])
-        except Exception:
-            pass
+        # El stream lo declara Terraform (scraper.>, 7 dias); si no existe, publish falla y
+        # el Job tambien. No se crea aqui: con un solo subject y sin retencion chocaria con el.
         for e in envelopes:
             await js.publish(subject, json.dumps(e, ensure_ascii=False).encode("utf-8"))
         return len(envelopes)

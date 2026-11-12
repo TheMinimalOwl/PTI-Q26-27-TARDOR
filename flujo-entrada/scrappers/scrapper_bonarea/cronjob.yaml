@@ -11,6 +11,9 @@ spec:
   schedule: "0 2 * * *"
   timeZone: "Europe/Madrid"
   concurrencyPolicy: Forbid
+  # Si a las 02:00 el cluster estaba parado (VM reiniciada), la pasada se lanza al volver,
+  # siempre que sea en las 6 h siguientes.
+  startingDeadlineSeconds: 21600
   successfulJobsHistoryLimit: 2
   failedJobsHistoryLimit: 2
   jobTemplate:

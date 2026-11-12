@@ -1,5 +1,10 @@
 #!/usr/bin/env bash
 #
+# HISTORICO (octubre de 2026): montaje a mano, anterior a Terraform. Solo monta Mercadona,
+# con el durable filtrando scraper.mercadona.raw, en el namespace `default` y con imagenes
+# :v1/:v2. No conoce Consum, Caprabo, Condis ni bonArea, ni la API/BD. Para desplegar hoy:
+# `bash flujo-entrada/infra/up.sh` (ver infra/README.md). Se conserva como referencia.
+#
 # Montaje del flujo de entrada en la VM del cluster. Idempotente: se puede repetir.
 #
 #   bash setup-vm.sh              # todo: base + namespaces + nats + fission + normalizer + scraper + verify
@@ -16,7 +21,7 @@
 # cargan en el cluster con `minikube image load` (lo hacen este script y deploy.sh). Si un pod
 # se queda en ImagePullBackOff, es que falta ese paso.
 #
-# Sin BD: la tarea 3 (escritura en base de datos) sigue pendiente. El MessageQueueTrigger de
+# Sin BD: este script no despliega la API/BD (hoy lo hace infra/api-up.sh). El MessageQueueTrigger de
 # Fission no se monta a proposito: da 401 contra el router de 1.27 y el puente es el
 # Deployment `normalizer-consumer`.
 #

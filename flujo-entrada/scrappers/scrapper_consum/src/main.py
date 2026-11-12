@@ -10,13 +10,16 @@ caen en la misma tienda se recorren una sola vez.
 
 Cada envelope lleva `wh` = codigo de la tienda de Consum (p. ej. "378") y `postal_code`.
 
-Sale con codigo != 0 si una tienda no da productos o si no se pueden publicar, para que el
-Job quede como fallido y se vea.
+Sale con codigo != 0 si una tienda no da productos, si faltan mas de un MAX_MISSING de los
+que dice la API (`totalCount`; pasada a medias) o si no se pueden publicar, para que el Job
+quede como fallido y se vea.
 
 Variables:
   SCRAPER_POSTAL_CODES (08016)  codigos postales, separados por comas
   SCRAPER_DELAY (5)   segundos entre peticiones (el catalogo son ~90 paginas por tienda)
   SCRAPER_LIMIT (100) productos por pagina (el maximo que acepta la API)
+  SCRAPER_MAX_MISSING (0.03) fraccion de productos que puede faltar respecto a totalCount
+                      (paginar con offset ya pierde ~0,8 % porque el catalogo se mueve)
   NATS_URL, NATS_SUBJECT, NATS_STREAM, NATS_DRY_RUN
 """
 import os
@@ -32,6 +35,7 @@ POSTAL_CODES = [c.strip() for c in os.getenv("SCRAPER_POSTAL_CODES", "08016").sp
 DELAY = float(os.getenv("SCRAPER_DELAY", "5"))
 LIMIT = int(os.getenv("SCRAPER_LIMIT", "100"))
 DRY_RUN = os.getenv("NATS_DRY_RUN", "0") == "1"
+MAX_MISSING = float(os.getenv("SCRAPER_MAX_MISSING", "0.03"))
 
 
 def collect(zone: dict) -> tuple[list[dict], int]:
@@ -85,6 +89,8 @@ if __name__ == "__main__":
         print(f"nats: {info}")
         if not items:
             failures.append(f"wh={wh}: 0 productos")
+        elif total and len(items) < (1 - MAX_MISSING) * total:
+            failures.append(f"wh={wh}: {len(items)} de {total} productos (pasada a medias)")
         elif not DRY_RUN and n != len(items):
             failures.append(f"wh={wh}: publicados {n} de {len(items)}")
 

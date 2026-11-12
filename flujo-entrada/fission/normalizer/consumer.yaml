@@ -25,6 +25,14 @@ spec:
               value: "http://router.fission/normalize"
             - name: CONSUMER_BATCH
               value: "50"
+          # Vivo = ha tocado /tmp/healthy en los ultimos 120 s, cosa que solo hace mientras
+          # esta conectado a NATS (ver consumer.py). Si NATS no vuelve, Kubernetes lo reinicia.
+          livenessProbe:
+            exec:
+              command: ["python", "-c", "import os,sys,time; sys.exit(time.time() - os.path.getmtime('/tmp/healthy') > 120)"]
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 2
           resources:
             requests: { cpu: "100m", memory: "128Mi" }
             limits: { cpu: "500m", memory: "512Mi" }

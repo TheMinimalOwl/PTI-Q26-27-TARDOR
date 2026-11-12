@@ -40,6 +40,18 @@ resource "kubectl_manifest" "scraper_cronjob" {
   ]
 }
 
+# Rotacion de out/*.txt (7 dias) en el PVC compartido. Usa la imagen del scraper de Mercadona.
+resource "kubectl_manifest" "scraper_out_cleanup" {
+  yaml_body = replace(
+    file("${local.ingesta}/scrappers/k8s/cleanup-cronjob.yaml"),
+    "/image: scrapper-mercadona:\\S+/",
+    "image: ${local.image.scraper}",
+  )
+  override_namespace = "scrappers"
+
+  depends_on = [terraform_data.image["scraper"], kubectl_manifest.scraper_pvc]
+}
+
 resource "kubectl_manifest" "scraper_consum_cronjob" {
   yaml_body = replace(replace(
     file("${local.ingesta}/scrappers/scrapper_consum/cronjob.yaml"),

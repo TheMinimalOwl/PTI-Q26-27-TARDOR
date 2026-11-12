@@ -1,9 +1,9 @@
 
-# Volumen para los volcados txt del scraper: /app/out del CronJob pasa a ser
-# persistente, asi cada pasada (incluida la de las 02:00) deja su
-# mercadona_<fecha>.txt en disco. ReadWriteOnce vale: el CronJob usa
-# concurrencyPolicy=Forbid (un solo pod escribiendo a la vez) y minikube es
-# single-node.
+# Volumen para los volcados txt de TODOS los scrapers: /app/out de cada CronJob es
+# persistente, asi cada pasada deja su <cadena>_<wh>_<fecha>.txt en disco (los rota
+# scrappers/k8s/cleanup-cronjob.yaml a los 7 dias). A las 02:00 escriben cinco Jobs a la
+# vez: ReadWriteOnce vale porque minikube es de un solo nodo y RWO limita por nodo, no por
+# pod. Con varios nodos haria falta ReadWriteMany o un volumen por scraper.
 apiVersion: v1
 
 kind: PersistentVolumeClaim

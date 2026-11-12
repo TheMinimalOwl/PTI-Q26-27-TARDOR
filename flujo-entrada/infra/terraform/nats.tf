@@ -68,6 +68,9 @@ resource "kubectl_manifest" "consumer_normalizer" {
       ackPolicy      = "explicit"
       ackWait        = "30s"
       maxAckPending  = var.normalizer_max_ack_pending
+      # Un lote que falla siempre no se reintenta 7 dias: tras maxDeliver entregas (~50 min con
+      # AckWait de 30 s) se descarta y NATS publica un aviso ($JS.EVENT.ADVISORY...MAX_DELIVERIES).
+      maxDeliver     = var.normalizer_max_deliver
       deliverPolicy  = "all"
       replayPolicy   = "instant"
     }

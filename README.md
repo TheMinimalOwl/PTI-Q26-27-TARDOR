@@ -10,9 +10,9 @@ supermercado, **los convierte a un formato común** y **los expone a la app medi
 Sobre esa misma base de datos se añade un módulo de **RAG** que responde preguntas abiertas
 apoyándose siempre en datos reales de precios.
 
-Este repositorio contiene la parte de datos: la **ingesta** (los scrapers y el normalizador) y
-el **módulo de IA**. La app móvil y la API son de otros compañeros y viven en las ramas `app` y
-`api`.
+Este repositorio contiene la **ingesta** (los scrapers y el normalizador), la **API con su
+base de datos** (`api/`, del equipo de API/BD) y el **módulo de IA**. La app móvil es de otros
+compañeros y vive en la rama `app`.
 
 ## El problema
 
@@ -96,13 +96,15 @@ respuestas inventadas.
 
 | Flujo | Carpeta | Estado |
 |---|---|---|
-| Ingesta | [`flujo-entrada/`](flujo-entrada/) | Implementado y desplegado en el clúster |
+| Ingesta | [`flujo-entrada/`](flujo-entrada/) | Desplegada: cinco cadenas (Mercadona, Consum, Caprabo, Condis y bonÀrea) cada noche a las 02:00 |
+| Consulta | [`api/`](api/) | API (FastAPI), PostgreSQL + pgvector, Redis y el writer que carga la ingesta; desplegada en la misma VM. La app (rama `app`), pendiente |
 | RAG | [`flujo-ia/`](flujo-ia/) | Prototipo completo, con dataset y tests |
-| Consulta | — | Pendiente: ramas `api` y `app` |
 
-La **ingesta** se montó con un script idempotente ([`setup-vm.sh`](flujo-entrada/setup-vm.sh))
-que levanta los namespaces, NATS con JetStream, Fission, la función normalizadora y el CronJob
-del scraper, y deja el clúster en un estado verificable. El **RAG** se monta con
+La **ingesta** se despliega con un solo comando ([`infra/up.sh`](flujo-entrada/infra/up.sh),
+Terraform sobre un perfil de minikube propio): namespaces, NATS con JetStream, Fission, la
+función normalizadora y los CronJobs de los scrapers. Con `API=1` despliega también la parte de
+API/BD tal cual en el mismo clúster, y lo que publica la ingesta acaba cada noche en
+PostgreSQL. El **RAG** se monta con
 [`setup.sh`](flujo-ia/setup.sh), que crea el entorno, descarga el modelo de embeddings y
 construye el índice; el LLM es opcional y se puede trabajar en modo *solo recuperación*.
 
@@ -111,21 +113,21 @@ construye el índice; el LLM es opcional y se puede trabajar en modo *solo recup
 | Capa | Tecnologías |
 |---|---|
 | Orquestación | Kubernetes (Minikube), Docker, CronJobs |
-| Scraping | Python, `requests` (Mercadona: API JSON; Carrefour: `requests` + BeautifulSoup) |
+| Scraping | Python, `requests` (APIs JSON de Mercadona, Consum y Condis; JSON interno de bonÀrea; HTML de Caprabo) |
 | Transporte | NATS JetStream |
 | Normalización | Fission (FaaS), Python, Pydantic |
-| Base de datos | PostgreSQL + pgvector *(pendiente)* |
-| Caché | Redis *(pendiente)* |
-| API | FastAPI, REST/JSON *(pendiente)* |
+| Base de datos | PostgreSQL + pgvector |
+| Caché | Redis |
+| API | FastAPI, REST/JSON |
 | App móvil | React Native, TypeScript *(pendiente)* |
 | RAG | Embeddings de HuggingFace (`e5-small`), LangChain, LLM local (Ollama) o remoto (Gemini), JSON Schema y guardrails |
 
 ## Puesta en marcha
 
 ```bash
-# Ingesta: monta y verifica el clúster completo
-bash flujo-entrada/infra/up.sh          # todo con Terraform en un perfil de minikube propio
-# (alternativa manual: bash flujo-entrada/setup-vm.sh && bash flujo-entrada/setup-vm.sh verify)
+# Ingesta (+ API y BD con API=1): monta y verifica el clúster completo
+API=1 bash flujo-entrada/infra/up.sh    # todo con Terraform en un perfil de minikube propio
+bash flujo-entrada/infra/autostart.sh   # que vuelva solo si la VM se reinicia
 
 # RAG: entorno + dataset + índice
 cd flujo-ia && bash setup.sh
@@ -143,5 +145,5 @@ lo que consumirán la API y la app. El detalle de cada parte está en
 | `develop` | Integración de los dos flujos de este repo |
 | `scrapping` | Origen de `flujo-entrada`: scrapers, NATS, normalizador y su documentación |
 | `ai` | Origen de `flujo-ia`: modelo de embeddings, prototipo RAG y evaluación |
-| `api` / `app` | La API y la app móvil, de otros compañeros |
+| `api` / `app` | Origen de `api/` y la app móvil, de otros compañeros |
 | `main` | Punto de partida del repositorio |

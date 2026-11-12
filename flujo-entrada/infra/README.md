@@ -55,10 +55,12 @@ Para que dos VMs den el mismo resultado está todo fijado:
   misma versión.
 - Las imágenes: `nats:2.10.29-alpine`, `python:3.13.18-slim` y la base de Fission
   `python-env` fijada por digest.
-- Los `requirements.txt` del scraper y del normalizador, con `==`.
+- Los `requirements.txt` de los scrapers y del normalizador, con `==`, y `nats-py==2.16.0`
+  en la imagen del consumer.
 
-Lo único que no se fija son los paquetes de apt (Docker Engine y los básicos): instala la
-versión estable del día.
+No se fijan los paquetes de apt (Docker Engine y los básicos), que instalan la versión estable
+del día, ni las imágenes de la parte de API/BD (`python:3.12-slim`, `pgvector/pgvector:pg16`,
+`redis:7.4-alpine`): son del equipo de API/BD (ver `docs/05-pendientes.md`).
 
 ## Qué hace `up.sh`
 
@@ -89,7 +91,7 @@ Es idempotente: si se vuelve a ejecutar, solo se reconstruye lo que haya cambiad
 | `namespaces.tf` | `scrappers`, `messaging` y `fission` (a partir de `cluster/namespace.yaml`) | `kubectl apply -k cluster/` |
 | `nats.tf` | Chart de NATS (con `messaging/nats-values.yaml`), **NACK**, y los CRD `Stream SCRAPERS` y `Consumer normalizer` | `helm install` + `kubectl exec nats-box -- nats request $JS.API...` |
 | `fission.tf` | Chart `fission-all` 1.27, `Environment python` con pydantic, `Package` + `Function normalizer`, `HTTPTrigger` (`fission.yaml`) y `normalizer-consumer` (`consumer.yaml`) | `helm install` + `fission env/fn create` + `deploy.sh` |
-| `scraper.tf` | `scraper-secrets`, PVC `scraper-out` y CronJobs `scrapper-mercadona`, `scrapper-consum`, `scrapper-caprabo`, `scrapper-condis` y `scrapper-bonarea` (02:00, hora de Madrid) | `kubectl apply -k scrappers/...` |
+| `scraper.tf` | `scraper-secrets`, PVC `scraper-out`, CronJobs `scrapper-mercadona`, `scrapper-consum`, `scrapper-caprabo`, `scrapper-condis` y `scrapper-bonarea` (02:00, hora de Madrid) y `scraper-out-cleanup` (01:30, borra los volcados de más de 7 días) | `kubectl apply -k scrappers/...` |
 
 Los YAML de siempre siguen siendo la fuente de verdad: Terraform los lee tal cual y solo
 cambia la etiqueta de la imagen.
@@ -106,7 +108,7 @@ Todo lo de la ingesta vive en namespaces propios y no toca `default`:
 
 | Namespace | Qué hay |
 |---|---|
-| `scrappers` | CronJobs `scrapper-mercadona`, `scrapper-consum`, `scrapper-caprabo`, `scrapper-condis` y `scrapper-bonarea`, `scraper-secrets`, PVC `scraper-out` |
+| `scrappers` | CronJobs `scrapper-mercadona`, `scrapper-consum`, `scrapper-caprabo`, `scrapper-condis`, `scrapper-bonarea` y `scraper-out-cleanup`, `scraper-secrets`, PVC `scraper-out` |
 | `messaging` | NATS (StatefulSet), `nats-box`, NACK, CRDs `Stream SCRAPERS` y `Consumer normalizer` |
 | `fission` | Plano de control de Fission (router, executor…) |
 | `ingesta` | `Environment python`, `Function` y `Package` `normalizer`, `HTTPTrigger`, pods del pool y `normalizer-consumer` |
@@ -141,9 +143,36 @@ en la BD, Caprabo 13.068 productos, Condis 7.810, Consum 8.611 (tienda 378) y Me
 6.245 productos (tienda `online`) con 0 errores.
 
 Cada noche el writer añade un precio por producto, tienda y día: eso es el histórico. Para
-no perderlo, la VM tiene que estar encendida a las 02:00, y el volumen de la BD se borra con
-`minikube delete` o `kubectl delete -k api/k8s/` (copias con `pg_dump`: decisión del equipo
-de API/BD).
+no perderlo:
+
+- La VM tiene que estar encendida a las 02:00. Si se reinicia, `autostart.sh` (ver abajo)
+  vuelve a levantar el clúster, y los CronJobs lanzan la pasada perdida si el clúster vuelve
+  antes de 6 h (`startingDeadlineSeconds`).
+- El volumen de la BD se borra con `down.sh`, `minikube delete` o `kubectl delete -k api/k8s/`.
+  No hay copia: es el único dato que no se puede recuperar (NATS solo guarda 7 días). Un
+  `pg_dump` nocturno es decisión del equipo de API/BD (ver `docs/05-pendientes.md`).
+
+## Si la VM se reinicia (`autostart.sh`)
+
+El contenedor de minikube tiene política de reinicio `no`: tras un reinicio de la VM no hay
+scrapers, NATS, API ni writer hasta que alguien lance `minikube start -p ingesta`. Para que
+vuelva solo:
+
+```bash
+bash flujo-entrada/infra/autostart.sh            # una vez; idempotente
+bash flujo-entrada/infra/autostart.sh --remove   # quitarlo
+```
+
+Con sudo instala una unidad systemd (`minikube-ingesta.service`, después de Docker); sin sudo,
+una línea `@reboot` en el crontab del usuario. Al arrancar espera a Docker y hace
+`minikube start -p ingesta`; los datos (BD, stream, volcados e imágenes) están en el volumen de
+minikube y sobreviven. Log en `~/.minikube-ingesta-autostart.log`. Hay que lanzarlo a mano una
+vez: `up.sh` no lo hace porque cambia la configuración del sistema.
+
+Probado el 12/11/2026 con un `sudo reboot` real en la VM: cron lo lanzó ~2 min después de
+arrancar y en ~3 min todo estaba en `Running`, con la BD (histórico de dos días), el stream de
+NATS y los durables intactos. Algunos pods se reinician una o dos veces al arrancar (la API, el
+writer y el consumer arrancan antes que NATS o PostgreSQL): es normal.
 
 ## Variables
 
@@ -170,7 +199,10 @@ bash flujo-entrada/infra/e2e.sh
 Lanza un Job desde cada CronJob, espera a que acaben (máximo 90 min), comprueba en el log que el
 scraper ha publicado más de 0 productos (detecta el fallo silencioso) y espera a que el
 consumidor `normalizer` quede a 0 pendientes y aparezcan lotes nuevos en
-`scraper.<cadena>.clean` (máximo 15 min). Lo hace para todas las cadenas a la vez
+`scraper.<cadena>.clean` (máximo 15 min). Después busca errores: en el log del consumer desde
+que empezó (`flush-error`, `parse-error`…) y dentro de los lotes `clean` de esta pasada
+(líneas `ERROR id=...`, con [`clean_check.py`](clean_check.py)); cualquiera hace fallar la
+prueba (`MAX_CLEAN_ERRORS` para tolerar alguno). Lo hace para todas las cadenas a la vez
 (`SCRAPERS="mercadona consum caprabo condis bonarea"`, los CronJobs; `SCRAPERS=consum` para uno solo).
 Con Caprabo la pasada dura unos 60 minutos. Sale con 0 solo si se cumple
 todo.
@@ -200,7 +232,9 @@ los carga todos.
 | `helm_release.fission` se queda esperando hasta el timeout | El Service `router` es de tipo LoadBalancer y en minikube nunca recibe IP | `routerServiceType: NodePort` |
 | "Error locating chart … 500" | GitHub falla a ratos | `up.sh` reintenta el apply hasta 3 veces. Las releases son `atomic`, así que un intento fallido no deja nada a medias |
 | En un contenedor (sin systemd) `bootstrap.sh` instala Docker pero dice "el demonio de docker no esta en marcha" | No hay systemd que arranque `dockerd` | Solo pasa en contenedores, no en una VM. Arranca `dockerd` a mano y repite `up.sh` |
-| Un Job de scraper acaba `Failed` con "0 productos" | Fallo de red puntual o la web bloquea | Desde el 11/11 el scraper falla en vez de acabar "bien" sin datos. Kubernetes lo reintenta (2 veces; Caprabo 1); si no, relanza el Job a mano |
+| Un Job de scraper acaba `Failed` con "0 productos", "subcategorías fallidas" o "pasada a medias" | Fallo de red puntual o la web bloquea | Desde el 11/11 el scraper falla en vez de acabar "bien" sin datos, y desde el 12/11 también si se queda a medias (más del 5 % de categorías fallidas; en Consum, más de un 3 % por debajo del total de la API). Kubernetes lo reintenta (2 veces; Caprabo 1); si no, relanza el Job a mano |
+| El consumer sigue `Running` pero no procesa | NATS estuvo caído y la conexión se cerró | Desde el 12/11 reintenta sin fin y tiene `livenessProbe`: si lleva más de 2 min sin conexión, Kubernetes lo reinicia |
+| Tras reiniciar la VM no hay nada en marcha | El contenedor de minikube no se reinicia solo | `autostart.sh` (ver arriba) |
 
 ## Cómo se ha probado
 
@@ -223,6 +257,8 @@ los carga todos.
 
 ## Relación con `setup-vm.sh`
 
-`setup-vm.sh` y `fission/normalizer/deploy.sh` siguen funcionando contra el clúster montado a
-mano (el perfil `minikube`). Lo nuevo es `infra/`. No conviene mezclar los dos en el mismo
+`setup-vm.sh` y `fission/normalizer/deploy.sh` son el montaje a mano de octubre (perfil
+`minikube`) y se conservan solo como referencia: montan **solo Mercadona**, con el durable
+filtrando `scraper.mercadona.raw`, en el namespace `default`, con imágenes `:v1`/`:v2` y sin
+API/BD. Para desplegar, `infra/`. No conviene mezclar los dos en el mismo
 clúster: las releases de Helm creadas a mano no están en el estado de Terraform.

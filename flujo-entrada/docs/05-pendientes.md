@@ -23,7 +23,11 @@ Casi cerrada. La cola de salida ya está conectada: el equipo de API/BD consume
 | Hueco | Impacto | Nota |
 |---|---|---|
 | Códigos postales desde la API | Alto | Hoy `postal_codes = ["08016"]` fijo. Falta el endpoint de la API con los códigos de los usuarios (propuesta en [`03`](03-contratos-datos.md#código-postal-y-tienda)) |
-| Sin alerta si falla un scraper | Medio | Desde el 11/11 el Job falla de forma visible, pero nadie avisa |
+| Sin alerta si falla un scraper | Medio | Desde el 11/11 el Job falla de forma visible (y desde el 12/11 también si se queda a medias), pero nadie avisa |
+| ~~La VM se reinicia y nada vuelve~~ | Hecho | `infra/autostart.sh` (12/11/2026): instalado en la VM y probado con un reinicio real |
+| ~~Consumer sordo si NATS cae~~ | Hecho | Reintentos sin fin + `livenessProbe` (12/11/2026) |
+| ~~`e2e.sh` siempre decía 0 errores~~ | Hecho | Buscaba `ERROR` en mayúsculas en el log; ahora mira `flush-error`/`parse-error` y las líneas `ERROR id=` de los lotes (12/11/2026) |
+| ~~Volcados `.txt` sin rotar~~ | Hecho | `scraper-out-cleanup` borra los de más de 7 días (12/11/2026) |
 | Sin deduplicación en la ingesta | Bajo | Una reentrega repite líneas en `clean`; la BD lo absorbe con *upsert* (clave producto + tienda + día) |
 | ~~Validar el respaldo `calculado` con una cadena sin `reference_price`~~ | Hecho | Con Caprabo (11/11/2026): donde la web da el precio por unidad, el calculado coincide en el 98 % ([`03`](03-contratos-datos.md#mapeo-de-campos-de-caprabo)) |
 | Sin `Service` para los `.txt` | Bajo | El volcado es solo para depurar; ya se guarda en el PVC `scraper-out` |
@@ -72,7 +76,13 @@ y no se ha tocado:
 |---|---|
 | Precio "actual" con varias tiendas | `_latest_prices()` (`api/app/repository.py`) hace `DISTINCT ON (product_id)` ordenando solo por `observed_on` (fecha). Si un producto tiene precio de dos tiendas el mismo día, sale una cualquiera. Pasará en cuanto haya varios códigos postales. Falta decidir: ¿precio por tienda/código postal del usuario, o el más reciente (`observed_at`)? |
 | `postal_code` no se guarda | El mensaje `clean` trae `postal_code` (y la ingesta ya lo publica), pero `stores` no tiene columna para él. Sin eso la API no puede filtrar por el código postal del usuario |
-| Tienda `default` antigua | Los lotes de antes del scraping por código postal llevaban `wh="default"`: en la BD hay tiendas `default` de Mercadona y Consum con precios del 11/11 que duplican los de `bcn1`/`378`. Decidir si se borran |
+| Tienda `default` antigua | Los lotes de antes del scraping por código postal llevaban `wh="default"`: en la BD hay tiendas `default` de Mercadona y Consum con precios del 11/11. No solo duplican a `bcn1`/`378`: 1.860 productos (243 de Mercadona y 1.617 de Consum) **solo** existen ahí, y la búsqueda los devuelve (en `/products/search?q=aceite oliva`, 3 de los 5 primeros son de `default` del 11/11). Propuesta: borrarlas |
+| Precios obsoletos | Sin filtro de frescura, un producto que desaparece del catálogo se sigue mostrando con su último precio para siempre. Propuesta: ignorar precios de más de N días (o marcarlos) |
+| `MaxDeliver` del writer | El durable `api-writer` no tiene límite de entregas. Un error de BD que no sea `ValueError` (p. ej. un nombre de más de 300 caracteres) se reintenta cada 10 s durante 7 días. La ingesta ya lo tiene en su durable (`maxDeliver` 100) |
+| Copia del histórico | El volumen de PostgreSQL se pierde con `down.sh`, `minikube delete` o `kubectl delete -k`, y es el único dato que no se puede recuperar. Propuesta: `pg_dump` nocturno (CronJob en `api`) a un volumen o fuera de la VM |
+| API solo dentro del clúster | El Service `api` es `ClusterIP`: solo se llega con `port-forward`, y la VM solo expone el puerto 22. Para la app hará falta un `NodePort`/Ingress o un túnel |
+| Versiones sin fijar | `python:3.12-slim`, `pgvector/pgvector:pg16` y `redis:7.4-alpine` van por etiqueta móvil |
+| Writer y caídas de NATS | Al reiniciar NATS (prueba del 12/11/2026) el writer muere con `ConnectionRefusedError` y vuelve porque Kubernetes reinicia el pod (1 reinicio). Funciona, pero conviene que reintente la conexión como el consumer de la ingesta (`max_reconnect_attempts=-1`) |
 | Nombres de cadena | `CHAIN_NAMES` (`api/app/ingest.py`) solo tiene `ahorramas`; las demás salen con `capitalize()`. Bien para Mercadona, Consum, Caprabo y Condis, pero bonÀrea sale como `Bonarea`: falta `"bonarea": "bonÀrea"` |
 | Endpoint de códigos postales | La ingesta necesita `GET /internal/postal-codes` (ver [`03`](03-contratos-datos.md)) para dejar de usar 08016 fijo |
 

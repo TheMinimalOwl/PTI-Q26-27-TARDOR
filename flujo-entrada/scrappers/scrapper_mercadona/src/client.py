@@ -1,7 +1,10 @@
+import os
+
 import requests
 
 TIMEOUT = 15
-HEADERS = {"User-Agent": "Mozilla/5.0"}
+# USER_AGENT viene del Secret scraper-secrets (lo monta cronjob.yaml).
+HEADERS = {"User-Agent": os.getenv("USER_AGENT", "Mozilla/5.0")}
 CHANGE_PC_URL = "https://tienda.mercadona.es/api/postal-codes/actions/change-pc/"
 
 
