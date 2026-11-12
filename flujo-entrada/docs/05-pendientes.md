@@ -24,11 +24,12 @@ Casi cerrada. La cola de salida ya está conectada: el equipo de API/BD consume
 |---|---|---|
 | Códigos postales desde la API | Alto | Hoy `postal_codes = ["08016"]` fijo. Falta el endpoint de la API con los códigos de los usuarios (propuesta en [`03`](03-contratos-datos.md#código-postal-y-tienda)) |
 | Sin alerta si falla un scraper | Medio | Desde el 11/11 el Job falla de forma visible, pero nadie avisa |
-| Sin idempotencia / deduplicación | Medio | Duplicados en reentrega |
+| Sin deduplicación en la ingesta | Bajo | Una reentrega repite líneas en `clean`; la BD lo absorbe con *upsert* (clave producto + tienda + día) |
 | ~~Validar el respaldo `calculado` con una cadena sin `reference_price`~~ | Hecho | Con Caprabo (11/11/2026): donde la web da el precio por unidad, el calculado coincide en el 98 % ([`03`](03-contratos-datos.md#mapeo-de-campos-de-caprabo)) |
 | Sin `Service` para los `.txt` | Bajo | El volcado es solo para depurar; ya se guarda en el PVC `scraper-out` |
 | Sin monitorización ni logs estructurados | Alto | Tarea 8 del plan |
 | Sin `schema_version` en el envelope | Bajo | Necesario si el formato evoluciona |
+| Tamaño del stream con más códigos postales | Bajo | Con cinco cadenas y un código postal, 7 días ocupan ~460 MiB de 1 GiB ([`04`](04-estados-y-errores.md)). Con más tiendas habrá que subir el PVC o bajar la retención (sin bajar del tiempo que el writer pueda estar parado) |
 | `ean` fuera de la línea limpia | Medio | Consum lo trae y serviría para emparejar el mismo producto entre cadenas; añadirlo cambia el contrato con API/BD |
 | Consum pierde ~0,8 % por paginar con `offset` | Bajo | El catálogo se mueve durante la pasada; se deduplica pero no se recupera lo desplazado |
 | Carrefour, Alcampo, Dia y Bonpreu **bloqueados** | Bajo | Probado el 11/11/2026 con Playwright (Chromium sin interfaz, sin camuflar el bot): las cuatro dan 403 (Cloudflare, CloudFront, Akamai). Pasarlos exigiría técnicas para ocultar el bot (huella falsa, proxies residenciales, captchas): **descartado** por condiciones de uso y `robots.txt`. Vía limpia: pedir acceso a los datos como proyecto académico. Playwright se usa solo para **descubrir** APIs internas de webs sin antibot (así salió bonÀrea) |
@@ -40,8 +41,8 @@ Casi cerrada. La cola de salida ya está conectada: el equipo de API/BD consume
 |---|---|---|
 | 3 (cierre) | 22–26 oct | **Hecho:** la salida `scraper.*.clean` la consume el writer de API/BD. Solo queda decidir texto vs JSON |
 | 4 | 26 oct | Presentación de progreso — estos documentos son la base |
-| 5 | 29 oct – 9 nov | Segundo scraper + `publish` + embeddings con el equipo de IA (Carrefour, intentado, quedó bloqueado por Cloudflare) |
-| 6 | 10–11 nov | 3º y 4º scraper (Alcampo, Ahorramás) + equivalencia de productos |
+| 5 | 29 oct – 9 nov | Segundo scraper (hecho: Consum; Carrefour quedó bloqueado por Cloudflare) + embeddings con el equipo de IA (pendiente) |
+| 6 | 10–11 nov | **Hecho con otras cadenas:** Consum, Caprabo, Condis y bonÀrea (Alcampo bloquea; Ahorramás no reparte en Cataluña). Queda la equivalencia de productos entre cadenas |
 | 7 | 12–16 nov | Calidad de datos + multi-tienda (`wh` real) |
 | 8 | 17–18 nov | Estabilizar ingesta + monitorización y logs |
 | 9–11 | 19–25 nov | Congelar, datos de demo, ensayo y demos |
@@ -52,8 +53,8 @@ timeline
   title Parte de ingesta: pendiente según el plan
   22–26 oct : conexión con la BD del equipo de API/BD (hecha)
   26 oct : presentación de progreso
-  29 oct – 9 nov : segundo scraper + embeddings
-  10–16 nov : 3º y 4º scraper + calidad de datos
+  29 oct – 9 nov : segundo scraper (hecho) + embeddings
+  10–16 nov : 3º, 4º y 5º scraper (hechos) + calidad de datos
   17–18 nov : estabilizar + monitorizar
   19–25 nov : congelar + demos
   26 nov – 20 dic : cierre, memoria y presentación final
@@ -62,8 +63,9 @@ timeline
 ## Por hacer para el equipo de API y BD
 
 Encontrado al conectar la ingesta con su BD (11/11/2026). El contrato del mensaje `clean`
-**cuadra**: su parser lee todas las líneas de las cuatro cadenas (66.129 productos), sin
-líneas sin parsear ni campos más largos que sus columnas. Lo que queda es de modelo de datos,
+**cuadra**: su parser lee todas las líneas de las cuatro primeras cadenas (66.129 productos),
+sin líneas sin parsear ni campos más largos que sus columnas; bonÀrea se cargó después con 0
+errores. Lo que queda es de modelo de datos,
 y no se ha tocado:
 
 | Qué | Detalle |
@@ -71,19 +73,19 @@ y no se ha tocado:
 | Precio "actual" con varias tiendas | `_latest_prices()` (`api/app/repository.py`) hace `DISTINCT ON (product_id)` ordenando solo por `observed_on` (fecha). Si un producto tiene precio de dos tiendas el mismo día, sale una cualquiera. Pasará en cuanto haya varios códigos postales. Falta decidir: ¿precio por tienda/código postal del usuario, o el más reciente (`observed_at`)? |
 | `postal_code` no se guarda | El mensaje `clean` trae `postal_code` (y la ingesta ya lo publica), pero `stores` no tiene columna para él. Sin eso la API no puede filtrar por el código postal del usuario |
 | Tienda `default` antigua | Los lotes de antes del scraping por código postal llevaban `wh="default"`: en la BD hay tiendas `default` de Mercadona y Consum con precios del 11/11 que duplican los de `bcn1`/`378`. Decidir si se borran |
-| Nombres de cadena | `CHAIN_NAMES` solo tiene `ahorramas`; las demás salen con `capitalize()` (bien para las cuatro actuales) |
+| Nombres de cadena | `CHAIN_NAMES` (`api/app/ingest.py`) solo tiene `ahorramas`; las demás salen con `capitalize()`. Bien para Mercadona, Consum, Caprabo y Condis, pero bonÀrea sale como `Bonarea`: falta `"bonarea": "bonÀrea"` |
 | Endpoint de códigos postales | La ingesta necesita `GET /internal/postal-codes` (ver [`03`](03-contratos-datos.md)) para dejar de usar 08016 fijo |
 
 ## Despliegue: separar ingesta y API/BD
 
-Hoy `infra/` (Terraform) despliega solo la ingesta en el perfil de minikube `ingesta`. La
-idea es tener **dos despliegues independientes en el mismo clúster**: uno de ingesta y otro
-de API/BD. La parte de la ingesta está hecha (pasos 2 y 3); el resto depende del equipo de
-API/BD:
+`infra/` (Terraform) despliega la ingesta en el perfil de minikube `ingesta`, y
+`infra/api-up.sh` añade la API/BD en el mismo clúster. La idea es tener **dos despliegues
+independientes en el mismo clúster**. Hechos los pasos 2, 3 y 5; el 1 y el 4 dependen sobre
+todo del equipo de API/BD:
 
 | Paso | Dueño | Qué |
 |---|---|---|
-| 1 | Ambos | Cuando exista el stack de API: sacar `bootstrap.sh` y el arranque de minikube a una carpeta común. Mientras tanto, el otro stack puede desplegar en el mismo perfil (`MINIKUBE_PROFILE`, contexto `ingesta`) |
+| 1 | Ambos | Sacar `bootstrap.sh` y el arranque de minikube a una carpeta común. Mientras tanto, `api-up.sh` despliega la API en el mismo perfil (`MINIKUBE_PROFILE`, contexto `ingesta`) |
 | 2 | Ingesta | **Hecho:** el pool de Fission y `normalizer-consumer` viven en el namespace `ingesta`, y Fission solo vigila ese namespace |
 | 3 | Ambos | **Hecho:** contrato `nats://nats.messaging.svc.cluster.local:4222`, stream `SCRAPERS`, subject `scraper.<cadena>.clean`, durable `api-writer` (ver [`03`](03-contratos-datos.md#cola-de-salida-frontera-con-apibd)). `infra/e2e.sh` comprueba que la salida se llena |
 | 4 | API/BD | Su propio stack de Terraform (`api/infra/`) con estado propio; recibe `nats_url` como variable, sin leer el estado de la ingesta |

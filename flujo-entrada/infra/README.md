@@ -13,10 +13,12 @@ bash flujo-entrada/infra/down.sh          # borra el perfil de minikube
 bash flujo-entrada/infra/down.sh --keep   # terraform destroy, deja el clúster
 ```
 
-Solo cubre la ingesta (scraper → NATS → normalizador → `scraper.<cadena>.clean`). La API, la
-BD y el RAG son de otros equipos y no se tocan. La frontera con ellos es la cola de salida:
-el stream `SCRAPERS` y el subject `scraper.<cadena>.clean`, que el writer de API/BD lee con su
-durable `api-writer` (ver [`docs/03-contratos-datos.md`](../docs/03-contratos-datos.md#cola-de-salida-frontera-con-apibd)).
+Terraform cubre la ingesta (scraper → NATS → normalizador → `scraper.<cadena>.clean`). La
+API, la BD y el RAG son de otros equipos y su código no se toca. La frontera con ellos es la
+cola de salida: el stream `SCRAPERS` y el subject `scraper.<cadena>.clean`, que el writer de
+API/BD lee con su durable `api-writer` (ver [`docs/03-contratos-datos.md`](../docs/03-contratos-datos.md#cola-de-salida-frontera-con-apibd)).
+Para tener la cadena entera en la VM, `api-up.sh` despliega su parte tal cual en el mismo
+clúster (ver [API y BD en la misma VM](#api-y-bd-en-la-misma-vm-api-upsh)).
 
 ## En una VM recién instalada
 
@@ -68,12 +70,13 @@ versión estable del día.
    unas 40.000 líneas). Si falla por la red, lo reintenta hasta 3 veces.
 4. Prueba de humo: el estado del stream y del consumidor, y `deploy.sh smoke` contra el router
    de Fission.
-5. Con `E2E=1`, además, [`e2e.sh`](e2e.sh): una pasada real del scraper (ver abajo).
+5. Con `API=1`, [`api-up.sh`](api-up.sh): la API y la BD en el namespace `api` (ver abajo).
+6. Con `E2E=1`, [`e2e.sh`](e2e.sh): una pasada real de los scrapers (ver abajo).
 
-Desde cero y comprobando que los datos llegan a la cola de salida:
+Desde cero y comprobando que los datos llegan a la BD:
 
 ```bash
-bash flujo-entrada/infra/down.sh && E2E=1 bash flujo-entrada/infra/up.sh
+bash flujo-entrada/infra/down.sh && API=1 E2E=1 bash flujo-entrada/infra/up.sh
 ```
 
 Es idempotente: si se vuelve a ejecutar, solo se reconstruye lo que haya cambiado.
@@ -110,8 +113,8 @@ Todo lo de la ingesta vive en namespaces propios y no toca `default`:
 | `api` | **Despliegue aparte** (`api-up.sh`, del equipo de API/BD): PostgreSQL + pgvector, Redis, API (2 réplicas) y `writer` |
 
 Fission se instala con `defaultNamespace: ingesta`, así que solo vigila ese namespace.
-Si otro equipo despliega en el mismo clúster (por ejemplo, la API en su namespace), no se
-pisan; la única conexión es NATS (`nats://nats.messaging.svc.cluster.local:4222`).
+La API/BD, desplegada en el mismo clúster en su namespace `api`, no se pisa con la ingesta;
+la única conexión es NATS (`nats://nats.messaging.svc.cluster.local:4222`).
 
 ## API y BD en la misma VM (`api-up.sh`)
 
@@ -134,7 +137,13 @@ API=1 bash flujo-entrada/infra/up.sh     # o todo de una vez
 
 Probado el 11/11/2026: 1.331 lotes `clean` cargados en ~4 minutos, 0 errores en el writer;
 en la BD, Caprabo 13.068 productos, Condis 7.810, Consum 8.611 (tienda 378) y Mercadona
-4.389 (`bcn1`), y `/products/search` compara las cuatro cadenas.
+4.389 (`bcn1`), y `/products/search` compara las cadenas. bonÀrea, añadido después, cargó
+6.245 productos (tienda `online`) con 0 errores.
+
+Cada noche el writer añade un precio por producto, tienda y día: eso es el histórico. Para
+no perderlo, la VM tiene que estar encendida a las 02:00, y el volumen de la BD se borra con
+`minikube delete` o `kubectl delete -k api/k8s/` (copias con `pg_dump`: decisión del equipo
+de API/BD).
 
 ## Variables
 
@@ -178,9 +187,9 @@ kubectl --context ingesta -n scrappers delete job prueba-manual
 kubectl --context ingesta -n messaging exec deploy/nats-box -- nats -s nats://nats:4222 stream subjects SCRAPERS
 ```
 
-En este perfil no hay writer, así que los lotes `clean` se acumulan en el stream. Cuando se
-despliegue la parte de API/BD en el mismo clúster, su durable `api-writer` empezará desde el
-principio y los cargará todos.
+Sin `api-up.sh` no hay writer, así que los lotes `clean` se acumulan en el stream (7 días).
+Cuando se despliega la parte de API/BD, su durable `api-writer` empieza desde el principio y
+los carga todos.
 
 ## Problemas conocidos (y cómo están resueltos)
 
@@ -191,7 +200,7 @@ principio y los cargará todos.
 | `helm_release.fission` se queda esperando hasta el timeout | El Service `router` es de tipo LoadBalancer y en minikube nunca recibe IP | `routerServiceType: NodePort` |
 | "Error locating chart … 500" | GitHub falla a ratos | `up.sh` reintenta el apply hasta 3 veces. Las releases son `atomic`, así que un intento fallido no deja nada a medias |
 | En un contenedor (sin systemd) `bootstrap.sh` instala Docker pero dice "el demonio de docker no esta en marcha" | No hay systemd que arranque `dockerd` | Solo pasa en contenedores, no en una VM. Arranca `dockerd` a mano y repite `up.sh` |
-| Un Job de scraper acaba `Failed` con "0 productos" | Fallo de red puntual o la web bloquea | Desde el 11/11 el scraper falla en vez de acabar "bien" sin datos. Kubernetes reintenta 2 veces; si no, relanza el Job a mano |
+| Un Job de scraper acaba `Failed` con "0 productos" | Fallo de red puntual o la web bloquea | Desde el 11/11 el scraper falla en vez de acabar "bien" sin datos. Kubernetes lo reintenta (2 veces; Caprabo 1); si no, relanza el Job a mano |
 
 ## Cómo se ha probado
 
@@ -208,6 +217,9 @@ principio y los cargará todos.
 - **Con código postal y Caprabo (11/11/2026):** `E2E=1 up.sh`, los tres scrapers a la vez
   con 08016: Mercadona `bcn1` 4652 → 94 lotes, Consum `378` 8611 → 173, Caprabo `8284` 13068
   → 263 (59 min), 0 errores, RC=0.
+- **Con bonÀrea y la API (11/11/2026):** `up.sh` añadió la imagen y el CronJob, y
+  `SCRAPERS=bonarea e2e.sh` dio 6245 productos → 125 lotes (17 min), 0 errores; el writer los
+  cargó en PostgreSQL (tienda `online`).
 
 ## Relación con `setup-vm.sh`
 

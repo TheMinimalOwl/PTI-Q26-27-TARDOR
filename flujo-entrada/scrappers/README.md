@@ -4,10 +4,12 @@ Recolectores crudos. Sin normalización.
 
 - Cada scraper solo extrae datos tal cual de la web y los vuelca a `txt`.
 - Normaliza Fission, no el scraper.
-- Activos: **Mercadona** (`scraper.mercadona.raw`), **Consum** (`scraper.consum.raw`) y
-  **Caprabo** (`scraper.caprabo.raw`) , **Condis** (`scraper.condis.raw`) y **bonÀrea** (`scraper.bonarea.raw`). Todos publican en NATS además del `txt` y se ejecutan a las 02:00
+- Activos: **Mercadona** (`scraper.mercadona.raw`), **Consum** (`scraper.consum.raw`),
+  **Caprabo** (`scraper.caprabo.raw`), **Condis** (`scraper.condis.raw`) y **bonÀrea**
+  (`scraper.bonarea.raw`). Todos publican en NATS además del `txt` y se ejecutan a las 02:00
   (hora de Madrid).
-- El scraper de Carrefour existe pero está bloqueado por Cloudflare (ver su README).
+- El scraper de Carrefour existe pero está bloqueado por Cloudflare, también con Playwright
+  (ver su README). No se despliega.
 - Para añadir una cadena: scraper que publique el crudo en `scraper.<cadena>.raw` + una
   función `from_<cadena>()` en `fission/normalizer/normalizer.py` + su CronJob en
   `infra/terraform/scraper.tf`. El consumer y el writer de API/BD ya la recogen solos.

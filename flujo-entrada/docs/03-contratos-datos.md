@@ -6,16 +6,15 @@ Contratos de la frontera de ingesta. Cualquier cambio aquí afecta al equipo de 
 
 ```mermaid
 flowchart LR
-  P["scrapper_mercadona<br/>publish.py"] -->|"1 msg = 1 producto"| RAW["scraper.mercadona.raw"]
-  P2["scrapper_consum<br/>publish.py"] -->|"1 msg = 1 producto"| RAW2["scraper.consum.raw"]
-  RAW --> C["normalizer-consumer"]
-  RAW2 --> C
-  C -->|"1 msg = 1 lote"| CLEAN["scraper.mercadona.clean"]
-  C -->|"1 msg = 1 lote"| CLEAN2["scraper.consum.clean"]
-  CLEAN2 --> API
-  CLEAN -->|"durable api-writer (pull)"| API["writer de API/BD<br/>→ PostgreSQL"]
-  RAW -.->|stream| S[("SCRAPERS<br/>subjects scraper.&gt;")]
-  CLEAN -.->|stream| S
+  P["scrapper_&lt;cadena&gt;<br/>publish.py"] -->|"1 msg = 1 producto"| RAW["scraper.&lt;cadena&gt;.raw"]
+  RAW -->|"durable normalizer<br/>filtro scraper.*.raw"| C["normalizer-consumer"]
+  C -->|"1 msg = 1 lote"| CLEAN["scraper.&lt;cadena&gt;.clean"]
+  CLEAN -->|"durable api-writer (pull)<br/>filtro scraper.*.clean"| W["writer de API/BD"]
+  W -->|upsert| DB[("PostgreSQL")]
+  subgraph S["stream SCRAPERS · subjects scraper.&gt; · 7 días"]
+    RAW
+    CLEAN
+  end
 ```
 
 | Subject | Productor | Consumidor | Granularidad |
@@ -89,8 +88,8 @@ kubectl -n messaging exec deploy/nats-box -- nats -s nats://nats:4222 consumer i
 
 ## Código postal y tienda
 
-Las dos cadenas deciden **qué productos** se venden según el código postal del cliente: cada
-código postal lo sirve una tienda o almacén con su propio surtido. En las pruebas
+Mercadona y Consum deciden **qué productos** se venden según el código postal del cliente:
+cada código postal lo sirve una tienda o almacén con su propio surtido. En las pruebas
 (11/11/2026) el precio de un mismo producto **no** cambiaba entre zonas, pero el catálogo sí
 (Consum: 8.611 productos en Barcelona, 9.581 en Valencia).
 
@@ -115,7 +114,7 @@ cada código postal**:
 código postal y la API lo guarda. Mientras eso no existe, se usa **08016** de ejemplo:
 
 - Con Terraform: variable `postal_codes` (lista, por defecto `["08016"]`), que se copia a la
-  variable de entorno `SCRAPER_POSTAL_CODES` de los dos CronJobs.
+  variable de entorno `SCRAPER_POSTAL_CODES` de todos los CronJobs.
 - Sin Terraform: `SCRAPER_POSTAL_CODES` en cada `cronjob.yaml` (separados por comas).
 
 Propuesta de contrato para cuando la API lo implemente (a acordar con el equipo de API/BD):
@@ -142,10 +141,10 @@ Publicado por `publish.build_envelope()`:
 | Campo | Tipo | Origen | Notas |
 |---|---|---|---|
 | `source` | string | constante | Cadena de origen |
-| `wh` | string | resuelto desde el código postal | Tienda o almacén de la cadena que sirve ese código postal: `bcn1` (Mercadona), `378` (Consum). Ver [Código postal y tienda](#código-postal-y-tienda) |
+| `wh` | string | resuelto desde el código postal | Tienda o almacén de la cadena que sirve ese código postal: `bcn1` (Mercadona), `378` (Consum), `8284` (Caprabo), `718` (Condis), `online` (bonÀrea). Ver [Código postal y tienda](#código-postal-y-tienda) |
 | `postal_code` | string | `SCRAPER_POSTAL_CODES` | Código postal del que salió `wh` |
 | `ts` | string | UTC, `isoformat(timespec="seconds")` | Formato `...+00:00` |
-| `product_id` | string | `str(product["id"])` | Duplicado del id para indexar sin abrir `product` |
+| `product_id` | string | id del producto en la cadena (`id`; `code` en Consum, `identifier` en bonÀrea) | Duplicado del id para indexar sin abrir `product` |
 | `product` | object | crudo de la fuente | **Sin tocar**: el normalizador decide qué hacer |
 
 > No hay versión de esquema (`schema_version`). Es un hueco a cubrir si el envelope
@@ -292,112 +291,6 @@ Reglas, en orden:
 > la fuente en el **99,1%** de los casos (las diferencias restantes son redondeo de
 > la fuente o incoherencias propias).
 
-## Mapeo de campos de Consum
-
-Consum no tiene la forma de Mercadona. En vez de cambiar el resto del normalizador, una
-función `from_consum()` traduce el crudo a la forma común (la de Mercadona) y todo lo demás
-(precio unitario canónico, línea limpia, contrato Pydantic) es igual. La cadena se detecta
-por la forma del objeto (`productData` + `priceData`), así que el scraper publica el crudo
-tal cual.
-
-| Forma común | Consum | Ejemplo |
-|---|---|---|
-| `id` | `code` (id público, el de la URL; `id` es interno) | `"1669"` |
-| `display_name` | `productData.name` | `Rabanito Bolsa` |
-| `price_instructions.unit_price` | `centAmount` del precio vigente: `OFFER_PRICE` si hay oferta, si no `PRICE` (en euros, pese al nombre) | `1.3` |
-| `price_instructions.reference_price` | `centUnitAmount` del mismo precio | `5.2` |
-| `price_instructions.reference_format` | `unitPriceUnitType` sin el `1 ` inicial | `1 Kg` → `Kg` |
-| `price_instructions.unit_size` / `size_format` | Final de `productData.description`; `N x tamaño` en packs; si no hay, se omite (`-`) | `250 Gr` → `250` / `Gr` |
-| `share_url` | `productData.url` | `https://tienda.consum.es/es/p/rabanito-bolsa/1669` |
-| `categories[0].name` | `categories[0].name` | `Zanahorias y otras raíces` |
-
-Formatos de `unitPriceUnitType` vistos (11/11/2026, 9.354 productos) y su unidad base:
-`1 Kg` (4.758) → kg, `1 L` (1.695) → l, `1 U` (1.614) → ud, `100 ml` (942) → l,
-`100 Gr` (204) → kg, `1 Lv` (111) → lavado, `1 Dc` (14) → ud (docena), `1 M` (8) → m y
-`1 Do` (8, dosis: pastillas de lavavajillas, bolsitas) → ud.
-
-Todos traen precio por unidad, así que **el 100 % sale con `src=fuente`** y ninguno queda
-incompleto. Ejemplo de línea limpia:
-
-```
-1669 | Rabanito Bolsa | 1.30EUR total | 5.20EUR/kg | 250Gr | Zanahorias y otras raíces | https://tienda.consum.es/es/p/rabanito-bolsa/1669 | ref=5.2EUR/Kg src=fuente
-```
-
-`ean` viaja en el crudo pero **no** en la línea limpia: añadirlo cambia el contrato con
-API/BD (ver [`05-pendientes.md`](05-pendientes.md)).
-
-## Mapeo de campos de bonÀrea
-
-El catálogo sale del JSON interno de la tienda online (`POST /ca/shop/ShoppingBody`, ver
-`scrappers/scrapper_bonarea/README.md`) y `from_bonarea()` lo traduce a la forma común. Se
-detecta por `identifier` + `priceToPay`.
-
-| Forma común | bonÀrea | Ejemplo |
-|---|---|---|
-| `id` | `identifier` | `"13*5179"` |
-| `display_name` | `description` | `Pit filetejat de gall dindi 5 u.` |
-| `price_instructions.unit_price` | `priceToPay` | `3.8` |
-| `price_instructions.reference_price` / `reference_format` | De `unitPrice`, con la etiqueta corregida a la unidad base | `10,15 €/kg` → `10.15` / `kg` |
-| `price_instructions.unit_size` / `size_format` | De `measurementUnit`; si no, del nombre | `aprox. 374 g` → `374` / `g` |
-| `share_url` | `urlFriendly` | `https://www.bonarea-online.com/online/producte/.../13_5179` |
-| `categories[0].name` | Última categoría de `category_path` (la añade el scraper) | `Gall dindi` |
-
-**Etiquetas mal puestas:** `unitPrice` a veces dice `€/ml.`, `€/cl.`, `€/g.` o `€/k.`, pero
-el valor es por litro o por kilo (`300,00 €/ml.` de un ambientador de 7 ml a 2,10 €). El
-adaptador corrige la etiqueta solo para bonÀrea. `€/d.` son dosis (ud); `0,00 €/...` no
-cuenta.
-
-Catálogo completo (11/11/2026, 6.245 productos de supermercado): 5.405 con precio por unidad
-de la web, 352 calculados y **488 incompletos (7,8 %)**: la web no da ni precio por unidad
-ni tamaño (vinos sin volumen, tintes, estuches). Donde hay los dos, el calculado coincide
-con la web en 5.394 de 5.397.
-
-## Mapeo de campos de Condis
-
-El catálogo sale de la API del buscador de la web (Empathy.co; ver
-`scrappers/scrapper_condis/README.md`) y `from_condis()` lo traduce a la forma común. Se
-detecta por `description` + `price.current`.
-
-| Forma común | Condis | Ejemplo |
-|---|---|---|
-| `id` | `id` | `"116335"` |
-| `display_name` | `description` | `TORTILLAS ZANUY TRIGO 8 UNIDADES 320 G` |
-| `price_instructions.unit_price` | `price.current` (ya es el de oferta; `regular` es el de siempre) | `1.69` |
-| `price_instructions.reference_price` / `reference_format` | De `pum` | `5,28€/Kilo` → `5.28` / `Kilo` |
-| `price_instructions.unit_size` / `size_format` | Del final del nombre, como en Caprabo; se ignora el `0 KG` de relleno de los nombres truncados | `320 G` → `320` / `g` |
-| `share_url` | `https://compraonline.condis.es` + `url` | `https://compraonline.condis.es/tortillas-.../p/116335/es_ES` |
-| `categories[0].name` | `family` (si no, el último de `category`) | `Platos preparados` |
-
-Formatos de `pum` vistos: `€/Kilo`, `€/Kg`, `€/Kilo PNE` (peso neto escurrido), `€/Litro`,
-`€/100 ml`, `€/100 g`, `€/Unidad`, `€/Docena`, `€/Dosis`, `€/M`, `€/Bandeja`, `€/Pieza`.
-Catálogo completo (11/11/2026, tienda 718, 7.810 productos): 7.742 con precio por unidad de la
-web, 38 calculados y 30 incompletos (0,4 %, nombres truncados sin cantidad: "CUÑA QUESO SEMI
-SA CANOVA 0 KG").
-
-## Mapeo de campos de Caprabo
-
-No hay API: el scraper saca los campos del HTML tal como los enseña la web (ver
-`scrappers/scrapper_caprabo/README.md`) y `from_caprabo()` los traduce a la forma común.
-Se detecta por `platform: "caprabo"`.
-
-| Forma común | Caprabo | Ejemplo |
-|---|---|---|
-| `id` | `id` (de la analítica de la web) | `"13899893"` |
-| `display_name` | `name` | `Naranja de zumo PREMIER, malla 2 kg` |
-| `price_instructions.unit_price` | `price` (vigente; ya es el de oferta si la hay) | `3.99` |
-| `price_instructions.reference_price` / `reference_format` | De `unit_price_text` cuando la web lo da | `1 KILO A 2,00 €` → `2.00` / `KILO` |
-| `price_instructions.unit_size` / `size_format` | Del nombre: última cantidad con unidad; `NxM` en packs; `1/2 docena`; `unidad`, `pieza`, `manojo` sin número = 1 ud | `malla 2 kg` → `2` / `kg` |
-| `share_url` | `url` | `https://www.capraboacasa.com/es/productdetail/13899893-.../` |
-| `categories[0].name` | `category` (título de la página de categoría) | `Naranjas y otros cítricos` |
-
-Aquí el **cálculo de respaldo trabaja de verdad**: la web da el precio por unidad en ~78 % de
-los productos (`src=fuente`); para el resto se calcula con el tamaño del nombre
-(`src=calculado`). Catálogo completo de Caprabo (11/11/2026, 13.068 productos): 10.162
-fuente, 2.821 calculado y 85 incompletos (0,7 %, productos sin cantidad en el nombre: "pack 1
-par", "al corte", estuches); en una muestra, donde hay las dos cosas, el cálculo coincide con
-la web en el 98 %. Formatos de
-`unit_price_text` vistos: `1 KILO`, `1 LITRO`, `1 DOCENA`, `1 UNIDAD`.
-
 ## Mapeo de campos de Mercadona
 
 ```mermaid
@@ -444,6 +337,112 @@ flowchart LR
 | `unit` | `reference_price ÷ factor(reference_format)`; si falta, `unit_price ÷ (tamaño × factor(size_format))` | `8.20` (EUR por unidad base) |
 | `size` / `size_fmt` | `unit_size` / `size_format` | `0.5` / `l` |
 | `ref` / `ref_fmt` / `src` | `reference_price` / `reference_format` / `fuente`·`calculado` | `8.200` / `L` / `fuente` |
+
+## Mapeo de campos de Consum
+
+Consum no tiene la forma de Mercadona. En vez de cambiar el resto del normalizador, una
+función `from_consum()` traduce el crudo a la forma común (la de Mercadona) y todo lo demás
+(precio unitario canónico, línea limpia, contrato Pydantic) es igual. La cadena se detecta
+por la forma del objeto (`productData` + `priceData`), así que el scraper publica el crudo
+tal cual.
+
+| Forma común | Consum | Ejemplo |
+|---|---|---|
+| `id` | `code` (id público, el de la URL; `id` es interno) | `"1669"` |
+| `display_name` | `productData.name` | `Rabanito Bolsa` |
+| `price_instructions.unit_price` | `centAmount` del precio vigente: `OFFER_PRICE` si hay oferta, si no `PRICE` (en euros, pese al nombre) | `1.3` |
+| `price_instructions.reference_price` | `centUnitAmount` del mismo precio | `5.2` |
+| `price_instructions.reference_format` | `unitPriceUnitType` sin el `1 ` inicial | `1 Kg` → `Kg` |
+| `price_instructions.unit_size` / `size_format` | Final de `productData.description`; `N x tamaño` en packs; si no hay, se omite (`-`) | `250 Gr` → `250` / `Gr` |
+| `share_url` | `productData.url` | `https://tienda.consum.es/es/p/rabanito-bolsa/1669` |
+| `categories[0].name` | `categories[0].name` | `Zanahorias y otras raíces` |
+
+Formatos de `unitPriceUnitType` vistos (11/11/2026, 9.354 productos) y su unidad base:
+`1 Kg` (4.758) → kg, `1 L` (1.695) → l, `1 U` (1.614) → ud, `100 ml` (942) → l,
+`100 Gr` (204) → kg, `1 Lv` (111) → lavado, `1 Dc` (14) → ud (docena), `1 M` (8) → m y
+`1 Do` (8, dosis: pastillas de lavavajillas, bolsitas) → ud.
+
+Todos traen precio por unidad, así que **el 100 % sale con `src=fuente`** y ninguno queda
+incompleto. Ejemplo de línea limpia:
+
+```
+1669 | Rabanito Bolsa | 1.30EUR total | 5.20EUR/kg | 250Gr | Zanahorias y otras raíces | https://tienda.consum.es/es/p/rabanito-bolsa/1669 | ref=5.2EUR/Kg src=fuente
+```
+
+`ean` viaja en el crudo pero **no** en la línea limpia: añadirlo cambia el contrato con
+API/BD (ver [`05-pendientes.md`](05-pendientes.md)).
+
+## Mapeo de campos de Caprabo
+
+No hay API: el scraper saca los campos del HTML tal como los enseña la web (ver
+`scrappers/scrapper_caprabo/README.md`) y `from_caprabo()` los traduce a la forma común.
+Se detecta por `platform: "caprabo"`.
+
+| Forma común | Caprabo | Ejemplo |
+|---|---|---|
+| `id` | `id` (de la analítica de la web) | `"13899893"` |
+| `display_name` | `name` | `Naranja de zumo PREMIER, malla 2 kg` |
+| `price_instructions.unit_price` | `price` (vigente; ya es el de oferta si la hay) | `3.99` |
+| `price_instructions.reference_price` / `reference_format` | De `unit_price_text` cuando la web lo da | `1 KILO A 2,00 €` → `2.00` / `KILO` |
+| `price_instructions.unit_size` / `size_format` | Del nombre: última cantidad con unidad; `NxM` en packs; `1/2 docena`; `unidad`, `pieza`, `manojo` sin número = 1 ud | `malla 2 kg` → `2` / `kg` |
+| `share_url` | `url` | `https://www.capraboacasa.com/es/productdetail/13899893-.../` |
+| `categories[0].name` | `category` (título de la página de categoría) | `Naranjas y otros cítricos` |
+
+Aquí el **cálculo de respaldo trabaja de verdad**: la web da el precio por unidad en ~78 % de
+los productos (`src=fuente`); para el resto se calcula con el tamaño del nombre
+(`src=calculado`). Catálogo completo de Caprabo (11/11/2026, 13.068 productos): 10.162
+fuente, 2.821 calculado y 85 incompletos (0,7 %, productos sin cantidad en el nombre: "pack 1
+par", "al corte", estuches); en una muestra, donde hay las dos cosas, el cálculo coincide con
+la web en el 98 %. Formatos de
+`unit_price_text` vistos: `1 KILO`, `1 LITRO`, `1 DOCENA`, `1 UNIDAD`.
+
+## Mapeo de campos de Condis
+
+El catálogo sale de la API del buscador de la web (Empathy.co; ver
+`scrappers/scrapper_condis/README.md`) y `from_condis()` lo traduce a la forma común. Se
+detecta por `description` + `price.current`.
+
+| Forma común | Condis | Ejemplo |
+|---|---|---|
+| `id` | `id` | `"116335"` |
+| `display_name` | `description` | `TORTILLAS ZANUY TRIGO 8 UNIDADES 320 G` |
+| `price_instructions.unit_price` | `price.current` (ya es el de oferta; `regular` es el de siempre) | `1.69` |
+| `price_instructions.reference_price` / `reference_format` | De `pum` | `5,28€/Kilo` → `5.28` / `Kilo` |
+| `price_instructions.unit_size` / `size_format` | Del final del nombre, como en Caprabo; se ignora el `0 KG` de relleno de los nombres truncados | `320 G` → `320` / `g` |
+| `share_url` | `https://compraonline.condis.es` + `url` | `https://compraonline.condis.es/tortillas-.../p/116335/es_ES` |
+| `categories[0].name` | `family` (si no, el último de `category`) | `Platos preparados` |
+
+Formatos de `pum` vistos: `€/Kilo`, `€/Kg`, `€/Kilo PNE` (peso neto escurrido), `€/Litro`,
+`€/100 ml`, `€/100 g`, `€/Unidad`, `€/Docena`, `€/Dosis`, `€/M`, `€/Bandeja`, `€/Pieza`.
+Catálogo completo (11/11/2026, tienda 718, 7.810 productos): 7.742 con precio por unidad de la
+web, 38 calculados y 30 incompletos (0,4 %, nombres truncados sin cantidad: "CUÑA QUESO SEMI
+SA CANOVA 0 KG").
+
+## Mapeo de campos de bonÀrea
+
+El catálogo sale del JSON interno de la tienda online (`POST /ca/shop/ShoppingBody`, ver
+`scrappers/scrapper_bonarea/README.md`) y `from_bonarea()` lo traduce a la forma común. Se
+detecta por `identifier` + `priceToPay`.
+
+| Forma común | bonÀrea | Ejemplo |
+|---|---|---|
+| `id` | `identifier` | `"13*5179"` |
+| `display_name` | `description` | `Pit filetejat de gall dindi 5 u.` |
+| `price_instructions.unit_price` | `priceToPay` | `3.8` |
+| `price_instructions.reference_price` / `reference_format` | De `unitPrice`, con la etiqueta corregida a la unidad base | `10,15 €/kg` → `10.15` / `kg` |
+| `price_instructions.unit_size` / `size_format` | De `measurementUnit`; si no, del nombre | `aprox. 374 g` → `374` / `g` |
+| `share_url` | `urlFriendly` | `https://www.bonarea-online.com/online/producte/.../13_5179` |
+| `categories[0].name` | Última categoría de `category_path` (la añade el scraper) | `Gall dindi` |
+
+**Etiquetas mal puestas:** `unitPrice` a veces dice `€/ml.`, `€/cl.`, `€/g.` o `€/k.`, pero
+el valor es por litro o por kilo (`300,00 €/ml.` de un ambientador de 7 ml a 2,10 €). El
+adaptador corrige la etiqueta solo para bonÀrea. `€/d.` son dosis (ud); `0,00 €/...` no
+cuenta.
+
+Catálogo completo (11/11/2026, 6.245 productos de supermercado): 5.405 con precio por unidad
+de la web, 352 calculados y **488 incompletos (7,8 %)**: la web no da ni precio por unidad
+ni tamaño (vinos sin volumen, tintes, estuches). Donde hay los dos, el calculado coincide
+con la web en 5.394 de 5.397.
 
 ## Contrato Pydantic
 
@@ -604,7 +603,7 @@ conservan solo para trazabilidad; la comparación usa siempre `unit_price` + `un
 
 Si el destino deja de ser texto plano y pasa a JSON (decisión abierta con API/BD, Prioridad 3
 de [`05-pendientes.md`](05-pendientes.md#prioridad-3--contrato-con-apibd)), el mensaje de
-`scraper.mercadona.clean` sería:
+`scraper.<cadena>.clean` sería:
 
 ```python
 class CleanBatch(BaseModel):

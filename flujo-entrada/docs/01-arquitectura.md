@@ -19,8 +19,12 @@ flowchart LR
         subgraph N3["fission · ingesta"]
             D["⚙️ Fission"]
         end
-        B --> C
-        C --> D
+        subgraph N4["api · equipo de API/BD"]
+            E[("🐘 PostgreSQL<br/>writer + API")]
+        end
+        B -->|raw| C
+        C <-->|"raw · clean"| D
+        C -->|clean| E
     end
 
     A --> B
@@ -29,17 +33,20 @@ flowchart LR
     classDef cScraper fill:#e8f5e9,stroke:#43a047,stroke-width:2px,color:#1b5e20,font-weight:bold
     classDef cNats fill:#fff8e1,stroke:#fb8c00,stroke-width:2px,color:#e65100,font-weight:bold
     classDef cFission fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px,color:#4a148c,font-weight:bold
+    classDef cApi fill:#e0f2f1,stroke:#00897b,stroke-width:2px,color:#004d40,font-weight:bold
 
     class A cInternet
     class B cScraper
     class C cNats
     class D cFission
+    class E cApi
 
     style EXT fill:#fafafa,stroke:#b0bec5,stroke-dasharray:5 5,color:#546e7a
     style K8S fill:#eef2f7,stroke:#5c6bc0,stroke-width:2px,color:#283593
     style N1 fill:#ffffff,stroke:#43a047
     style N2 fill:#ffffff,stroke:#fb8c00
     style N3 fill:#ffffff,stroke:#8e24aa
+    style N4 fill:#ffffff,stroke:#00897b
     linkStyle default stroke:#90a4ae,stroke-width:2px
 ```
 
@@ -84,9 +91,14 @@ flowchart TB
       FN["Function normalizer<br/>(Flask)"]
       CONS["Deployment normalizer-consumer"]
     end
-  end
 
-  XBD["API / BD<br/>(otro equipo)"]
+    subgraph nsApi["ns: api · equipo de API/BD (api-up.sh)"]
+      WR["Deployment writer"]
+      PG[("PostgreSQL + pgvector<br/>StatefulSet")]
+      API["Deployment api<br/>(FastAPI)"]
+      RD[("Redis")]
+    end
+  end
 
   CJMD -->|"GET (JSON)"| MD
   SEC -.-> CJMD
@@ -105,23 +117,24 @@ flowchart TB
   TRIG --> FN
   FN -->|"text/plain"| CONS
   CONS -->|"publica"| CLEAN
-  CLEAN -.->|"durable api-writer"| XBD
+  CLEAN -->|"durable api-writer (pull)"| WR
+  WR -->|"upsert"| PG
+  API -->|"lee"| PG
+  API --> RD
 
   classDef cExt fill:#e3f2fd,stroke:#1e88e5,stroke-width:2px,color:#0d47a1,font-weight:bold
   classDef cScraper fill:#e8f5e9,stroke:#43a047,stroke-width:2px,color:#1b5e20,font-weight:bold
   classDef cNats fill:#fff8e1,stroke:#fb8c00,stroke-width:2px,color:#e65100,font-weight:bold
-  classDef cNatsHueco fill:#fff8e1,stroke:#fb8c00,stroke-width:2px,stroke-dasharray:4 3,color:#e65100,font-weight:bold
   classDef cFission fill:#f3e5f5,stroke:#8e24aa,stroke-width:2px,color:#4a148c,font-weight:bold
-  classDef cPending fill:#eceff1,stroke:#90a4ae,stroke-width:2px,stroke-dasharray:4 3,color:#455a64,font-weight:bold
+  classDef cApi fill:#e0f2f1,stroke:#00897b,stroke-width:2px,color:#004d40,font-weight:bold
   classDef cSecret fill:#eceff1,stroke:#78909c,color:#37474f
 
-  class MD cExt
-  class CJMD cScraper
+  class MD,CS,GE,CD,BA cExt
+  class CJMD,CJCS,CJGE,CJCD,CJBA cScraper
   class SEC cSecret
-  class RAW cNats
-  class CLEAN cNatsHueco
+  class RAW,CLEAN cNats
   class ROUTER,TRIG,FN,CONS cFission
-  class XBD cPending
+  class WR,PG,API,RD cApi
 
   style ext fill:#fafafa,stroke:#b0bec5,stroke-dasharray:5 5,color:#546e7a
   style k8s fill:#f5f7fb,stroke:#5c6bc0,stroke-width:2px,color:#283593
@@ -129,6 +142,7 @@ flowchart TB
   style nsMsg fill:#fffde7,stroke:#fb8c00
   style nsFis fill:#faf1fc,stroke:#8e24aa
   style nsDef fill:#faf1fc,stroke:#8e24aa
+  style nsApi fill:#f0f9f8,stroke:#00897b
   linkStyle default stroke:#90a4ae,stroke-width:2px
 ```
 
@@ -140,12 +154,11 @@ flowchart TB
 | 🟠 **Ámbar** | mensajería |
 | 🟣 **Morado** | Fission |
 | 🔵 **Azul** | fuentes externas |
-| ⚪ **Gris discontinuo** | pendiente o de otro equipo |
+| 🟦 **Verde azulado** | API y BD: del equipo de API/BD, desplegado aparte en el mismo clúster |
 
 > [!NOTE]
-> - Un **canal ámbar con borde discontinuo** es un canal que todavía no tiene consumidor.
-> - Sobre las líneas: **continua** = tráfico de datos real; **discontinua** = montaje de
->   configuración o flujo aún no operativo.
+> Sobre las líneas: **continua** = tráfico de datos real; **discontinua** = solo
+> configuración (el `Secret` que monta el CronJob).
 
 ## 🧩 Componentes
 
@@ -160,11 +173,12 @@ secciones: todo el catálogo en ~20 peticiones. Publica en `scraper.condis.raw`.
 `scrapper_bonarea` usa el JSON interno con el que la web de bonÀrea carga cada categoría
 (encontrado con Playwright; el scraper no lo necesita). Publica en `scraper.bonarea.raw`.
 
-Hay un recolector por cadena, con la misma estructura. Abajo, el de Mercadona. El de Consum
-(`scrappers/scrapper_consum/`, ver su README) recorre la API paginada de Consum
-(`catalog/product?limit=100&offset=N`) con `SCRAPER_DELAY` segundos entre páginas, publica en
-`scraper.consum.raw`. Los dos salen con código ≠ 0 si no consiguen productos o no los
-publican, y los dos recorren la tienda que sirve cada código postal (`SCRAPER_POSTAL_CODES`).
+`scrapper_consum` recorre la API paginada de Consum (`catalog/product?limit=100&offset=N`)
+con `SCRAPER_DELAY` segundos entre páginas y publica en `scraper.consum.raw`.
+
+Hay un recolector por cadena, con la misma estructura (cada uno con su README). Todos salen
+con código ≠ 0 si no consiguen productos o no los publican, y todos recorren la tienda que
+sirve cada código postal (`SCRAPER_POSTAL_CODES`). Abajo, el de Mercadona como ejemplo.
 
 | Fichero | Responsabilidad |
 |---|---|
@@ -255,7 +269,7 @@ Fission por HTTP.
 | `../setup-vm.sh` | Script | — | Montaje a mano, idempotente, en el perfil `minikube` (ver *Orden de despliegue*) |
 | `cluster/namespace.yaml` | Namespace ×3 | — | `scrappers`, `fission`, `messaging` |
 | `messaging/nats-values.yaml` | Helm values | messaging | JetStream + PVC 1 Gi |
-| `scrappers/k8s/secrets.yaml` | Secret | scrappers | `scraper-secrets` (`USER_AGENT`; hoy solo lo lee el scraper de Carrefour) |
+| `scrappers/k8s/secrets.yaml` | Secret | scrappers | `scraper-secrets` (`USER_AGENT`; lo montan Mercadona y Carrefour, pero solo lo lee Carrefour) |
 | `scrapper_mercadona/cronjob.yaml` | CronJob | scrappers | `0 2 * * *` (Europe/Madrid); monta el PVC en `/app/out` |
 | `scrapper_consum/cronjob.yaml` | CronJob | scrappers | `0 2 * * *` (Europe/Madrid), `SCRAPER_DELAY=5`; mismo PVC |
 | `scrapper_caprabo/cronjob.yaml` | CronJob | scrappers | `0 2 * * *` (Europe/Madrid), `SCRAPER_DELAY=3`, máximo 2 h; mismo PVC |
@@ -264,6 +278,7 @@ Fission por HTTP.
 | `scrapper_mercadona/pvc.yaml` | PersistentVolumeClaim | scrappers | `scraper-out`, 1 Gi: guarda los `.txt` de depuración |
 | `fission/normalizer/fission.yaml` | HTTPTrigger | ingesta | POST `/normalize` (a `Function` `normalizer`) |
 | `fission/normalizer/consumer.yaml` | Deployment | ingesta | `normalizer-consumer` |
+| `../infra/api-up.sh` → `../../api/k8s/` | StatefulSet, Deployments, Services | api | **Del equipo de API/BD**, aplicado tal cual: PostgreSQL + pgvector, Redis, `api` y `writer` (ver [`infra/README.md`](../infra/README.md#api-y-bd-en-la-misma-vm-api-upsh)) |
 
 > [!NOTE]
 > Los YAML dicen `namespace: default` porque es lo que usa el montaje a mano. Terraform los
@@ -271,8 +286,9 @@ Fission por HTTP.
 
 > [!NOTE]
 > `scrappers/scrapper_carrefour/` (CronJob `*/30 * * * *`) está en el repo pero
-> **bloqueado** por el challenge de Cloudflare (15/10/2026): `setup-vm.sh` solo despliega
-> Mercadona. Detalle en `scrappers/scrapper_carrefour/README.md`.
+> **bloqueado** por el challenge de Cloudflare (15/10/2026; también con Playwright el
+> 11/11): ni Terraform ni `setup-vm.sh` lo despliegan. Detalle en
+> `scrappers/scrapper_carrefour/README.md`.
 
 ## 🔧 Variables de entorno
 
@@ -282,9 +298,10 @@ Fission por HTTP.
 |---|---|---|
 | `NATS_URL` | `nats://nats.messaging.svc.cluster.local:4222` | Servidor NATS |
 | `NATS_STREAM` | `SCRAPERS` | Stream destino |
-| `NATS_SUBJECT` | `scraper.mercadona.raw` | Subject de publicación |
+| `NATS_SUBJECT` | `scraper.<cadena>.raw` | Subject de publicación (cada scraper tiene el suyo) |
 | `NATS_DRY_RUN` | `0` | `1` = no publica (solo volcado txt) |
 | `SCRAPER_POSTAL_CODES` | `08016` | Códigos postales (separados por comas). Cada uno se traduce a su tienda (`wh`); ver [`03`](03-contratos-datos.md#código-postal-y-tienda) |
+| `SCRAPER_DELAY` | según la cadena | Segundos entre peticiones (Consum 5; Caprabo, Condis y bonÀrea 3; Mercadona usa 0,3 fijo) |
 
 ### 📥 Consumer
 
@@ -317,9 +334,9 @@ Fission por HTTP.
 > **Forma recomendada: un solo comando con Terraform.**
 >
 > ```bash
-> bash flujo-entrada/infra/up.sh         # instala lo que falte, crea el perfil `ingesta` y aplica
-> E2E=1 bash flujo-entrada/infra/up.sh   # y además una pasada real de cada cadena hasta scraper.<cadena>.clean
-> bash flujo-entrada/infra/down.sh       # lo borra
+> bash flujo-entrada/infra/up.sh               # instala lo que falte, crea el perfil `ingesta` y aplica
+> API=1 E2E=1 bash flujo-entrada/infra/up.sh   # y además la API/BD y una pasada real de cada cadena
+> bash flujo-entrada/infra/down.sh             # lo borra
 > ```
 >
 > `up.sh` instala docker, kubectl, minikube, helm y terraform si faltan (`bootstrap.sh`),
@@ -341,7 +358,8 @@ Fission por HTTP.
 > Tres piezas no están en ningún manifiesto y las crea ese script: el stream `SCRAPERS`
 > (subjects `scraper.>`, Max Age 7d), el consumidor durable `normalizer` (filtro
 > `scraper.mercadona.raw` → `deliver.normalizer`, ack explícito, `MaxAckPending 1000`) y el
-> entorno `python` con `version: 3` / `poolsize: 3`.
+> entorno `python` con `version: 3` / `poolsize: 3`. `setup-vm.sh` es anterior a las demás
+> cadenas: solo monta Mercadona (Terraform filtra `scraper.*.raw`, todas).
 
 ```bash
 # 1. Namespaces

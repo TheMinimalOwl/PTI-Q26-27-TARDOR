@@ -1,8 +1,11 @@
 # normalizer
 
-POST JSON crudo Mercadona -> txt limpio. Sin guardar nada.
+POST JSON crudo de cualquier cadena -> txt limpio. Sin guardar nada.
 
 - `POST /normalize` con dict, envelope `{"product": {...}}` o `{"items": [...]}`.
+- Cada cadena tiene un adaptador (`from_consum`, `from_caprabo`, `from_condis`,
+  `from_bonarea`) que traduce su crudo a la forma común (la de Mercadona); `to_common` elige
+  el adaptador por la forma del objeto. Mapeos en `docs/03-contratos-datos.md`.
 - Calcula el **precio unitario canónico** (`€/kg` · `€/l` · `€/ud` · `€/m` · `€/lavado`):
   usa el `reference_price` de la fuente si existe, y si no lo calcula desde
   `unit_price` y el tamaño. Contrato y tabla de conversión:
@@ -21,12 +24,16 @@ Pruebas locales (sin cluster):
 - `python test_local.py` — normaliza el último `scrapper_mercadona/out/mercadona_*.txt`.
 - `python test_unit_price.py` — casos del precio unitario + validación sobre datos reales.
 - `python test_models.py` — contrato Pydantic, tolerancia por item y endpoint.
+- `python test_consum.py`, `test_caprabo.py`, `test_condis.py`, `test_bonarea.py` — cada
+  adaptador con casos fijos y, si hay volcado en `scrappers/scrapper_<cadena>/out/`, con el
+  catálogo real.
 
 ## Despliegue
 
 Pydantic **no** está en la imagen `python` prebuilt de Fission, y la función lo necesita.
-Hay un script idempotente que se ejecuta **en la VM del clúster** (necesita docker, minikube,
-kubectl y el CLI `fission`):
+Con Terraform (`infra/up.sh`) esto ya va incluido y no hace falta nada de esta sección. Lo
+de abajo es el montaje a mano: un script idempotente que se ejecuta **en la VM del clúster**
+(necesita docker, minikube, kubectl y el CLI `fission`):
 
 ```bash
 bash deploy.sh            # entorno + función + trigger + consumer + prueba de humo
@@ -63,7 +70,10 @@ toca (`3.45EUR/l … src=fuente`).
 El consumer ya instala pydantic desde `requirements.txt` (`Dockerfile.consumer`), así que
 `clean_local` valida aunque `NORMALIZE_URL` esté vacío.
 
-## Clúster desplegado (17/10/2026)
+## Clúster montado a mano (17/10/2026)
+
+Estado de entonces con `setup-vm.sh` (perfil `minikube`, solo Mercadona). Con Terraform lo de
+`default` va al namespace `ingesta` y el durable filtra `scraper.*.raw`.
 
 | Qué | Valor |
 |---|---|
