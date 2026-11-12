@@ -10,13 +10,15 @@
 # 3. terraform apply: imagenes, namespaces, NATS + JetStream (NACK), Fission, normalizer,
 #    consumer y CronJob del scraper.
 # 4. Prueba de humo contra el router de Fission y estado de NATS.
-# 5. Con E2E=1, ademas, e2e.sh: una pasada real del scraper hasta scraper.mercadona.clean.
+# 5. Con API=1, api-up.sh: la API y la BD del equipo de API/BD (api/k8s) en el mismo
+#    cluster, con el writer cargando scraper.*.clean en PostgreSQL.
+# 6. Con E2E=1, ademas, e2e.sh: una pasada real de los scrapers hasta scraper.<cadena>.clean.
 #
 # Es idempotente: repetirlo solo reconstruye/actualiza lo que haya cambiado.
 #
 # Variables (valores por defecto entre parentesis):
 #   MINIKUBE_PROFILE (ingesta)  MINIKUBE_CPUS (2)  MINIKUBE_MEMORY (4g)
-#   MINIKUBE_DRIVER (docker)    K8S_VERSION (v1.37.0)  SKIP_SMOKE (0)  E2E (0)
+#   MINIKUBE_DRIVER (docker)    K8S_VERSION (v1.37.0)  SKIP_SMOKE (0)  API (0)  E2E (0)
 #   y las de bootstrap.sh (KUBECTL_VERSION, MINIKUBE_VERSION, HELM_VERSION, TF_VERSION).
 #
 # Requisito unico: Ubuntu/Debian con sudo (solo para instalar docker la primera vez).
@@ -32,6 +34,7 @@ DRIVER="${MINIKUBE_DRIVER:-docker}"
 K8S_VERSION="${K8S_VERSION:-v1.37.0}"
 SKIP_SMOKE="${SKIP_SMOKE:-0}"
 E2E="${E2E:-0}"
+API="${API:-0}"
 
 say()  { printf '\n== %s\n' "$*"; }
 die()  { printf 'ERROR: %s\n' "$*" >&2; exit 1; }
@@ -125,6 +128,11 @@ step_smoke() {
   terraform -chdir="$TF_DIR" output -raw prueba_manual
 }
 
+step_api() {
+  [ "$API" = 1 ] || return 0
+  MINIKUBE_PROFILE="$PROFILE" bash "$HERE/api-up.sh"
+}
+
 step_e2e() {
   [ "$E2E" = 1 ] || return 0
   MINIKUBE_PROFILE="$PROFILE" \
@@ -136,4 +144,5 @@ step_tools "$@"
 step_cluster
 step_apply
 step_smoke
+step_api
 step_e2e

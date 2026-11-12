@@ -24,10 +24,12 @@ flowchart LR
 | `scraper.consum.raw` | scraper de Consum | `normalizer-consumer` (durable `normalizer`) | 1 mensaje por producto |
 | `scraper.caprabo.raw` | scraper de Caprabo | `normalizer-consumer` (durable `normalizer`) | 1 mensaje por producto |
 | `scraper.condis.raw` | scraper de Condis | `normalizer-consumer` (durable `normalizer`) | 1 mensaje por producto |
+| `scraper.bonarea.raw` | scraper de bonÀrea | `normalizer-consumer` (durable `normalizer`) | 1 mensaje por producto |
 | `scraper.mercadona.clean` | `normalizer-consumer` | writer de API/BD (durable `api-writer`) | 1 mensaje por lote |
 | `scraper.consum.clean` | `normalizer-consumer` | writer de API/BD (durable `api-writer`) | 1 mensaje por lote |
 | `scraper.caprabo.clean` | `normalizer-consumer` | writer de API/BD (durable `api-writer`) | 1 mensaje por lote |
 | `scraper.condis.clean` | `normalizer-consumer` | writer de API/BD (durable `api-writer`) | 1 mensaje por lote |
+| `scraper.bonarea.clean` | `normalizer-consumer` | writer de API/BD (durable `api-writer`) | 1 mensaje por lote |
 
 El consumer agrupa los lotes **por cadena** (nunca mezcla dos cadenas en un lote) y publica
 cada uno en el `clean` de la cadena de la que vino: `scraper.<cadena>.raw` →
@@ -101,6 +103,7 @@ cada código postal**:
 | Consum | `GET /api/rest/V1.0/shipping/area?zipCode=08016` → zona de reparto a domicilio | Cabeceras `X-TOL-ZONE: 378` y `X-TOL-SHIPPING-ZONE: 378D` | `wh=378` (tienda "Centro 378", Barcelona) |
 | Caprabo | Sin login no se puede elegir: la web enseña su tienda online por defecto. Solo se comprueba que el código postal sea de Cataluña (08, 17, 25, 43), donde reparte | — | `wh=8284` ("Caprabo_Plataforma") |
 | Condis | La web elige la tienda en su servidor al pedir (no hay API pública). Se usa la que ve sin iniciar sesión (`SCRAPER_STORE`) y se comprueba que el código postal sea de Cataluña | `store=718` en cada petición al buscador | `wh=718` |
+| bonÀrea | Un único catálogo online sin iniciar sesión; se comprueba que el código postal sea de Cataluña | — | `wh=online` |
 
 - Varios códigos postales que caen en la misma tienda se recorren **una sola vez**.
 - Si una cadena no da servicio en un código postal (Consum no reparte en Madrid ni Sevilla),
@@ -322,6 +325,32 @@ incompleto. Ejemplo de línea limpia:
 
 `ean` viaja en el crudo pero **no** en la línea limpia: añadirlo cambia el contrato con
 API/BD (ver [`05-pendientes.md`](05-pendientes.md)).
+
+## Mapeo de campos de bonÀrea
+
+El catálogo sale del JSON interno de la tienda online (`POST /ca/shop/ShoppingBody`, ver
+`scrappers/scrapper_bonarea/README.md`) y `from_bonarea()` lo traduce a la forma común. Se
+detecta por `identifier` + `priceToPay`.
+
+| Forma común | bonÀrea | Ejemplo |
+|---|---|---|
+| `id` | `identifier` | `"13*5179"` |
+| `display_name` | `description` | `Pit filetejat de gall dindi 5 u.` |
+| `price_instructions.unit_price` | `priceToPay` | `3.8` |
+| `price_instructions.reference_price` / `reference_format` | De `unitPrice`, con la etiqueta corregida a la unidad base | `10,15 €/kg` → `10.15` / `kg` |
+| `price_instructions.unit_size` / `size_format` | De `measurementUnit`; si no, del nombre | `aprox. 374 g` → `374` / `g` |
+| `share_url` | `urlFriendly` | `https://www.bonarea-online.com/online/producte/.../13_5179` |
+| `categories[0].name` | Última categoría de `category_path` (la añade el scraper) | `Gall dindi` |
+
+**Etiquetas mal puestas:** `unitPrice` a veces dice `€/ml.`, `€/cl.`, `€/g.` o `€/k.`, pero
+el valor es por litro o por kilo (`300,00 €/ml.` de un ambientador de 7 ml a 2,10 €). El
+adaptador corrige la etiqueta solo para bonÀrea. `€/d.` son dosis (ud); `0,00 €/...` no
+cuenta.
+
+Catálogo completo (11/11/2026, 6.245 productos de supermercado): 5.405 con precio por unidad
+de la web, 352 calculados y **488 incompletos (7,8 %)**: la web no da ni precio por unidad
+ni tamaño (vinos sin volumen, tintes, estuches). Donde hay los dos, el calculado coincide
+con la web en 5.394 de 5.397.
 
 ## Mapeo de campos de Condis
 

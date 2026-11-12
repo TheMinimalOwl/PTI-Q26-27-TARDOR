@@ -1,0 +1,5 @@
+namespace: scrappers
+
+# El PVC scraper-out es compartido: lo crea scrapper_mercadona/pvc.yaml.
+resources:
+  - cronjob.yaml

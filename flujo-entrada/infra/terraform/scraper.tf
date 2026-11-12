@@ -1,5 +1,5 @@
 # Scrapers: secreto, PVC de volcados (compartido) y un CronJob por cadena, leidos de los YAML
-# de scrappers/. Activos: Mercadona, Consum, Caprabo y Condis,
+# de scrappers/. Activos: Mercadona, Consum, Caprabo, Condis y bonArea,
 # todos a las 02:00 (hora de Madrid).
 # Carrefour no se despliega: esta bloqueado por Cloudflare (ver docs/05-pendientes.md).
 
@@ -50,6 +50,21 @@ resource "kubectl_manifest" "scraper_consum_cronjob" {
 
   depends_on = [
     terraform_data.image["scraper_consum"],
+    kubectl_manifest.scraper_pvc,
+    kubectl_manifest.stream,
+  ]
+}
+
+resource "kubectl_manifest" "scraper_bonarea_cronjob" {
+  yaml_body = replace(replace(
+    file("${local.ingesta}/scrappers/scrapper_bonarea/cronjob.yaml"),
+    "/image: scrapper-bonarea:\\S+/",
+    "image: ${local.image.scraper_bonarea}",
+  ), local.postal_codes_re, local.postal_codes_val)
+  override_namespace = "scrappers"
+
+  depends_on = [
+    terraform_data.image["scraper_bonarea"],
     kubectl_manifest.scraper_pvc,
     kubectl_manifest.stream,
   ]

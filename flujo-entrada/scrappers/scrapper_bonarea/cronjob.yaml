@@ -1,0 +1,45 @@
+# Scraper de bonArea (JSON interno de la tienda online, una llamada por categoria): ~6.200
+# productos en ~345 categorias.
+# Proyecto academico sin animo de lucro: una pasada nocturna, peticiones de una en una y
+# SCRAPER_DELAY segundos entre peticiones (con 3 s, unos 18 minutos).
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: scrapper-bonarea
+  namespace: scrappers
+spec:
+  schedule: "0 2 * * *"
+  timeZone: "Europe/Madrid"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 2
+  failedJobsHistoryLimit: 2
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 7200   # 2 h como maximo (tarda ~18 min)
+      template:
+        spec:
+          restartPolicy: OnFailure
+          volumes:
+            - name: out
+              persistentVolumeClaim:
+                claimName: scraper-out
+          containers:
+            - name: scraper
+              image: scrapper-bonarea:v1
+              imagePullPolicy: IfNotPresent
+              env:
+                - name: NATS_URL
+                  value: "nats://nats.messaging.svc.cluster.local:4222"
+                # Codigos postales (separados por comas). Los dara la API; de momento uno de ejemplo.
+                # Con Terraform se sobrescribe con la variable `postal_codes`.
+                - name: SCRAPER_POSTAL_CODES
+                  value: "08016"
+                - name: SCRAPER_DELAY
+                  value: "3"
+              volumeMounts:
+                - name: out
+                  mountPath: /app/out
+              resources:
+                requests: { cpu: "100m", memory: "256Mi" }
+                limits:   { cpu: "500m", memory: "768Mi" }

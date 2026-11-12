@@ -15,11 +15,11 @@
 #
 # Sale con 0 solo si todo eso se cumple. Necesita internet (baja los catalogos).
 #
-# Variables: SCRAPERS ("mercadona consum caprabo condis")  MINIKUBE_PROFILE (ingesta)
+# Variables: SCRAPERS ("mercadona consum caprabo condis bonarea")  MINIKUBE_PROFILE (ingesta)
 #            FN_NAMESPACE (ingesta)  JOB_TIMEOUT (5400 s)  DRAIN_TIMEOUT (900 s)  KEEP_JOB (0)
 set -euo pipefail
 
-SCRAPERS="${SCRAPERS:-${CHAINS:-mercadona consum caprabo condis}}"
+SCRAPERS="${SCRAPERS:-${CHAINS:-mercadona consum caprabo condis bonarea}}"
 PROFILE="${MINIKUBE_PROFILE:-ingesta}"
 FN_NS="${FN_NAMESPACE:-ingesta}"
 JOB_TIMEOUT="${JOB_TIMEOUT:-5400}"

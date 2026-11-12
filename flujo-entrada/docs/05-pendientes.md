@@ -31,7 +31,7 @@ Casi cerrada. La cola de salida ya está conectada: el equipo de API/BD consume
 | Sin `schema_version` en el envelope | Bajo | Necesario si el formato evoluciona |
 | `ean` fuera de la línea limpia | Medio | Consum lo trae y serviría para emparejar el mismo producto entre cadenas; añadirlo cambia el contrato con API/BD |
 | Consum pierde ~0,8 % por paginar con `offset` | Bajo | El catálogo se mueve durante la pasada; se deduplica pero no se recupera lo desplazado |
-| Carrefour **bloqueada** (la 2ª cadena acabó siendo Consum) | Medio | Challenge JS de Cloudflare desde el 15/10/2026; requiere navegador real. Código en `scrappers/scrapper_carrefour/` (no lo despliega `setup-vm.sh`) |
+| Carrefour, Alcampo, Dia y Bonpreu **bloqueados** | Bajo | Probado el 11/11/2026 con Playwright (Chromium sin interfaz, sin camuflar el bot): las cuatro dan 403 (Cloudflare, CloudFront, Akamai). Pasarlos exigiría técnicas para ocultar el bot (huella falsa, proxies residenciales, captchas): **descartado** por condiciones de uso y `robots.txt`. Vía limpia: pedir acceso a los datos como proyecto académico. Playwright se usa solo para **descubrir** APIs internas de webs sin antibot (así salió bonÀrea) |
 | Embeddings (coordinado con el equipo de IA) | Alto | Tarea 5; no existe nada |
 
 ## Roadmap alineado con el plan
@@ -59,6 +59,21 @@ timeline
   26 nov – 20 dic : cierre, memoria y presentación final
 ```
 
+## Por hacer para el equipo de API y BD
+
+Encontrado al conectar la ingesta con su BD (11/11/2026). El contrato del mensaje `clean`
+**cuadra**: su parser lee todas las líneas de las cuatro cadenas (66.129 productos), sin
+líneas sin parsear ni campos más largos que sus columnas. Lo que queda es de modelo de datos,
+y no se ha tocado:
+
+| Qué | Detalle |
+|---|---|
+| Precio "actual" con varias tiendas | `_latest_prices()` (`api/app/repository.py`) hace `DISTINCT ON (product_id)` ordenando solo por `observed_on` (fecha). Si un producto tiene precio de dos tiendas el mismo día, sale una cualquiera. Pasará en cuanto haya varios códigos postales. Falta decidir: ¿precio por tienda/código postal del usuario, o el más reciente (`observed_at`)? |
+| `postal_code` no se guarda | El mensaje `clean` trae `postal_code` (y la ingesta ya lo publica), pero `stores` no tiene columna para él. Sin eso la API no puede filtrar por el código postal del usuario |
+| Tienda `default` antigua | Los lotes de antes del scraping por código postal llevaban `wh="default"`: en la BD hay tiendas `default` de Mercadona y Consum con precios del 11/11 que duplican los de `bcn1`/`378`. Decidir si se borran |
+| Nombres de cadena | `CHAIN_NAMES` solo tiene `ahorramas`; las demás salen con `capitalize()` (bien para las cuatro actuales) |
+| Endpoint de códigos postales | La ingesta necesita `GET /internal/postal-codes` (ver [`03`](03-contratos-datos.md)) para dejar de usar 08016 fijo |
+
 ## Despliegue: separar ingesta y API/BD
 
 Hoy `infra/` (Terraform) despliega solo la ingesta en el perfil de minikube `ingesta`. La
@@ -72,7 +87,7 @@ API/BD:
 | 2 | Ingesta | **Hecho:** el pool de Fission y `normalizer-consumer` viven en el namespace `ingesta`, y Fission solo vigila ese namespace |
 | 3 | Ambos | **Hecho:** contrato `nats://nats.messaging.svc.cluster.local:4222`, stream `SCRAPERS`, subject `scraper.<cadena>.clean`, durable `api-writer` (ver [`03`](03-contratos-datos.md#cola-de-salida-frontera-con-apibd)). `infra/e2e.sh` comprueba que la salida se llena |
 | 4 | API/BD | Su propio stack de Terraform (`api/infra/`) con estado propio; recibe `nats_url` como variable, sin leer el estado de la ingesta |
-| 5 | Ambos | `up.sh` en la raíz que encadene bootstrap → clúster → ingesta → API, y prueba end-to-end hasta filas en PostgreSQL |
+| 5 | Ambos | **Hecho (11/11/2026):** `infra/api-up.sh` despliega `api/k8s` tal cual en el mismo clúster (namespace `api`) y comprueba filas en PostgreSQL; `API=1 up.sh` lo encadena. Sigue pendiente el paso 4 (Terraform propio de API/BD) |
 
 Por qué un clúster y no dos: la API llega a NATS por DNS interno; con dos clústeres habría
 que exponer NATS fuera, se duplica la RAM y vuelve el problema de inotify.

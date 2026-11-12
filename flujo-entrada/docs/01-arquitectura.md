@@ -57,6 +57,7 @@ flowchart TB
     CS["API Consum<br/>tienda.consum.es/api"]
     GE["Web Caprabo<br/>capraboacasa.com (HTML)"]
     CD["API buscador Condis<br/>api.empathy.co"]
+    BA["JSON interno bonÀrea<br/>bonarea-online.com"]
   end
 
   subgraph k8s["Cluster Minikube (local)"]
@@ -65,6 +66,7 @@ flowchart TB
       CJCS["CronJob scrapper-consum<br/>0 2 * * * (Madrid)"]
       CJGE["CronJob scrapper-caprabo<br/>0 2 * * * (Madrid)"]
       CJCD["CronJob scrapper-condis<br/>0 2 * * * (Madrid)"]
+      CJBA["CronJob scrapper-bonarea<br/>0 2 * * * (Madrid)"]
       SEC["Secret scraper-secrets"]
     end
 
@@ -95,6 +97,8 @@ flowchart TB
   CJGE -->|"publica"| RAW
   CJCD -->|"GET (JSON)"| CD
   CJCD -->|"publica"| RAW
+  CJBA -->|"POST (JSON)"| BA
+  CJBA -->|"publica"| RAW
   RAW -->|"consumer deliver.normalizer"| CONS
   CONS -->|"POST /normalize"| ROUTER
   ROUTER --> TRIG
@@ -145,13 +149,16 @@ flowchart TB
 
 ## 🧩 Componentes
 
-### 1 · 🕷️ `scrapper_mercadona`, `scrapper_consum`, `scrapper_caprabo` y `scrapper_condis` — recolectores
+### 1 · 🕷️ `scrapper_mercadona`, `scrapper_consum`, `scrapper_caprabo`, `scrapper_condis` y `scrapper_bonarea` — recolectores
 
 `scrapper_caprabo` no tiene API: lee el HTML de las categorías de capraboacasa.com y publica
 en `scraper.caprabo.raw`. Ver su README.
 
 `scrapper_condis` lee la API JSON del buscador de la web de Condis (Empathy.co), por
 secciones: todo el catálogo en ~20 peticiones. Publica en `scraper.condis.raw`.
+
+`scrapper_bonarea` usa el JSON interno con el que la web de bonÀrea carga cada categoría
+(encontrado con Playwright; el scraper no lo necesita). Publica en `scraper.bonarea.raw`.
 
 Hay un recolector por cadena, con la misma estructura. Abajo, el de Mercadona. El de Consum
 (`scrappers/scrapper_consum/`, ver su README) recorre la API paginada de Consum
@@ -253,6 +260,7 @@ Fission por HTTP.
 | `scrapper_consum/cronjob.yaml` | CronJob | scrappers | `0 2 * * *` (Europe/Madrid), `SCRAPER_DELAY=5`; mismo PVC |
 | `scrapper_caprabo/cronjob.yaml` | CronJob | scrappers | `0 2 * * *` (Europe/Madrid), `SCRAPER_DELAY=3`, máximo 2 h; mismo PVC |
 | `scrapper_condis/cronjob.yaml` | CronJob | scrappers | `0 2 * * *` (Europe/Madrid), `SCRAPER_DELAY=3`, `SCRAPER_STORE=718`; mismo PVC |
+| `scrapper_bonarea/cronjob.yaml` | CronJob | scrappers | `0 2 * * *` (Europe/Madrid), `SCRAPER_DELAY=3`, máximo 2 h; mismo PVC |
 | `scrapper_mercadona/pvc.yaml` | PersistentVolumeClaim | scrappers | `scraper-out`, 1 Gi: guarda los `.txt` de depuración |
 | `fission/normalizer/fission.yaml` | HTTPTrigger | ingesta | POST `/normalize` (a `Function` `normalizer`) |
 | `fission/normalizer/consumer.yaml` | Deployment | ingesta | `normalizer-consumer` |

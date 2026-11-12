@@ -21,6 +21,13 @@ locals {
       files      = ["Dockerfile", "requirements.txt", "src/**/*.py"]
       build_args = {}
     }
+    scraper_bonarea = {
+      name       = "scrapper-bonarea"
+      dir        = "scrappers/scrapper_bonarea"
+      dockerfile = "Dockerfile"
+      files      = ["Dockerfile", "requirements.txt", "src/**/*.py"]
+      build_args = {}
+    }
     scraper_condis = {
       name       = "scrapper-condis"
       dir        = "scrappers/scrapper_condis"

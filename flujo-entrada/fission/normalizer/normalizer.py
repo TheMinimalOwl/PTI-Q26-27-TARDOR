@@ -384,12 +384,66 @@ def from_condis(p: dict) -> dict:
     }
 
 
+# bonÀrea: "10,15 €/kg", "33,07 €/l.", "0,23 €/u.", "0,10 €/d." (dosis), "0,08 €/m".
+# La etiqueta a veces va mal pero el valor es por unidad base: "300,00 €/ml." de un
+# ambientador de 7 ml a 2,10 € son 300 €/l; "57,65 €/g." son €/kg; "11,77 €/cl." son €/l.
+_BA_UNIT_PRICE = re.compile(r"^\s*([0-9.,]+)\s*€\s*/\s*([a-z]+)\.*\s*$", re.I)
+_BA_REF_FMT = {"kg": "kg", "k": "kg", "g": "kg", "l": "l", "ml": "l", "cl": "l",
+               "u": "ud", "d": "ud", "m": "m"}
+# Tamano: "aprox. 374 g", "70 cl.", "pack 6 u.", "100ml.", "16 d.", "1/2 m."
+_BA_SIZE = re.compile(r"(?:(\d+)\s*/\s*(\d+)|(\d+(?:[.,]\d+)?))\s*(kg|g|l|ml|cl|u|d|m)\b\.?", re.I)
+_BA_SIZE_FMT = {"kg": "kg", "g": "g", "l": "l", "ml": "ml", "cl": "cl", "u": "ud", "d": "ud", "m": "m"}
+
+
+def from_bonarea(p: dict) -> dict:
+    """Producto crudo de bonÀrea (JSON interno `ShoppingBody` de la web) -> forma comun.
+
+    - precio: `priceToPay` (el del envase; en los productos al peso, el de la pieza aprox.).
+    - precio por unidad de la fuente: `unitPrice` ("10,15 €/kg"), en el 87 % de los
+      productos. La etiqueta se corrige a la unidad base (ver `_BA_REF_FMT`); "0,00 €/..." no
+      cuenta.
+    - tamano: `measurementUnit` ("aprox. 374 g", "70 cl.", "pack 6 u.") o, si no lo hay, el
+      del nombre ("... 500ml"). Con el se calcula el precio por unidad cuando la web no lo
+      da (`src=calculado`).
+    """
+    pi = {"unit_price": p.get("priceToPay")}
+    m = _BA_UNIT_PRICE.match(str(p.get("unitPrice") or ""))
+    if m and m.group(2).lower() in _BA_REF_FMT:
+        value = m.group(1).replace(".", "").replace(",", ".")
+        if _dec(value):
+            pi["reference_price"] = value
+            pi["reference_format"] = _BA_REF_FMT[m.group(2).lower()]
+
+    m = _BA_SIZE.search(str(p.get("measurementUnit") or ""))
+    if m:
+        num, den, amount, unit = m.groups()
+        size = (Decimal(num) / Decimal(den)) if num and int(den) else _dec(amount)
+        if size:
+            pi.update(unit_size=size, size_format=_BA_SIZE_FMT[unit.lower()])
+    if "unit_size" not in pi:
+        # Sin `measurementUnit` util: el tamano del nombre ("Norit no mes planxa 500ml").
+        size, size_fmt = _ge_size(str(p.get("description") or ""))
+        if size:
+            pi.update(unit_size=size, size_format=size_fmt.lower())
+
+    path = p.get("category_path") or []
+    return {
+        "id": str(p.get("identifier", "-")),
+        "display_name": " ".join(str(p.get("description") or "").split()),
+        "price_instructions": pi,
+        "share_url": p.get("urlFriendly", ""),
+        "categories": [{"name": path[-1]}] if path else [],
+    }
+
+
 def to_common(p):
     """Traduce el crudo de cualquier cadena a la forma comun (Mercadona pasa tal cual)."""
     if isinstance(p, dict) and "priceData" in p and "productData" in p:
         return from_consum(p)
     if isinstance(p, dict) and p.get("platform") == "caprabo":
         return from_caprabo(p)
+    if isinstance(p, dict) and "priceToPay" in p and "identifier" in p:
+        return from_bonarea(p)
     if isinstance(p, dict) and "description" in p and isinstance(p.get("price"), dict) and "current" in p["price"]:
         return from_condis(p)
     return p

@@ -82,11 +82,11 @@ Es idempotente: si se vuelve a ejecutar, solo se reconstruye lo que haya cambiad
 
 | Fichero | Recursos | Antes lo hacía |
 |---|---|---|
-| `images.tf` | `scrapper-mercadona`, `scrapper-consum`, `scrapper-caprabo`, `scrapper-condis`, `normalizer-env` y `normalizer-consumer`: `docker build` + `minikube image load`, y comprueba con `minikube image ls` que han llegado al nodo | Lo mismo, a mano |
+| `images.tf` | `scrapper-mercadona`, `scrapper-consum`, `scrapper-caprabo`, `scrapper-condis`, `scrapper-bonarea`, `normalizer-env` y `normalizer-consumer`: `docker build` + `minikube image load`, y comprueba con `minikube image ls` que han llegado al nodo | Lo mismo, a mano |
 | `namespaces.tf` | `scrappers`, `messaging` y `fission` (a partir de `cluster/namespace.yaml`) | `kubectl apply -k cluster/` |
 | `nats.tf` | Chart de NATS (con `messaging/nats-values.yaml`), **NACK**, y los CRD `Stream SCRAPERS` y `Consumer normalizer` | `helm install` + `kubectl exec nats-box -- nats request $JS.API...` |
 | `fission.tf` | Chart `fission-all` 1.27, `Environment python` con pydantic, `Package` + `Function normalizer`, `HTTPTrigger` (`fission.yaml`) y `normalizer-consumer` (`consumer.yaml`) | `helm install` + `fission env/fn create` + `deploy.sh` |
-| `scraper.tf` | `scraper-secrets`, PVC `scraper-out` y CronJobs `scrapper-mercadona`, `scrapper-consum`, `scrapper-caprabo` y `scrapper-condis` (02:00, hora de Madrid) | `kubectl apply -k scrappers/...` |
+| `scraper.tf` | `scraper-secrets`, PVC `scraper-out` y CronJobs `scrapper-mercadona`, `scrapper-consum`, `scrapper-caprabo`, `scrapper-condis` y `scrapper-bonarea` (02:00, hora de Madrid) | `kubectl apply -k scrappers/...` |
 
 Los YAML de siempre siguen siendo la fuente de verdad: Terraform los lee tal cual y solo
 cambia la etiqueta de la imagen.
@@ -103,14 +103,38 @@ Todo lo de la ingesta vive en namespaces propios y no toca `default`:
 
 | Namespace | Qué hay |
 |---|---|
-| `scrappers` | CronJobs `scrapper-mercadona`, `scrapper-consum`, `scrapper-caprabo` y `scrapper-condis`, `scraper-secrets`, PVC `scraper-out` |
+| `scrappers` | CronJobs `scrapper-mercadona`, `scrapper-consum`, `scrapper-caprabo`, `scrapper-condis` y `scrapper-bonarea`, `scraper-secrets`, PVC `scraper-out` |
 | `messaging` | NATS (StatefulSet), `nats-box`, NACK, CRDs `Stream SCRAPERS` y `Consumer normalizer` |
 | `fission` | Plano de control de Fission (router, executor…) |
 | `ingesta` | `Environment python`, `Function` y `Package` `normalizer`, `HTTPTrigger`, pods del pool y `normalizer-consumer` |
+| `api` | **Despliegue aparte** (`api-up.sh`, del equipo de API/BD): PostgreSQL + pgvector, Redis, API (2 réplicas) y `writer` |
 
 Fission se instala con `defaultNamespace: ingesta`, así que solo vigila ese namespace.
 Si otro equipo despliega en el mismo clúster (por ejemplo, la API en su namespace), no se
 pisan; la única conexión es NATS (`nats://nats.messaging.svc.cluster.local:4222`).
+
+## API y BD en la misma VM (`api-up.sh`)
+
+La API y la BD son del equipo de API/BD (carpeta `api/`), pero se despliegan en el **mismo
+clúster** como un despliegue aparte, para que lo que publica la ingesta acabe en PostgreSQL:
+
+```bash
+bash flujo-entrada/infra/api-up.sh       # después de up.sh
+API=1 bash flujo-entrada/infra/up.sh     # o todo de una vez
+```
+
+- No toca nada de `api/`: hace `docker build` de `api/`, `minikube image load` de
+  `pti/api:dev` y `kubectl apply -k api/k8s/` (namespace `api`).
+- El `writer` lee `scraper.*.clean` con el durable `api-writer` y hace *upsert* en
+  PostgreSQL. Al arrancar carga lo que haya en el stream (7 días).
+- Al final comprueba `/health` y cuenta productos y precios por cadena.
+- Mismo clúster porque el writer llega a NATS por DNS interno
+  (`nats.messaging.svc.cluster.local`).
+- Quitarlo: `kubectl --context ingesta delete -k api/k8s/` (borra también el volumen de la BD).
+
+Probado el 11/11/2026: 1.331 lotes `clean` cargados en ~4 minutos, 0 errores en el writer;
+en la BD, Caprabo 13.068 productos, Condis 7.810, Consum 8.611 (tienda 378) y Mercadona
+4.389 (`bcn1`), y `/products/search` compara las cuatro cadenas.
 
 ## Variables
 
@@ -122,7 +146,7 @@ scrapers; por defecto `["08016"]`), `fission_namespace_functions` (`ingesta`), l
 `fission_python_base`). Están todas en `terraform/variables.tf`.
 
 `up.sh` además acepta `MINIKUBE_PROFILE`, `MINIKUBE_CPUS`, `MINIKUBE_MEMORY`,
-`MINIKUBE_DRIVER`, `K8S_VERSION`, `SKIP_SMOKE=1` y `E2E=1`, además de las versiones de las
+`MINIKUBE_DRIVER`, `K8S_VERSION`, `SKIP_SMOKE=1`, `API=1` y `E2E=1`, además de las versiones de las
 herramientas de `bootstrap.sh` (`KUBECTL_VERSION`, `MINIKUBE_VERSION`, `HELM_VERSION`,
 `TF_VERSION`).
 
@@ -138,7 +162,7 @@ Lanza un Job desde cada CronJob, espera a que acaben (máximo 90 min), comprueba
 scraper ha publicado más de 0 productos (detecta el fallo silencioso) y espera a que el
 consumidor `normalizer` quede a 0 pendientes y aparezcan lotes nuevos en
 `scraper.<cadena>.clean` (máximo 15 min). Lo hace para todas las cadenas a la vez
-(`SCRAPERS="mercadona consum caprabo condis"`, los CronJobs; `SCRAPERS=consum` para uno solo).
+(`SCRAPERS="mercadona consum caprabo condis bonarea"`, los CronJobs; `SCRAPERS=consum` para uno solo).
 Con Caprabo la pasada dura unos 60 minutos. Sale con 0 solo si se cumple
 todo.
 
