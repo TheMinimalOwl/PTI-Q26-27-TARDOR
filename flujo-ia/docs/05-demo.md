@@ -23,17 +23,22 @@ python -m rag.cli ask "¿Cuál es el aceite de oliva virgen extra de 1 l más ba
 - **Retrieval verificado:** los tres AOVE de 1 l en el top-2 + distractores
   0,5 l en posiciones 3-4. Correcto.
 
-### 2 · Empate por unidad (precio unitario + empates)
+### 2 · Precio por cadena (empate a 12,50 EUR/l)
 
 ```
-python -m rag.cli ask "¿Cuál es el aceite de oliva virgen extra de 1 l más barato por unidad?" --llm ollama
+python -m rag.cli ask "¿Cuál es el aceite de oliva virgen extra de 1 l más barato por unidad en cada una de las tres cadenas?" --llm ollama
 ```
 
-- **Qué demuestra:** precio unitario (EUR/l) y que el prompt obliga a decir
-  *"hay empate"* cuando lo hay.
-- **Respuesta esperada:** **empate de tres** a `12,50 EUR/l` — Hacendado,
-  Carrefour y Alcampo (`10001`, `10002`, `10003`).
-- **Retrieval verificado:** los tres empates están en el **top-3**. Correcto.
+- **Qué demuestra:** precio unitario (EUR/l) comparado **cadena a cadena**:
+  la respuesta lista los tres empatados.
+- **Respuesta esperada:** Hacendado, Carrefour y Alcampo (`10001`, `10002`,
+  `10003`) — los tres a `12,50 EUR/l`.
+- **Retrieval verificado:** los tres empates en el **top-3**. Y con LLM en
+  la VM (13/11): la respuesta lista los tres.
+- **Por qué esta redacción:** con la pregunta original (*"...más barato por
+  unidad"*) qwen3:8b compara los precios **totales** y elige solo Carrefour
+  (11,70 EUR) — medido en la VM: fallaba 2 de 2. Con "en cada una de las
+  tres cadenas" obliga a comparar por cadena y sale el empate.
 
 ### 3 · Lookup con filtro de cadena (búsqueda simple)
 

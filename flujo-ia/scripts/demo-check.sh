@@ -78,8 +78,8 @@ demo "1 · precio en total (11.70 + carrefour)" \
   "¿Cuál es el aceite de oliva virgen extra de 1 l más barato en total?" \
   "re.search(r'11[.,]70', ans) and 'carrefour' in ans.lower()"
 
-demo "2 · empate por unidad (12.50 + 3 cadenas)" \
-  "¿Cuál es el aceite de oliva virgen extra de 1 l más barato por unidad?" \
+demo "2 · precio por cadena (12.50 + 3 cadenas)" \
+  "¿Cuál es el aceite de oliva virgen extra de 1 l más barato por unidad en cada una de las tres cadenas?" \
   "re.search(r'12[.,]50', ans) and ('empate' in ans.lower() or (all(c in ans.lower() for c in ('carrefour', 'alcampo')) and ('mercadona' in ans.lower() or 'hacendado' in ans.lower())))"
 
 demo "3 · lookup Mercadona (0.45 + mercadona)" \

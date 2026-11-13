@@ -81,6 +81,17 @@ def test_abstencion_es_valida(hits):
     assert g.citas_validas is True
 
 
+def test_no_marca_abstencion_en_una_respuesta_sustantiva(hits):
+    """'No hay empate...' es una respuesta, no una abstencion (bug medido
+    en la VM: la regex con 'no hay' marcaba abstained=true y la app habria
+    pintado el aviso de 'no encontrado' sobre una respuesta valida)."""
+    g = aplicar_guardrails(
+        "No hay empate: el más barato es [1] Aceite de oliva 1 l a 12.50 EUR/l.", hits
+    )
+    assert g.abstention is False
+    assert g.ok is True
+
+
 def test_sin_contexto_hay_abstencion_forzosa(hits):
     g = aplicar_guardrails("Te lo invento: 12,50 EUR", [])
     assert g.abstention is True

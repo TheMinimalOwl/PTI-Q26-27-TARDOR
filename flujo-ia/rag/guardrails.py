@@ -38,9 +38,14 @@ SCHEMA_RESPUESTA = SCHEMA_DIR / "respuesta-asistente.schema.json"
 _NUMERO_PRECIO = re.compile(r"\d+(?:[.,]\d{2,})")
 # Identificador citados entre corchetes
 _CITA = re.compile(r"\[([^\[\]]+)\]")
-# Frases con las que el modelo se abstiene
+# Frases con las que el modelo se abstiene.
+# Ojo con "no hay" en solitario: con la respuesta "No hay empate en los
+# precios" marcaba abstencion falsa (medido en la VM, 13/11). Se quita y
+# siguen cubiertas las formulaciones habituales ("no he encontrado",
+# "no consta", "sin datos"...); el caso de contexto vacio lo cubre la
+# rama forzada de aplicar_guardrails.
 _ABSTENCION = re.compile(
-    r"no (?:he )?(?:encontrado|hay|consta|aparece)|no tengo|sin datos|no puedo|"
+    r"no (?:he )?(?:encontrado|consta|aparece)|no tengo|sin datos|no puedo|"
     r"no se encuentra|ningun producto|no aparece",
     re.IGNORECASE,
 )
