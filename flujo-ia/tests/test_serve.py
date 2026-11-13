@@ -75,6 +75,27 @@ def test_equiv_por_nombre(cliente):
     assert isinstance(d["candidatos"], list)
 
 
+def test_cors_permite_otro_origen(cliente):
+    """La app llama desde otro origen: todas las respuestas llevan CORS."""
+    r = cliente.get("/health")
+    assert r.headers["Access-Control-Allow-Origin"] == "*"
+
+
+def test_cors_preflight_options(cliente):
+    """El preflight del navegador (OPTIONS) tiene que contestar 200 con CORS."""
+    r = cliente.open("/ask", method="OPTIONS")
+    assert r.status_code == 200
+    assert r.headers["Access-Control-Allow-Origin"] == "*"
+    assert "POST" in r.headers["Access-Control-Allow-Methods"]
+
+
+def test_docs_devuelve_html(cliente):
+    r = cliente.get("/docs")
+    assert r.status_code == 200
+    assert "text/html" in r.headers["Content-Type"]
+    assert "/ask/stream" in r.get_data(as_text=True)
+
+
 def test_el_modulo_se_puede_arrancar_como_script():
     """`python -m rag.serve --help` tiene que funcionar: lo usa la unidad systemd."""
     r = subprocess.run(

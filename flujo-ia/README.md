@@ -18,6 +18,7 @@ prototipo lo consume sin tocar una linea.
 | [`docs/03-evaluacion.md`](docs/03-evaluacion.md) | Metricas, resultados medidos y como reproducirlos |
 | [`docs/04-despliegue.md`](docs/04-despliegue.md) | Despliegue en la VM: systemd, API y verificacion |
 | [`docs/05-demo.md`](docs/05-demo.md) | **Preguntas de demo que funcionan siempre** (tarea del plan) |
+| [`docs/06-integracion-api.md`](docs/06-integracion-api.md) | **Contrato de la API para la app** y plan de pruebas (17-18/11) |
 
 ## Arranque rapido
 

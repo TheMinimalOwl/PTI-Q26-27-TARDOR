@@ -9,8 +9,14 @@ Endpoints:
     GET  /health              estado del servicio (indice, modelo, LLM)
     POST /search              busqueda de catalogo
     POST /equiv               equivalencia entre cadenas
-    POST /ask                 pregunta en lenguaje natural
-    GET  /docs                documentacion interactiva (Swagger)
+    POST /ask                 pregunta en lenguaje natural (JSON validado)
+    POST /ask/stream          respuesta token a token (SSE)
+    GET  /docs                documentacion de los endpoints (HTML)
+
+El servicio envia cabeceras CORS (`Access-Control-Allow-Origin: *`) para que
+la app pueda llamarlo desde otro origen en el navegador. El contrato completo
+(documentacion de los payloads y plan de pruebas) esta en
+`docs/06-integracion-api.md`.
 
 Se arranca con:
 
@@ -41,6 +47,15 @@ from .pipelines import catalogo, equivalencia, qa
 from .retriever import Filters, Retriever
 
 app = Flask(__name__)
+
+
+@app.after_request
+def _cors(resp: Response) -> Response:
+    """CORS abierto: la app (otro origen) puede llamar desde el navegador."""
+    resp.headers["Access-Control-Allow-Origin"] = "*"
+    resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+    return resp
 
 # Estado global del servicio: se carga una vez al arrancar.
 _ESTADO: dict = {"retriever": None, "llm": None, "error": None}
@@ -250,6 +265,47 @@ def ask_stream():
         mimetype="text/event-stream",
         headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"},
     )
+
+
+_DOCS_HTML = """<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<title>RAG · API</title>
+<style>
+ body{font-family:Arial,sans-serif;background:#0F172A;color:#F8FAFC;margin:0;padding:40px}
+ h1{font-size:28px} h1 span{color:#38BDF8} h2{font-size:18px;color:#34D399;margin-top:32px}
+ table{border-collapse:collapse;width:100%;max-width:900px}
+ td,th{border:1px solid #334155;padding:8px 12px;text-align:left;font-size:14px}
+ th{background:#1E293B;color:#94A3B8} code{color:#818CF8}
+ pre{background:#1E293B;border-radius:8px;padding:14px;max-width:900px;overflow:auto;font-size:13px}
+ p,a{color:#94A3B8;font-size:14px}
+</style></head><body>
+<h1>API del <span>RAG</span> · contrato para la app</h1>
+<p>Contrato completo, payloads de ejemplo y plan de pruebas: <code>docs/06-integracion-api.md</code></p>
+<h2>Endpoints</h2>
+<table>
+<tr><th>Método</th><th>Ruta</th><th>Cuerpo</th><th>Devuelve</th></tr>
+<tr><td>GET</td><td><code>/health</code></td><td>—</td><td>estado: índice, embeddings, LLM</td></tr>
+<tr><td>POST</td><td><code>/search</code></td><td><code>{"query", "k", filtros...}</code></td><td>resultados + respuesta</td></tr>
+<tr><td>POST</td><td><code>/equiv</code></td><td><code>{"id"|"nombre", "chain"}</code></td><td>candidatos + elegido</td></tr>
+<tr><td>POST</td><td><code>/ask</code></td><td><code>{"question", "k", "estricto"}</code></td><td>JSON validado (answer, sources, guardrails...)</td></tr>
+<tr><td>POST</td><td><code>/ask/stream</code></td><td><code>{"question"}</code></td><td>SSE: <code>fuentes</code>, <code>token</code>, <code>fin</code></td></tr>
+</table>
+<h2>Ejemplo</h2>
+<pre>curl -s -X POST http://localhost:8080/ask \\
+  -H 'Content-Type: application/json' \\
+  -d '{"question": "¿Cuánto cuesta el agua mineral de 1.5 l en Mercadona?"}'</pre>
+<h2>Errores</h2>
+<table>
+<tr><td>400</td><td>falta <code>query</code>/<code>question</code>; o <code>/ask/stream</code> sin LLM</td></tr>
+<tr><td>404</td><td><code>/equiv</code>: producto origen no encontrado</td></tr>
+</table>
+</body></html>"""
+
+
+@app.get("/docs")
+def docs():
+    """Documentacion de los endpoints: pagina HTML sin dependencias."""
+    return Response(_DOCS_HTML, mimetype="text/html")
 
 
 
