@@ -79,15 +79,17 @@ distractores de 0,5 l y 0,75 l detrás. Es la pregunta que explica la frase
 # 1. Checklist completo (entorno → tests → servicios → API → CLI)
 bash scripts/verificar.sh
 
-# 2. Las cuatro preguntas, con LLM
-cd flujo-ia
-for q in "¿Cuál es el aceite de oliva virgen extra de 1 l más barato en total?" \
-         "¿Cuál es el aceite de oliva virgen extra de 1 l más barato por unidad?" \
-         "¿Cuánto cuesta el agua mineral de 1.5 l en Mercadona?" \
-         "¿Cuánto cuesta el arroz de 1 kg?"; do
-  python -m rag.cli ask "$q" --llm ollama
-done
+# 2. Las cuatro preguntas, automáticas (PASS/FAIL con el criterio de abajo)
+bash scripts/demo-check.sh                          # servicio local
+bash scripts/demo-check.sh --url http://<vm>:8080   # contra la VM
 ```
+
+`demo-check.sh` comprueba primero que el servicio **tiene LLM** y luego cada
+respuesta: `1` con 11.70 + carrefour, `2` con 12.50 + empate de las tres
+cadenas, `3` con 0.45 + mercadona, y `4` sin precios (abstención). Sale con
+código 0 solo si las 4 pasan.
+
+Versión manual (para leer la respuesta a mano):
 
 Comprobación rápida por pregunta (lo que tiene que verse):
 
