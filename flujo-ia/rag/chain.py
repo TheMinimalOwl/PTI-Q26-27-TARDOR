@@ -331,8 +331,12 @@ def flujo_qa(
 
     Eventos emitidos:
       ("fuentes", [id, ...])  los productos del contexto, antes de responder
-      ("token", "texto")      un trozo de la respuesta
-      ("fin", {...})          la respuesta completa y el estado
+      ("token", "texto")      un trozo de la respuesta, sin cabeceras
+      ("fin", {...})          respuesta limpia, fuentes citadas e hits
+
+    El prompt pide el formato `RESPUESTA: ... / FUENTES: ...`: aqui se
+    separa sobre la marcha para que la app pinte solo la respuesta (antes
+    le llegaban las cabeceras del prompt) y `fin` trae los ids citados.
     """
     hits = retriever.search(question, k=k, filters=filters)
     contexto = format_context(hits)
@@ -340,13 +344,55 @@ def flujo_qa(
     sistema, usuario = partir_mensajes(mensajes)
 
     yield ("fuentes", [str(h.doc.get("id")) for h in hits])
+
     partes: list[str] = []
+    buf = ""
+    en_respuesta = False
+    acabado = False
     for trozo in llm.chat_stream(sistema, usuario):
-        if not trozo:
+        if not trozo or acabado:
             continue
-        partes.append(trozo)
-        yield ("token", trozo)
-    yield ("fin", {"question": question, "respuesta": "".join(partes), "hits": hits})
+        buf += trozo
+        if not en_respuesta:
+            idx = buf.find("RESPUESTA:")
+            if idx == -1:
+                # Sin cabecera todavia: se guarda el buffer. Si crece mucho
+                # es que el modelo no la pone, y se emite el texto tal cual.
+                if len(buf) > 64:
+                    en_respuesta = True
+                else:
+                    continue
+            else:
+                buf = buf[idx + len("RESPUESTA:"):].lstrip("\n ")
+                en_respuesta = True
+                if not buf:
+                    continue
+        fidx = buf.find("FUENTES:")
+        if fidx != -1:
+            cuerpo, buf, acabado = buf[:fidx], "", True
+            if cuerpo:
+                partes.append(cuerpo)
+                yield ("token", cuerpo)
+            continue
+        # Se retienen los ultimos 7 caracteres por si "FUENTES:" (8) viene
+        # partido entre dos trozos: la palabra entera siempre acaba viendose
+        # completa en el buffer acumulado.
+        if len(buf) > 7:
+            cuerpo, buf = buf[:-7], buf[-7:]
+            partes.append(cuerpo)
+            yield ("token", cuerpo)
+    if buf:
+        fidx = buf.find("FUENTES:")
+        resto = buf[:fidx] if fidx != -1 else buf
+        if resto:
+            partes.append(resto)
+            yield ("token", resto)
+
+    respuesta, fuentes = separar_respuesta("".join(partes))
+    yield (
+        "fin",
+        {"question": question, "respuesta": respuesta, "fuentes": fuentes, "hits": hits},
+    )
 
 
 def invocar(cadena: Runnable, entrada: dict) -> dict:

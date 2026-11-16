@@ -34,6 +34,18 @@ class FakeLLM(BaseLLM):
         return LLMResponse(text=self.respuesta, provider=self.provider, model=self.model)
 
 
+class _StreamLLM(FakeLLM):
+    """Devuelve la respuesta trozo a trozo, partiendo hasta las cabeceras.
+
+    Es lo mas parecido a Ollama: los trozos llegan cortados por todos
+    lados, incluso a mitad de "RESPUESTA:" o "FUENTES:".
+    """
+
+    def chat_stream(self, system: str, user: str):
+        for i in range(0, len(self.respuesta), 4):
+            yield self.respuesta[i : i + 4]
+
+
 @pytest.fixture
 def retriever() -> Retriever:
     docs = [
@@ -138,6 +150,36 @@ def test_flujo_qa_emite_eventos(retriever):
     assert "1" in ids
     fin = eventos[-1][1]
     assert "hola" in fin["respuesta"]
+
+
+def test_flujo_qa_limpia_las_cabeceras_del_prompt(retriever):
+    """Los tokens no deben traer 'RESPUESTA:'/'FUENTES:': es el formato
+    interno del prompt, no la respuesta (llegaba tal cual a la app)."""
+    llm = _StreamLLM(
+        "RESPUESTA: cuesta 12.50 EUR, el [1] mas barato.\n\nFUENTES: [1] Aceite - barato"
+    )
+    eventos = list(flujo_qa(retriever, llm, "¿cuanto cuesta el aceite?"))
+    assert [t for t, _ in eventos][0] == "fuentes"
+    assert [t for t, _ in eventos][-1] == "fin"
+    tokens = "".join(d for t, d in eventos if t == "token")
+    assert "RESPUESTA:" not in tokens
+    assert "FUENTES:" not in tokens
+    assert "12.50" in tokens
+    fin = eventos[-1][1]
+    assert "12.50" in fin["respuesta"]
+    assert "FUENTES" not in fin["respuesta"]
+    assert fin["fuentes"] == ["1"]
+    assert fin["hits"] and "1" in [h.doc["id"] for h in fin["hits"]]
+
+
+def test_flujo_qa_sin_formato_devuelve_el_texto_entero(retriever):
+    """Si el modelo no pone cabeceras, el texto no se pierde (el buffer se
+    suelta entero al terminar)."""
+    llm = _StreamLLM("El aceite cuesta 12.50 EUR.")
+    eventos = list(flujo_qa(retriever, llm, "¿cuanto?"))
+    tokens = "".join(d for t, d in eventos if t == "token")
+    assert tokens.strip() == "El aceite cuesta 12.50 EUR."
+    assert "12.50" in eventos[-1][1]["respuesta"]
 
 
 def test_contexto_incluye_los_campos_que_hacen_falta():

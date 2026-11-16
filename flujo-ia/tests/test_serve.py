@@ -7,6 +7,7 @@ hace la unidad systemd.
 
 from __future__ import annotations
 
+import json
 import subprocess
 import sys
 from pathlib import Path
@@ -67,6 +68,52 @@ def test_stream_sin_llm_da_400(cliente):
     assert cliente.post("/ask/stream", json={"question": "x"}).status_code == 400
 
 
+def test_stream_fin_es_json_util_con_guardrails(cliente):
+    """El fin del streaming tiene que ser JSON util para la app.
+
+    Antes 'hits' salia como repr() de los objetos Python (un string
+    inservible), el texto traia las cabeceras 'RESPUESTA:'/'FUENTES:' del
+    prompt y no habia guardrails. Ahora el contrato es el de /ask.
+    """
+    from rag.llm import BaseLLM, LLMResponse
+
+    class LLMFalso(BaseLLM):
+        provider = "fake"
+        model = "fake-1b"
+
+        def chat(self, system: str, user: str) -> LLMResponse:
+            return LLMResponse(text="", provider=self.provider, model=self.model)
+
+        def chat_stream(self, system: str, user: str):
+            trozo = "RESPUESTA: cuesta 12.50 EUR en [1].\nFUENTES: [1] Aceite"
+            for i in range(0, len(trozo), 5):
+                yield trozo[i : i + 5]
+
+    serve._ESTADO["llm"] = LLMFalso()
+    r = cliente.post("/ask/stream", json={"question": "¿cuanto cuesta el aceite?"})
+    assert r.status_code == 200
+
+    eventos = {}
+    for bloque in r.get_data(as_text=True).split("\n\n"):
+        if not bloque.strip():
+            continue
+        lineas = bloque.split("\n")
+        ev = next((l[7:] for l in lineas if l.startswith("event: ")), "")
+        data = next((l[6:] for l in lineas if l.startswith("data: ")), "")
+        if ev:
+            eventos[ev] = json.loads(data)
+
+    assert "token" in eventos
+    fin = eventos["fin"]
+    assert isinstance(fin["hits"], list) and fin["hits"]
+    assert isinstance(fin["hits"][0], dict) and "id" in fin["hits"][0]
+    assert "RESPUESTA:" not in fin["respuesta"]
+    assert "FUENTES:" not in fin["respuesta"]
+    assert fin["fuentes"] == ["1"]
+    assert fin["abstained"] in (True, False)
+    assert "ok" in fin["guardrails"]
+
+
 def test_equiv_por_nombre(cliente):
     r = cliente.post("/equiv", json={"nombre": "aceite de oliva", "chain": "carrefour"})
     assert r.status_code == 200
@@ -94,6 +141,16 @@ def test_docs_devuelve_html(cliente):
     assert r.status_code == 200
     assert "text/html" in r.headers["Content-Type"]
     assert "/ask/stream" in r.get_data(as_text=True)
+
+
+def test_probar_devuelve_html(cliente):
+    """La pagina de prueba en vivo es el cliente de referencia de la app."""
+    r = cliente.get("/probar")
+    assert r.status_code == 200
+    assert "text/html" in r.headers["Content-Type"]
+    html = r.get_data(as_text=True)
+    assert "/ask/stream" in html
+    assert "10.4.41.108" in html  # default de la base URL al abrirlo como fichero
 
 
 def test_el_modulo_se_puede_arrancar_como_script():

@@ -12,6 +12,7 @@ Endpoints:
     POST /ask                 pregunta en lenguaje natural (JSON validado)
     POST /ask/stream          respuesta token a token (SSE)
     GET  /docs                documentacion de los endpoints (HTML)
+    GET  /probar              cliente de prueba en vivo: demo + streaming (HTML)
 
 El servicio envia cabeceras CORS (`Access-Control-Allow-Origin: *`) para que
 la app pueda llamarlo desde otro origen en el navegador. El contrato completo
@@ -123,6 +124,27 @@ def _hits_json(hits) -> list[dict]:
         }
         for h in hits
     ]
+
+
+def _fin_json(fin: dict) -> dict:
+    """Evento final del streaming con el mismo contrato que `/ask`.
+
+    Los `hits` salen como JSON (antes se serializaban los objetos Python tal
+    cual, inservibles para la app) y el texto pasa por los guardrails, para
+    que la app pinte el aviso de abstencion igual que con `/ask`. El
+    `respuesta` de aqui manda sobre lo pintado en vivo: corrige citas si
+    hace falta.
+    """
+    hits = fin.get("hits") or []
+    g = aplicar_guardrails(fin.get("respuesta") or "", hits, estricto=True)
+    return {
+        "question": fin.get("question"),
+        "respuesta": g.respuesta_corregida or fin.get("respuesta") or "",
+        "fuentes": fin.get("fuentes") or [],
+        "hits": _hits_json(hits),
+        "abstained": bool(g.abstention),
+        "guardrails": g.as_dict(),
+    }
 
 
 @app.get("/health")
@@ -256,6 +278,8 @@ def ask_stream():
     def generar():
         try:
             for tipo, dato in flujo_qa(_retriever(), llm, question, k=k, filters=filtros):
+                if tipo == "fin":
+                    dato = _fin_json(dato)
                 yield "event: " + tipo + "\ndata: " + json.dumps(dato, ensure_ascii=False, default=str) + "\n\n"
         except Exception as e:  # noqa: BLE001 - el error viaja como evento
             yield "event: error\ndata: " + json.dumps({"error": str(e)}, ensure_ascii=False) + "\n\n"
@@ -280,7 +304,8 @@ _DOCS_HTML = """<!doctype html>
  p,a{color:#94A3B8;font-size:14px}
 </style></head><body>
 <h1>API del <span>RAG</span> · contrato para la app</h1>
-<p>Contrato completo, payloads de ejemplo y plan de pruebas: <code>docs/06-integracion-api.md</code></p>
+<p>Contrato completo, payloads de ejemplo y plan de pruebas: <code>docs/06-integracion-api.md</code><br>
+Prueba en vivo con las preguntas de demo y streaming: <a href="/probar" style="color:#38BDF8">/probar</a></p>
 <h2>Endpoints</h2>
 <table>
 <tr><th>Método</th><th>Ruta</th><th>Cuerpo</th><th>Devuelve</th></tr>
@@ -306,6 +331,213 @@ _DOCS_HTML = """<!doctype html>
 def docs():
     """Documentacion de los endpoints: pagina HTML sin dependencias."""
     return Response(_DOCS_HTML, mimetype="text/html")
+
+
+_PROBAR_HTML = """<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAG · Probar</title>
+<style>
+ body{font-family:Arial,sans-serif;background:#0F172A;color:#F8FAFC;margin:0;padding:32px;max-width:960px}
+ h1{font-size:26px} h1 span{color:#38BDF8}
+ p{color:#94A3B8;font-size:14px}
+ code{color:#818CF8}
+ label{font-size:13px;color:#94A3B8;display:block;margin-top:16px}
+ input,textarea{font-family:inherit;font-size:14px;border-radius:8px;border:1px solid #334155;background:#1E293B;color:#F8FAFC;padding:10px 12px;width:100%;box-sizing:border-box}
+ textarea{min-height:64px;resize:vertical}
+ button{font-family:inherit;font-size:14px;border-radius:8px;border:0;padding:10px 16px;margin:10px 6px 0 0;cursor:pointer;background:#38BDF8;color:#0F172A;font-weight:bold}
+ button.sec{background:#334155;color:#F8FAFC;font-weight:normal}
+ button.demo{background:#1E293B;color:#94A3B8;border:1px solid #334155;font-weight:normal;font-size:13px;padding:6px 10px;margin:6px 6px 0 0}
+ button.demo:hover{border-color:#38BDF8;color:#F8FAFC}
+ button:disabled{opacity:.5;cursor:wait}
+ #out{background:#1E293B;border-radius:8px;padding:16px;min-height:80px;margin-top:16px;font-size:15px;line-height:1.5;white-space:pre-wrap}
+ #meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+ .chip{font-size:12px;padding:4px 10px;border-radius:999px;background:#1E293B;border:1px solid #334155;color:#94A3B8}
+ .ok{border-color:#34D399;color:#34D399} .bad{border-color:#F87171;color:#F87171} .warn{border-color:#FBBF24;color:#FBBF24}
+ .fuentes{font-size:12px;color:#94A3B8;margin-top:10px}
+ .fuentes b{color:#F8FAFC;font-weight:normal}
+ .err{color:#F87171;font-size:13px;margin-top:8px}
+ #st{color:#94A3B8}
+ a{color:#38BDF8}
+</style></head><body>
+<h1>Probar el <span>RAG</span> en vivo</h1>
+<p>Cliente de referencia: usa el mismo contrato que la app (<code>/ask/stream</code> y <code>/ask</code>).
+Documentación: <a href="/docs">/docs</a> · Estado: <span id="st">comprobando…</span></p>
+
+<label for="base">Base URL (cámbiala para apuntar a otro servicio y comprobar CORS)</label>
+<input id="base" onchange="health()">
+
+<label>Preguntas de demo (verificadas con qwen3:8b)</label>
+<div id="demob"></div>
+
+<label for="q">Pregunta</label>
+<textarea id="q" placeholder="¿Cuánto cuesta el agua mineral de 1.5 l en Mercadona?"></textarea>
+<button id="bstream" onclick="stream()">Preguntar · stream</button>
+<button class="sec" id="bask" onclick="simple()">Preguntar · JSON</button>
+<button class="sec" onclick="limpiar()">Limpiar</button>
+
+<div id="out"></div>
+<div id="meta"></div>
+<div class="fuentes" id="fuentes"></div>
+<div class="err" id="err"></div>
+
+<script>
+const DEMO = [
+  "¿Cuál es el aceite de oliva virgen extra de 1 l más barato en total?",
+  "¿Cuál es el aceite de oliva virgen extra de 1 l más barato por unidad en cada una de las tres cadenas?",
+  "¿Cuánto cuesta el agua mineral de 1.5 l en Mercadona?",
+  "¿Cuánto cuesta el arroz bomba de 1 kg en Lidl?"
+];
+const $ = id => document.getElementById(id);
+$("base").value = /^https?:/.test(location.protocol) ? location.origin : "http://10.4.41.108:8080";
+
+DEMO.forEach(q => {
+  const b = document.createElement("button");
+  b.className = "demo";
+  b.textContent = q.length > 62 ? q.slice(0, 60) + "\\u2026" : q;
+  b.title = q;
+  b.onclick = () => { $("q").value = q; stream(); };
+  $("demob").appendChild(b);
+});
+
+async function health() {
+  try {
+    const r = await fetch($("base").value + "/health");
+    const d = await r.json();
+    $("st").textContent = (d.ok ? "\\u2705 " : "\\u26a0\\ufe0f ") + d.n_productos + " productos \\u00b7 " + (d.llm ? d.llm.model : "sin LLM");
+    $("st").style.color = d.ok ? "#34D399" : "#FBBF24";
+  } catch (e) {
+    $("st").textContent = "\\u274c el servicio no responde";
+    $("st").style.color = "#F87171";
+  }
+}
+health();
+
+function chip(texto, clase) {
+  const s = document.createElement("span");
+  s.className = "chip" + (clase ? " " + clase : "");
+  s.textContent = texto;
+  $("meta").appendChild(s);
+}
+
+function pintarResultado(d, ms) {
+  $("meta").innerHTML = "";
+  chip("\\u23f1 " + (ms / 1000).toFixed(1) + " s");
+  chip(d.abstained ? "abstained: s\\u00ed" : "abstained: no", d.abstained ? "warn" : "ok");
+  const gok = d.guardrails && d.guardrails.ok;
+  chip("guardrails: " + (gok ? "ok" : "REVISAR"), gok ? "ok" : "bad");
+  if (d.guardrails && d.guardrails.warnings && d.guardrails.warnings.length) {
+    chip("\\u26a0 " + d.guardrails.warnings.join(" \\u00b7 "), "warn");
+  }
+  const fuentes = d.sources || [];
+  $("fuentes").innerHTML = fuentes.length
+    ? "Fuentes: " + fuentes.map(f =>
+        "<b>[" + f.id + "]</b> " + f.name + " \\u00b7 " + f.chain +
+        (f.price_total != null ? " \\u00b7 " + f.price_total + " \\u20ac" : "")
+      ).join(" &nbsp;|&nbsp; ")
+    : "";
+}
+
+async function stream() {
+  const q = $("q").value.trim();
+  if (!q) return;
+  activar(false);
+  $("err").textContent = ""; $("meta").innerHTML = ""; $("fuentes").innerHTML = "";
+  $("out").textContent = "\\u2026";
+  const t0 = Date.now();
+  try {
+    const r = await fetch($("base").value + "/ask/stream", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({question: q}),
+    });
+    if (!r.ok) {
+      const e = await r.json().catch(() => ({}));
+      throw new Error(e.error || "HTTP " + r.status);
+    }
+    const reader = r.body.pipeThrough(new TextDecoderStream()).getReader();
+    let buf = "", texto = "", fin = null;
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+      buf += value;
+      let i;
+      while ((i = buf.indexOf("\\n\\n")) >= 0) {
+        const bloque = buf.slice(0, i);
+        buf = buf.slice(i + 2);
+        let ev = "", data = "";
+        for (const linea of bloque.split("\\n")) {
+          if (linea.startsWith("event: ")) ev = linea.slice(7);
+          else if (linea.startsWith("data: ")) data = linea.slice(6);
+        }
+        if (!ev) continue;
+        let dato;
+        try { dato = JSON.parse(data); } catch { dato = data; }
+        if (ev === "token") { texto += dato; $("out").textContent = texto; }
+        else if (ev === "fin") fin = dato;
+        else if (ev === "error") throw new Error(dato.error || "error del stream");
+      }
+    }
+    const ms = Date.now() - t0;
+    if (fin) {
+      $("out").textContent = fin.respuesta;
+      pintarResultado({
+        abstained: fin.abstained,
+        guardrails: fin.guardrails,
+        sources: (fin.hits || []).map(h => ({id: h.id, name: h.name, chain: h.chain, price_total: h.total})),
+      }, ms);
+    } else {
+      $("out").textContent = texto;
+      chip("\\u23f1 " + (ms / 1000).toFixed(1) + " s");
+    }
+  } catch (e) {
+    $("out").textContent = "";
+    $("err").textContent = "Error: " + e.message;
+  }
+  activar(true);
+}
+
+async function simple() {
+  const q = $("q").value.trim();
+  if (!q) return;
+  activar(false);
+  $("err").textContent = ""; $("meta").innerHTML = ""; $("fuentes").innerHTML = "";
+  $("out").textContent = "\\u2026";
+  const t0 = Date.now();
+  try {
+    const r = await fetch($("base").value + "/ask", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({question: q}),
+    });
+    const d = await r.json();
+    if (!r.ok) throw new Error(d.error || "HTTP " + r.status);
+    $("out").textContent = d.answer;
+    pintarResultado(d, Date.now() - t0);
+  } catch (e) {
+    $("out").textContent = "";
+    $("err").textContent = "Error: " + e.message;
+  }
+  activar(true);
+}
+
+function activar(on) {
+  $("bstream").disabled = !on;
+  $("bask").disabled = !on;
+}
+
+function limpiar() {
+  $("q").value = ""; $("out").textContent = ""; $("meta").innerHTML = "";
+  $("fuentes").innerHTML = ""; $("err").textContent = "";
+}
+</script>
+</body></html>"""
+
+
+@app.get("/probar")
+def probar():
+    """Cliente de prueba en vivo: las 4 preguntas de demo y el streaming."""
+    return Response(_PROBAR_HTML, mimetype="text/html")
 
 
 
