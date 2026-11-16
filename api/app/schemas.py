@@ -58,7 +58,13 @@ class PriceHistory(BaseModel):
 
 class ListItemIn(BaseModel):
     q: str = Field(min_length=2, max_length=100, description="Qué comprar, p. ej. 'leche entera'")
-    quantity: int = Field(1, ge=1, le=99)
+    amount: Decimal | None = Field(
+        None, gt=0, le=1000,
+        description="Cantidad deseada en la unidad (p. ej. 3 con unit 'l' = 3 litros). "
+        "Si se indica, se elige el producto con el que cuesta menos llegar a esa cantidad "
+        "y se ignora `quantity`.",
+    )
+    quantity: int = Field(1, ge=1, le=99, description="Paquetes, si no se indica `amount`")
     unit: str | None = Field(None, description="Opcional: kg, l, ud, m o lavado")
 
 
@@ -69,9 +75,10 @@ class ShoppingListIn(BaseModel):
 
 class ListLine(BaseModel):
     q: str
-    quantity: int
+    amount: Money | None  # quantitat demanada (en product.unit), o null si es demanaven paquets
+    packs: int            # paquets que cal comprar
     product: ProductSummary
-    subtotal: Money  # preu total del producte × quantitat
+    subtotal: Money       # preu del paquet × packs
 
 
 class Basket(BaseModel):
@@ -86,10 +93,18 @@ class ChainBasket(Basket):
 
 
 class OptimizedList(BaseModel):
-    baskets: list[ChainBasket]  # tota la llista a cada cadena: primer les més completes i, dins, la més barata
-    best_chain: str | None      # la primera de `baskets`
-    combined: Basket            # cada article a la cadena on és més barat
-    savings: Money | None       # best_chain − combined; null si no es poden comparar (falten articles diferents)
+    # Primer el resum (és el que es mira a Swagger i a l'app) i després el detall.
+    best_chain: str | None = Field(description="Mejor súper para comprar toda la lista en uno solo")
+    best_total: Money | None = Field(description="Precio final de la lista en `best_chain`")
+    combined_total: Money = Field(description="Precio final comprando cada artículo donde es más barato")
+    savings: Money | None = Field(
+        description="Cuánto se ahorra combinando súpers (`best_total` − `combined_total`). "
+        "Es null si no son comparables (faltan artículos distintos)"
+    )
+    combined: Basket = Field(description="Detalle de la compra combinada: cada artículo en el súper más barato")
+    baskets: list[ChainBasket] = Field(
+        description="Detalle de la lista entera en cada súper: primero los que tienen más artículos y, entre ellos, el más barato"
+    )
 
 
 class Health(BaseModel):

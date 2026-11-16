@@ -123,16 +123,31 @@ Las respuestas de búsqueda y detalle llevan la cabecera `X-Cache: HIT|MISS`.
 
 ### Lista optimizada
 
-Cuerpo de `POST /shopping-list/optimize` (`quantity` y `unit` son opcionales; `chains` limita las cadenas):
+Cuerpo de `POST /shopping-list/optimize` (`amount`, `quantity` y `unit` son opcionales;
+`chains` limita las cadenas):
 
 ```json
-{"items": [{"q": "leche entera"}, {"q": "arroz redondo", "quantity": 2}, {"q": "huevos"}],
+{"items": [{"q": "aceite", "amount": 3, "unit": "l"}, {"q": "arroz redondo", "quantity": 2},
+           {"q": "huevos"}],
  "chains": ["mercadona", "alcampo"]}
 ```
 
-- Para cada artículo y cadena se elige el producto de **menor precio unitario** dentro de la
-  unidad principal (la misma regla que la búsqueda): el que sale más a cuenta. Coste de la
-  línea = precio total del envase × `quantity`.
+- Solo se comparan productos de la unidad principal (`unit` o la más frecuente), como en la búsqueda.
+- **Con `amount`** (recomendado: la app pregunta cuánto quieres al marcar un producto): se
+  calcula cuántos envases hacen falta para llegar a esa cantidad (`amount` ÷ tamaño del envase,
+  redondeado hacia arriba) y se elige el producto con el que cuesta menos. Así todas las cadenas
+  se comparan por la misma cantidad. Ej.: 3 L de aceite → 3 botellas de 1 L (14,55 €) antes que
+  una garrafa de 5 L (17,25 €); 5 L → la garrafa. Se ignora `quantity`.
+- El **tamaño del envase** sale de la etiqueta: `size` × factor de `size_format` (la tabla de
+  conversión de `flujo-entrada/docs/03-contratos-datos.md`: `500 g` → 0,5 kg, `33 cl` → 0,33 l,
+  `1 dz` → 12 ud). Solo si no hay tamaño o el formato no es de esa unidad se usa
+  total ÷ precio unitario, porque el precio unitario de la fuente a veces no cuadra (ofertas,
+  peso escurrido, packs). Los productos sin ninguno de los dos no entran.
+- **Sin `amount`**: se elige el envase más barato y se compran `quantity` envases.
+- Cada línea lleva `amount` (lo pedido, o `null`), `packs` (envases a comprar) y
+  `subtotal` = precio del envase × `packs`. No se mezclan tamaños en una misma línea.
+- **Resumen al principio de la respuesta:** `best_chain`, `best_total` (precio final en el mejor
+  súper), `combined_total` (precio final combinando) y `savings`. Debajo va el detalle.
 - `baskets`: la lista entera en cada cadena, con `total`, `found`, `missing` y las líneas.
   Ordenadas por más artículos encontrados y, dentro, por la más barata.
 - `best_chain`: la primera de `baskets` (el mejor supermercado si solo se va a uno).

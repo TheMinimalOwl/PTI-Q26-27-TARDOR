@@ -1,7 +1,8 @@
 """Llista de la compra optimitzada.
 
-Per a cada article es busca el producte més barat de cada cadena (repository.cheapest_per_chain).
-Amb això es calculen dues coses:
+Per a cada article es busca, a cada cadena, el producte amb què surt més barat
+(repository.cheapest_per_chain). Si l'article diu quina quantitat es vol (`amount`), totes
+les cadenes es comparen per aquesta mateixa quantitat. Amb això es calculen dues coses:
 - la cistella sencera a cada cadena (anar a un sol supermercat);
 - la cistella combinada: cada article a la cadena on surt més barat.
 """
@@ -13,8 +14,8 @@ from . import repository
 from .schemas import Basket, ChainBasket, ChainOut, ListLine, OptimizedList, ShoppingListIn
 
 
-def _line(q: str, quantity: int, product) -> ListLine:
-    return ListLine(q=q, quantity=quantity, product=product, subtotal=product.price.total * quantity)
+def _line(q: str, amount: Decimal | None, product, packs: int, cost: Decimal) -> ListLine:
+    return ListLine(q=q, amount=amount, packs=packs, product=product, subtotal=cost)
 
 
 def _basket(lines: list[ListLine], missing: list[str]) -> dict:
@@ -32,12 +33,14 @@ def optimize(session: Session, body: ShoppingListIn) -> OptimizedList:
 
     for item in body.items:
         q = " ".join(item.q.lower().split())
-        _, products = repository.cheapest_per_chain(session, q, item.unit, list(chains))
-        for product in products:
-            per_chain[product.chain.slug].append(_line(q, item.quantity, product))
-        if products:
-            best = min(products, key=lambda p: (p.price.total, p.chain.slug))
-            combined.append(_line(q, item.quantity, best))
+        _, options = repository.cheapest_per_chain(
+            session, q, item.unit, list(chains), item.amount, item.quantity
+        )
+        lines = [_line(q, item.amount, product, packs, cost) for product, packs, cost in options]
+        for line in lines:
+            per_chain[line.product.chain.slug].append(line)
+        if lines:
+            combined.append(min(lines, key=lambda l: (l.subtotal, l.product.chain.slug)))
         else:
             combined_missing.append(q)
 
@@ -56,8 +59,10 @@ def optimize(session: Session, body: ShoppingListIn) -> OptimizedList:
         savings = best.total - combined_basket.total
 
     return OptimizedList(
-        baskets=baskets,
         best_chain=best.chain.slug if best else None,
-        combined=combined_basket,
+        best_total=best.total if best else None,
+        combined_total=combined_basket.total,
         savings=savings,
+        combined=combined_basket,
+        baskets=baskets,
     )

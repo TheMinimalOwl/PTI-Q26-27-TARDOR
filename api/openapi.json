@@ -291,14 +291,90 @@
         "tags": [
           "lista"
         ],
-        "summary": "Optimize Shopping List",
-        "description": "Quant costa la llista a cada cadena i quant costa comprant cada article on és més barat.\n\nPer a cada article es tria, a cada cadena, el producte de menor preu unitari (el que surt\nmés a compte) dins de la unitat principal, com a la cerca. El cost és preu total × quantitat.",
+        "summary": "Lista de la compra optimizada",
+        "description": "Cuánto cuesta la lista entera en cada súper y cuánto comprando cada artículo donde es más barato.\n\n**Cómo probarlo:** *Try it out* → elige un ejemplo en el desplegable → *Execute*.\nEl precio final está **al principio de la respuesta**: `best_chain` y `best_total`\n(mejor súper si vas a uno solo), `combined_total` (combinando súpers) y `savings` (ahorro).\n\nCon `amount` (p. ej. 3 litros) se calcula cuántos envases hacen falta y se elige el que\nsale más barato, así todos los súpers se comparan por la misma cantidad.",
         "operationId": "optimize_shopping_list_shopping_list_optimize_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
                 "$ref": "#/components/schemas/ShoppingListIn"
+              },
+              "examples": {
+                "con_cantidades": {
+                  "summary": "Con cantidades (recomendado)",
+                  "description": "Cada artículo dice cuánto quieres; la API elige el tamaño de envase más barato.",
+                  "value": {
+                    "items": [
+                      {
+                        "q": "aceite oliva",
+                        "amount": 3,
+                        "unit": "l"
+                      },
+                      {
+                        "q": "macarrones",
+                        "amount": 2,
+                        "unit": "kg"
+                      },
+                      {
+                        "q": "arroz redondo",
+                        "amount": 2,
+                        "unit": "kg"
+                      },
+                      {
+                        "q": "pechuga pollo",
+                        "amount": 1,
+                        "unit": "kg"
+                      },
+                      {
+                        "q": "huevos",
+                        "amount": 12,
+                        "unit": "ud"
+                      }
+                    ]
+                  }
+                },
+                "sin_cantidades": {
+                  "summary": "Sin cantidades (envases)",
+                  "description": "Sin `amount`: el envase más barato × `quantity`.",
+                  "value": {
+                    "items": [
+                      {
+                        "q": "aceite oliva virgen extra"
+                      },
+                      {
+                        "q": "leche entera"
+                      },
+                      {
+                        "q": "arroz redondo",
+                        "quantity": 2
+                      },
+                      {
+                        "q": "huevos"
+                      }
+                    ]
+                  }
+                },
+                "algunas_cadenas": {
+                  "summary": "Solo algunos súpers",
+                  "description": "`chains` limita la comparación a estas cadenas.",
+                  "value": {
+                    "items": [
+                      {
+                        "q": "arroz redondo",
+                        "amount": 2,
+                        "unit": "kg"
+                      },
+                      {
+                        "q": "huevos"
+                      }
+                    ],
+                    "chains": [
+                      "mercadona",
+                      "alcampo"
+                    ]
+                  }
+                }
               }
             }
           },
@@ -466,11 +542,29 @@
             "title": "Q",
             "description": "Qué comprar, p. ej. 'leche entera'"
           },
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 1000.0,
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount",
+            "description": "Cantidad deseada en la unidad (p. ej. 3 con unit 'l' = 3 litros). Si se indica, se elige el producto con el que cuesta menos llegar a esa cantidad y se ignora `quantity`."
+          },
           "quantity": {
             "type": "integer",
             "maximum": 99.0,
             "minimum": 1.0,
             "title": "Quantity",
+            "description": "Paquetes, si no se indica `amount`",
             "default": 1
           },
           "unit": {
@@ -498,9 +592,20 @@
             "type": "string",
             "title": "Q"
           },
-          "quantity": {
+          "amount": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Amount"
+          },
+          "packs": {
             "type": "integer",
-            "title": "Quantity"
+            "title": "Packs"
           },
           "product": {
             "$ref": "#/components/schemas/ProductSummary"
@@ -513,7 +618,8 @@
         "type": "object",
         "required": [
           "q",
-          "quantity",
+          "amount",
+          "packs",
           "product",
           "subtotal"
         ],
@@ -521,13 +627,6 @@
       },
       "OptimizedList": {
         "properties": {
-          "baskets": {
-            "items": {
-              "$ref": "#/components/schemas/ChainBasket"
-            },
-            "type": "array",
-            "title": "Baskets"
-          },
           "best_chain": {
             "anyOf": [
               {
@@ -537,10 +636,25 @@
                 "type": "null"
               }
             ],
-            "title": "Best Chain"
+            "title": "Best Chain",
+            "description": "Mejor súper para comprar toda la lista en uno solo"
           },
-          "combined": {
-            "$ref": "#/components/schemas/Basket"
+          "best_total": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Best Total",
+            "description": "Precio final de la lista en `best_chain`"
+          },
+          "combined_total": {
+            "type": "number",
+            "title": "Combined Total",
+            "description": "Precio final comprando cada artículo donde es más barato"
           },
           "savings": {
             "anyOf": [
@@ -551,15 +665,30 @@
                 "type": "null"
               }
             ],
-            "title": "Savings"
+            "title": "Savings",
+            "description": "Cuánto se ahorra combinando súpers (`best_total` − `combined_total`). Es null si no son comparables (faltan artículos distintos)"
+          },
+          "combined": {
+            "$ref": "#/components/schemas/Basket",
+            "description": "Detalle de la compra combinada: cada artículo en el súper más barato"
+          },
+          "baskets": {
+            "items": {
+              "$ref": "#/components/schemas/ChainBasket"
+            },
+            "type": "array",
+            "title": "Baskets",
+            "description": "Detalle de la lista entera en cada súper: primero los que tienen más artículos y, entre ellos, el más barato"
           }
         },
         "type": "object",
         "required": [
-          "baskets",
           "best_chain",
+          "best_total",
+          "combined_total",
+          "savings",
           "combined",
-          "savings"
+          "baskets"
         ],
         "title": "OptimizedList"
       },
