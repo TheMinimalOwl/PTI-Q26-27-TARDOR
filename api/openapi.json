@@ -285,10 +285,124 @@
           }
         }
       }
+    },
+    "/shopping-list/optimize": {
+      "post": {
+        "tags": [
+          "lista"
+        ],
+        "summary": "Optimize Shopping List",
+        "description": "Quant costa la llista a cada cadena i quant costa comprant cada article on és més barat.\n\nPer a cada article es tria, a cada cadena, el producte de menor preu unitari (el que surt\nmés a compte) dins de la unitat principal, com a la cerca. El cost és preu total × quantitat.",
+        "operationId": "optimize_shopping_list_shopping_list_optimize_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ShoppingListIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OptimizedList"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "Basket": {
+        "properties": {
+          "total": {
+            "type": "number",
+            "title": "Total"
+          },
+          "found": {
+            "type": "integer",
+            "title": "Found"
+          },
+          "missing": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/ListLine"
+            },
+            "type": "array",
+            "title": "Lines"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "found",
+          "missing",
+          "lines"
+        ],
+        "title": "Basket"
+      },
+      "ChainBasket": {
+        "properties": {
+          "total": {
+            "type": "number",
+            "title": "Total"
+          },
+          "found": {
+            "type": "integer",
+            "title": "Found"
+          },
+          "missing": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Missing"
+          },
+          "lines": {
+            "items": {
+              "$ref": "#/components/schemas/ListLine"
+            },
+            "type": "array",
+            "title": "Lines"
+          },
+          "chain": {
+            "$ref": "#/components/schemas/ChainOut"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total",
+          "found",
+          "missing",
+          "lines",
+          "chain"
+        ],
+        "title": "ChainBasket"
+      },
       "ChainOut": {
         "properties": {
           "slug": {
@@ -342,6 +456,112 @@
           "redis"
         ],
         "title": "Health"
+      },
+      "ListItemIn": {
+        "properties": {
+          "q": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 2,
+            "title": "Q",
+            "description": "Qué comprar, p. ej. 'leche entera'"
+          },
+          "quantity": {
+            "type": "integer",
+            "maximum": 99.0,
+            "minimum": 1.0,
+            "title": "Quantity",
+            "default": 1
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit",
+            "description": "Opcional: kg, l, ud, m o lavado"
+          }
+        },
+        "type": "object",
+        "required": [
+          "q"
+        ],
+        "title": "ListItemIn"
+      },
+      "ListLine": {
+        "properties": {
+          "q": {
+            "type": "string",
+            "title": "Q"
+          },
+          "quantity": {
+            "type": "integer",
+            "title": "Quantity"
+          },
+          "product": {
+            "$ref": "#/components/schemas/ProductSummary"
+          },
+          "subtotal": {
+            "type": "number",
+            "title": "Subtotal"
+          }
+        },
+        "type": "object",
+        "required": [
+          "q",
+          "quantity",
+          "product",
+          "subtotal"
+        ],
+        "title": "ListLine"
+      },
+      "OptimizedList": {
+        "properties": {
+          "baskets": {
+            "items": {
+              "$ref": "#/components/schemas/ChainBasket"
+            },
+            "type": "array",
+            "title": "Baskets"
+          },
+          "best_chain": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Best Chain"
+          },
+          "combined": {
+            "$ref": "#/components/schemas/Basket"
+          },
+          "savings": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Savings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "baskets",
+          "best_chain",
+          "combined",
+          "savings"
+        ],
+        "title": "OptimizedList"
       },
       "PriceHistory": {
         "properties": {
@@ -602,6 +822,39 @@
           "items"
         ],
         "title": "SearchPage"
+      },
+      "ShoppingListIn": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ListItemIn"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "minItems": 1,
+            "title": "Items"
+          },
+          "chains": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chains",
+            "description": "Opcional: solo estas cadenas (slugs)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "ShoppingListIn"
       },
       "ValidationError": {
         "properties": {

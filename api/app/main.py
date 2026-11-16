@@ -4,6 +4,8 @@ Flux de consulta: app → API → Redis (L1) → PostgreSQL (L2).
 Documentació interactiva a /docs; contracte a /openapi.json.
 """
 from contextlib import asynccontextmanager
+import hashlib
+import json
 from datetime import date
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Response
@@ -11,11 +13,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from . import repository
+from . import repository, shopping
 from .cache import Cache, get_cache
 from .config import settings
 from .db import get_session, init_db
-from .schemas import ChainOut, Health, PriceHistory, ProductDetail, SearchPage
+from .schemas import (
+    ChainOut, Health, OptimizedList, PriceHistory, ProductDetail, SearchPage, ShoppingListIn,
+)
 
 
 @asynccontextmanager
@@ -31,7 +35,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 # L'app mòbil en desenvolupament (Expo web) crida des d'un altre origen.
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"], allow_headers=["*"])
 
 
 @app.get("/health", response_model=Health, tags=["sistema"])  # Comprova si la BD i Redis responen. Kubernetes el fa servir per saber si el contenidor està bé.
@@ -119,3 +123,26 @@ def get_price_history(
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     points = repository.price_history(session, product_id, since, until)
     return PriceHistory(product_id=product_id, unit=product.unit, points=points)
+
+
+@app.post("/shopping-list/optimize", response_model=OptimizedList, tags=["lista"])
+def optimize_shopping_list(
+    body: ShoppingListIn,
+    response: Response,
+    session: Session = Depends(get_session),
+    cache: Cache = Depends(get_cache),
+):
+    """Quant costa la llista a cada cadena i quant costa comprant cada article on és més barat.
+
+    Per a cada article es tria, a cada cadena, el producte de menor preu unitari (el que surt
+    més a compte) dins de la unitat principal, com a la cerca. El cost és preu total × quantitat."""
+    raw = json.dumps(body.model_dump(mode="json"), sort_keys=True)
+    key = "list:" + hashlib.sha1(raw.encode()).hexdigest()
+    if (cached := cache.get(key)) is not None:
+        response.headers["X-Cache"] = "HIT"
+        return cached
+
+    result = shopping.optimize(session, body)
+    cache.set(key, result.model_dump(mode="json"))
+    response.headers["X-Cache"] = "MISS"
+    return result

@@ -102,6 +102,7 @@ Contrato completo: [`api/openapi.json`](../openapi.json) (generado desde el cód
 | `GET /products/search?q=&chain=&unit=&limit=&offset=` | Productos cuyo nombre contiene todas las palabras de `q` (sin distinguir mayúsculas ni acentos), ordenados por **precio unitario** ascendente. Primero los de la unidad principal (`unit` de la respuesta: la pedida o, si no, la más frecuente) y después el resto, porque €/l y €/ud no se comparan |
 | `GET /products/{id}` | Detalle del producto con su precio actual |
 | `GET /products/{id}/prices?from=&to=` | Historial de precios (para la gráfica de tendencias) |
+| `POST /shopping-list/optimize` | **Lista de la compra optimizada:** cuánto cuesta la lista entera en cada cadena y cuánto comprando cada artículo donde es más barato (ver abajo) |
 
 Ejemplo de `GET /products/search?q=aceite&limit=1`:
 
@@ -120,15 +121,37 @@ Ejemplo de `GET /products/search?q=aceite&limit=1`:
 
 Las respuestas de búsqueda y detalle llevan la cabecera `X-Cache: HIT|MISS`.
 
+### Lista optimizada
+
+Cuerpo de `POST /shopping-list/optimize` (`quantity` y `unit` son opcionales; `chains` limita las cadenas):
+
+```json
+{"items": [{"q": "leche entera"}, {"q": "arroz redondo", "quantity": 2}, {"q": "huevos"}],
+ "chains": ["mercadona", "alcampo"]}
+```
+
+- Para cada artículo y cadena se elige el producto de **menor precio unitario** dentro de la
+  unidad principal (la misma regla que la búsqueda): el que sale más a cuenta. Coste de la
+  línea = precio total del envase × `quantity`.
+- `baskets`: la lista entera en cada cadena, con `total`, `found`, `missing` y las líneas.
+  Ordenadas por más artículos encontrados y, dentro, por la más barata.
+- `best_chain`: la primera de `baskets` (el mejor supermercado si solo se va a uno).
+- `combined`: cada artículo en la cadena donde su línea es más barata.
+- `savings`: `best_chain.total − combined.total`. Es `null` si la combinada encuentra artículos
+  que la mejor cadena no tiene (no serían comparables).
+
+Con los datos de demo, leche + arroz ×2 + huevos + aceite virgen extra: Alcampo 15,36 €;
+combinando 15,28 € (el arroz en Ahorramás), ahorro 0,08 €.
+
 ## Caché (Redis)
 
-- Se cachean `search` y `products/{id}` durante `CACHE_TTL` (300 s).
+- Se cachean `search`, `products/{id}` y la lista optimizada (clave = hash del cuerpo) durante `CACHE_TTL` (300 s).
 - Invalidación por **versión**: las claves van prefijadas con `catalog:version`; el writer la
   incrementa tras cada lote, así que los datos nuevos se ven al momento.
 - Si Redis cae, la API sigue respondiendo desde PostgreSQL.
 
 ## Próximo (no incluido aún)
 
-Autenticación y usuarios, listas de la compra y lista optimizada, alertas de bajada de
+Autenticación y usuarios, listas de la compra guardadas por usuario, alertas de bajada de
 precio, supermercados cercanos (las columnas `stores.latitude/longitude` ya existen) y el
 endpoint del asistente de IA.

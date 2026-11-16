@@ -45,6 +45,26 @@ def _summary(product: Product, price: Price | None, store_code: str | None) -> d
     )
 
 
+def _name_conditions(q: str) -> list:
+    """Cada paraula de `q` ha de sortir al nom (sense distingir majúscules ni accents)."""
+    return [
+        func.unaccent(Product.name).ilike(func.unaccent(f"%{_escape_like(word)}%"), escape="\\")
+        for word in q.split()
+    ]
+
+
+def _main_unit(session: Session, conditions: list) -> str | None:
+    """La unitat més freqüent entre els productes que compleixen `conditions`."""
+    return session.scalar(
+        select(Product.unit)
+        .join(Product.chain)
+        .where(and_(*conditions), Product.unit.is_not(None))
+        .group_by(Product.unit)
+        .order_by(func.count().desc(), Product.unit)
+        .limit(1)
+    )
+
+
 def search_products(
     session: Session, q: str, chain: str | None, unit: str | None, limit: int, offset: int
 ) -> tuple[int, str | None, list[ProductSummary]]:
@@ -57,10 +77,7 @@ def search_products(
     freqüent entre els resultats) i després la resta. Retorna també aquesta unitat."""
     latest = aliased(Price, _latest_prices().subquery())
 
-    conditions = [
-        func.unaccent(Product.name).ilike(func.unaccent(f"%{_escape_like(word)}%"), escape="\\")
-        for word in q.split()
-    ]
+    conditions = _name_conditions(q)
     if chain:
         conditions.append(Chain.slug == chain)
     if unit:
@@ -69,14 +86,7 @@ def search_products(
     base = select(Product).join(Product.chain).where(and_(*conditions))
     total = session.scalar(select(func.count()).select_from(base.subquery()))
 
-    main_unit = unit or session.scalar(
-        select(Product.unit)
-        .join(Product.chain)
-        .where(and_(*conditions), Product.unit.is_not(None))
-        .group_by(Product.unit)
-        .order_by(func.count().desc(), Product.unit)
-        .limit(1)
-    )
+    main_unit = unit or _main_unit(session, conditions)
     order = [latest.unit_price.asc().nulls_last(), Product.name]
     if main_unit:
         order.insert(0, case((Product.unit == main_unit, 0), else_=1))
@@ -133,3 +143,35 @@ def price_history(
 
 def list_chains(session: Session) -> list[ChainOut]:
     return [ChainOut.model_validate(c) for c in session.scalars(select(Chain).order_by(Chain.name))]
+
+
+def cheapest_per_chain(
+    session: Session, q: str, unit: str | None, chains: list[str] | None
+) -> tuple[str | None, list[ProductSummary]]:
+    """Per a un article de la llista, el producte més barat de cada cadena.
+
+    Només compara productes de la unitat principal (`unit` o la més freqüent), i tria el
+    de menor preu unitari (el que surt més a compte); a igualtat, el de menor preu total.
+    Els productes sense preu no compten. Retorna la unitat i un producte per cadena."""
+    latest = aliased(Price, _latest_prices().subquery())
+
+    conditions = _name_conditions(q)
+    if chains:
+        conditions.append(Chain.slug.in_(chains))
+    main_unit = unit or _main_unit(session, conditions)
+    if main_unit is None:
+        return None, []
+    conditions.append(Product.unit == main_unit)
+
+    rows = session.execute(
+        select(Product, latest, Store.code)
+        .join(Product.chain)
+        .join(latest, latest.product_id == Product.id)
+        .join(Store, Store.id == latest.store_id)
+        .where(and_(*conditions), latest.total.is_not(None))
+        .options(joinedload(Product.chain))
+        .distinct(Product.chain_id)
+        .order_by(Product.chain_id, latest.unit_price.asc().nulls_last(), latest.total, Product.id)
+    ).all()
+
+    return main_unit, [ProductSummary(**_summary(p, price, code)) for p, price, code in rows]

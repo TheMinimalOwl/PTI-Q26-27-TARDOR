@@ -78,3 +78,51 @@ def test_detalle_e_historial(client):
 
 def test_producto_inexistente(client):
     assert client.get("/products/999999").status_code == 404
+
+
+def _optimize(client, items, **extra):
+    return client.post("/shopping-list/optimize", json={"items": items, **extra}).json()
+
+
+def test_lista_optimizada(client):
+    # Dades de demo: Alcampo és la més barata sencera (15,36 €); combinant, l'arròs
+    # s'agafa a Ahorramàs (1,25 € en lloc d'1,29 €) i surt a 15,28 €.
+    res = _optimize(client, [
+        {"q": "aceite oliva virgen extra"},
+        {"q": "leche entera"},
+        {"q": "arroz redondo", "quantity": 2},
+        {"q": "huevos"},
+    ])
+    assert res["best_chain"] == "alcampo"
+    assert [b["chain"]["slug"] for b in res["baskets"]][:2] == ["alcampo", "ahorramas"]
+    assert res["baskets"][0]["total"] == 15.36
+    assert res["combined"]["total"] == 15.28
+    assert res["savings"] == 0.08
+    rice = next(l for l in res["combined"]["lines"] if l["q"] == "arroz redondo")
+    assert rice["product"]["chain"]["slug"] == "ahorramas"
+    assert rice["subtotal"] == 2.5
+
+
+def test_lista_tria_el_millor_preu_unitari(client):
+    # "aceite": la garrafa de 5 L (3,45 €/l) surt més a compte que l'ampolla d'1 L.
+    res = _optimize(client, [{"q": "aceite"}], chains=["mercadona"])
+    line = res["baskets"][0]["lines"][0]
+    assert line["product"]["name"] == "Aceite de oliva 0,4º garrafa 5 L"
+
+
+def test_lista_con_articulo_que_no_existe(client):
+    res = _optimize(client, [{"q": "huevos"}, {"q": "caviar beluga"}])
+    assert res["combined"]["missing"] == ["caviar beluga"]
+    assert all(b["missing"] == ["caviar beluga"] for b in res["baskets"])
+    assert res["best_chain"] == "alcampo"
+    assert res["savings"] == 0
+
+
+def test_lista_solo_algunas_cadenas(client):
+    res = _optimize(client, [{"q": "arroz redondo"}], chains=["mercadona", "carrefour"])
+    assert {b["chain"]["slug"] for b in res["baskets"]} == {"mercadona", "carrefour"}
+    assert res["best_chain"] == "mercadona"
+
+
+def test_lista_vacia_es_error(client):
+    assert client.post("/shopping-list/optimize", json={"items": []}).status_code == 422
