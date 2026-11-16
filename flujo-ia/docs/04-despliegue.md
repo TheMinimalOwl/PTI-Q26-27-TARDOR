@@ -28,6 +28,25 @@ Notas del entorno real:
 - El repo es **privado**: la VM necesita credenciales para `git pull`. Se
   dejaron en `~/.git-credentials` (permisos 600) usando el credential store.
 
+### Acceso y operacion de la VM (datos reales)
+
+| Dato | Valor |
+|---|---|
+| VM | `gastly`, IP `10.4.41.108` (se alcanza con la VPN FIB / FortiClient activa) |
+| Usuario SSH | **`alumne`** (no `joel`) |
+| Repo clonado | **`~/TARDOR-test`** (el nombre no es `PTI-Q26-27-TARDOR`) |
+| Consola | VNC de OpenNebula Sunstone (`virtech.fib.upc.edu`) |
+| Servicio | unidad de usuario `flujo-ia` (`Linger=yes`: se reinicia por SSH sin sesion) |
+
+Despliegue completo desde el portatil en un solo comando:
+
+```bash
+ssh alumne@10.4.41.108 'cd ~/TARDOR-test && git pull origin ai && systemctl --user restart flujo-ia'
+```
+
+Comprobarlo despues: `curl -s http://10.4.41.108:8080/health` y
+`bash scripts/demo-check.sh --url http://10.4.41.108:8080`.
+
 ## 1. Requisitos de la VM
 
 El prototipo no necesita GPU. Lo que decide es el **LLM**:
