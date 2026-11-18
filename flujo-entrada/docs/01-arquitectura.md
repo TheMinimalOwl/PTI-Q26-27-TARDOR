@@ -268,6 +268,14 @@ Fission por HTTP.
 
 `cluster/namespace.yaml` crea `scrappers`, `fission` y `messaging`.
 
+### 6 · 📈 `monitoring` — Prometheus y Grafana
+
+Prometheus recoge métricas de los scrapers (por el Pushgateway, al acabar cada pasada), de
+NATS (exportador del chart), del consumer (`:8000/metrics`) y de Kubernetes
+(kube-state-metrics). Grafana enseña el panel *Ingesta* y lanza 12 alertas (scraper sin
+pasada, caída de productos, cola sin vaciar, errores del normalizador, stream lleno…).
+Detalle en [`monitoring/README.md`](../monitoring/README.md).
+
 ## 📜 Manifiestos
 
 | Manifiesto | Kind | Namespace | Notas |
@@ -286,6 +294,7 @@ Fission por HTTP.
 | `scrappers/k8s/cleanup-cronjob.yaml` | CronJob | scrappers | `scraper-out-cleanup`, 01:30: borra los `.txt` de más de 7 días |
 | `fission/normalizer/fission.yaml` | HTTPTrigger | ingesta | POST `/normalize` (a `Function` `normalizer`) |
 | `fission/normalizer/consumer.yaml` | Deployment | ingesta | `normalizer-consumer` |
+| `monitoring/` (`../infra/terraform/monitoring.tf`) | Helm (Prometheus, Grafana) | monitoring | Prometheus con kube-state-metrics, node-exporter y Pushgateway; Grafana con el panel *Ingesta* y las alertas (ver [`monitoring/README.md`](../monitoring/README.md)) |
 | `../infra/api-up.sh` → `../../api/k8s/` | StatefulSet, Deployments, Services | api | **Del equipo de API/BD**, aplicado tal cual: PostgreSQL + pgvector, Redis, `api` y `writer` (ver [`infra/README.md`](../infra/README.md#api-y-bd-en-la-misma-vm-api-upsh)) |
 
 > [!NOTE]
@@ -310,6 +319,7 @@ Fission por HTTP.
 | `NATS_DRY_RUN` | `0` | `1` = no publica (solo volcado txt) |
 | `SCRAPER_POSTAL_CODES` | `08016` | Códigos postales (separados por comas). Cada uno se traduce a su tienda (`wh`); ver [`03`](03-contratos-datos.md#código-postal-y-tienda) |
 | `SCRAPER_DELAY` | según la cadena | Segundos entre peticiones (Consum 5; Caprabo, Condis y bonÀrea 3; Mercadona usa 0,3 fijo) |
+| `PUSHGATEWAY_URL` | `http://pushgateway.monitoring.svc.cluster.local:9091` | Adónde envía `metrics.py` los números de la pasada; vacío = no envía |
 
 ### 📥 Consumer
 
@@ -320,6 +330,7 @@ Fission por HTTP.
 | `NATS_SUBJECT_OUT` | `scraper.mercadona.clean` | Solo de reserva: la salida se deriva del subject de entrada (`scraper.<cadena>.raw` → `scraper.<cadena>.clean`) |
 | `NORMALIZE_URL` | `http://router.fission/normalize` | Si vacío → normaliza en proceso |
 | `CONSUMER_BATCH` | `50` | Tamaño de lote antes de volcar |
+| `METRICS_PORT` | `8000` | Puerto de `/metrics` para Prometheus; `0` = sin métricas |
 
 ## 🧭 Decisiones de diseño
 

@@ -23,7 +23,7 @@ Casi cerrada. La cola de salida ya está conectada: el equipo de API/BD consume
 | Hueco | Impacto | Nota |
 |---|---|---|
 | Códigos postales desde la API | Alto | Hoy `postal_codes = ["08016"]` fijo. Falta el endpoint de la API con los códigos de los usuarios (propuesta en [`03`](03-contratos-datos.md#código-postal-y-tienda)) |
-| Sin alerta si falla un scraper | Medio | Desde el 11/11 el Job falla de forma visible (y desde el 12/11 también si se queda a medias), pero nadie avisa |
+| ~~Sin alerta si falla un scraper~~ | Hecho | Alertas de Grafana (12/11/2026): sin pasada correcta en 26 h, Job fallido, caída de productos, publicación incompleta ([`monitoring/`](../monitoring/README.md)). Para que lleguen fuera de Grafana falta poner el bot de Telegram (`alert_telegram_*`) |
 | ~~La VM se reinicia y nada vuelve~~ | Hecho | `infra/autostart.sh` (12/11/2026): instalado en la VM y probado con un reinicio real |
 | ~~Consumer sordo si NATS cae~~ | Hecho | Reintentos sin fin + `livenessProbe` (12/11/2026) |
 | ~~`e2e.sh` siempre decía 0 errores~~ | Hecho | Buscaba `ERROR` en mayúsculas en el log; ahora mira `flush-error`/`parse-error` y las líneas `ERROR id=` de los lotes (12/11/2026) |
@@ -31,7 +31,8 @@ Casi cerrada. La cola de salida ya está conectada: el equipo de API/BD consume
 | Sin deduplicación en la ingesta | Bajo | Una reentrega repite líneas en `clean`; la BD lo absorbe con *upsert* (clave producto + tienda + día) |
 | ~~Validar el respaldo `calculado` con una cadena sin `reference_price`~~ | Hecho | Con Caprabo (11/11/2026): donde la web da el precio por unidad, el calculado coincide en el 98 % ([`03`](03-contratos-datos.md#mapeo-de-campos-de-caprabo)) |
 | Sin `Service` para los `.txt` | Bajo | El volcado es solo para depurar; ya se guarda en el PVC `scraper-out` |
-| Sin monitorización ni logs estructurados | Alto | Tarea 8 del plan |
+| ~~Sin monitorización~~ | Hecho | Prometheus + Grafana (12/11/2026): panel *Ingesta* y 12 alertas ([`monitoring/`](../monitoring/README.md)) |
+| Sin logs estructurados ni centralizados | Bajo | Los logs se leen con `kubectl logs`; Loki se dejó fuera por memoria (nodo de 4 GiB) |
 | Sin `schema_version` en el envelope | Bajo | Necesario si el formato evoluciona |
 | Tamaño del stream con más códigos postales | Bajo | Con cinco cadenas y un código postal, 7 días ocupan ~460 MiB de 1 GiB ([`04`](04-estados-y-errores.md)). Con más tiendas habrá que subir el PVC o bajar la retención (sin bajar del tiempo que el writer pueda estar parado) |
 | `ean` fuera de la línea limpia | Medio | Consum lo trae y serviría para emparejar el mismo producto entre cadenas; añadirlo cambia el contrato con API/BD |
@@ -48,7 +49,7 @@ Casi cerrada. La cola de salida ya está conectada: el equipo de API/BD consume
 | 5 | 29 oct – 9 nov | Segundo scraper (hecho: Consum; Carrefour quedó bloqueado por Cloudflare) + embeddings con el equipo de IA (pendiente) |
 | 6 | 10–11 nov | **Hecho con otras cadenas:** Consum, Caprabo, Condis y bonÀrea (Alcampo bloquea; Ahorramás no reparte en Cataluña). Queda la equivalencia de productos entre cadenas |
 | 7 | 12–16 nov | Calidad de datos + multi-tienda (`wh` real) |
-| 8 | 17–18 nov | Estabilizar ingesta + monitorización y logs |
+| 8 | 17–18 nov | Estabilizar ingesta + monitorización y logs (**monitorización hecha** el 12/11; quedan los logs) |
 | 9–11 | 19–25 nov | Congelar, datos de demo, ensayo y demos |
 | 12–15 | 26 nov – 20 dic | Correcciones, despliegue documentado, presentación y memoria |
 
@@ -84,6 +85,7 @@ y no se ha tocado:
 | Versiones sin fijar | `python:3.12-slim`, `pgvector/pgvector:pg16` y `redis:7.4-alpine` van por etiqueta móvil |
 | Writer y caídas de NATS | Al reiniciar NATS (prueba del 12/11/2026) el writer muere con `ConnectionRefusedError` y vuelve porque Kubernetes reinicia el pod (1 reinicio). Funciona, pero conviene que reintente la conexión como el consumer de la ingesta (`max_reconnect_attempts=-1`) |
 | Nombres de cadena | `CHAIN_NAMES` (`api/app/ingest.py`) solo tiene `ahorramas`; las demás salen con `capitalize()`. Bien para Mercadona, Consum, Caprabo y Condis, pero bonÀrea sale como `Bonarea`: falta `"bonarea": "bonÀrea"` |
+| Métricas de API/BD | Prometheus ya está en el clúster (namespace `monitoring`) y recoge cualquier pod con las anotaciones `prometheus.io/scrape: "true"` y `prometheus.io/port`. Propuesta: `postgres_exporter` junto a PostgreSQL, `/metrics` en la API (latencia, errores) y en el writer (lotes y filas escritas). No se ha tocado nada de `api/` |
 | Endpoint de códigos postales | La ingesta necesita `GET /internal/postal-codes` (ver [`03`](03-contratos-datos.md)) para dejar de usar 08016 fijo |
 
 ## Despliegue: separar ingesta y API/BD
@@ -110,7 +112,7 @@ que exponer NATS fuera, se duplica la RAM y vuelve el problema de inotify.
 |---|---|
 | Scraper | Extrae, publica en NATS y **devuelve código de salida != 0** si no publicó |
 | Consumer | Tiene búfer acotado y es idempotente por `product_id` |
-| Ingesta | Monitorización básica: nº de items, errores y lag visibles |
+| Ingesta | Monitorización básica: nº de items, errores y lag visibles (**hecho**: panel *Ingesta* en Grafana) |
 
 ## Preguntas abiertas
 

@@ -2,6 +2,8 @@ import json
 import os
 from datetime import datetime, timezone
 
+import metrics
+
 STREAM = os.getenv("NATS_STREAM", "SCRAPERS")
 NATS_URL = os.getenv("NATS_URL", "nats://nats.messaging.svc.cluster.local:4222")
 DRY_RUN = os.getenv("NATS_DRY_RUN", "0") == "1"
@@ -35,11 +37,15 @@ async def _publish_async(envelopes: list[dict]) -> int:
 def publish(items: list[dict], wh: str, postal_code: str) -> tuple[int, str]:
     envelopes = [build_envelope(p, wh, postal_code) for p in items if "id" in p]
     if DRY_RUN or not envelopes:
+        if not DRY_RUN:
+            metrics.push("caprabo", wh, postal_code, 0, 0)
         return 0, f"dry-run ({len(envelopes)} pendientes)"
     import asyncio
 
     try:
         n = asyncio.run(_publish_async(envelopes))
-        return n, f"{n} -> {SUBJECT}@{NATS_URL}"
+        info = f"{n} -> {SUBJECT}@{NATS_URL}"
     except Exception as e:
-        return 0, f"ERROR NATS ({e}), txt intacto"
+        n, info = 0, f"ERROR NATS ({e}), txt intacto"
+    metrics.push("caprabo", wh, postal_code, len(envelopes), n)
+    return n, info

@@ -8,6 +8,7 @@ API/BD los lee de ahi. Un lote nunca mezcla dos cadenas ni dos tiendas.
 import asyncio
 import json
 import os
+import time
 from datetime import datetime, timezone
 
 # Para mensajes cuyo subject no siga scraper.<cadena>.raw (no deberia pasar).
@@ -20,6 +21,52 @@ DELIVER = os.getenv("NATS_DELIVER", "deliver.normalizer")
 # Si NATS cae, nats-py reintenta sin fin; si no vuelve en HEALTH_MAX s (consumer.yaml), la
 # marca envejece y Kubernetes reinicia el pod. Si la conexion se cierra del todo, se sale.
 HEALTH_FILE = os.getenv("HEALTH_FILE", "/tmp/healthy")
+# Metricas para Prometheus en :METRICS_PORT/metrics (el pod lleva las anotaciones
+# prometheus.io/scrape). METRICS_PORT=0 las desactiva.
+METRICS_PORT = int(os.getenv("METRICS_PORT", "8000"))
+
+
+class Metrics:
+    """Contadores por cadena. Sin prometheus_client (pruebas en local) no hacen nada."""
+
+    def __init__(self, port: int):
+        self.on = False
+        if not port:
+            return
+        try:
+            from prometheus_client import Counter, Gauge, Histogram, start_http_server
+        except ImportError:
+            return
+        self.raw = Counter("normalizer_raw_messages", "Crudos recibidos de NATS", ["chain"])
+        self.batches = Counter("normalizer_batches", "Lotes limpios publicados", ["chain"])
+        self.products = Counter("normalizer_products", "Productos en los lotes publicados", ["chain"])
+        self.clean_errors = Counter("normalizer_clean_errors", "Lineas ERROR en los lotes (no validan)", ["chain"])
+        self.incomplete = Counter("normalizer_clean_incomplete", "Lineas sin precio por unidad", ["chain"])
+        self.flush_errors = Counter("normalizer_flush_errors", "Lotes que no se han podido publicar")
+        self.parse_errors = Counter("normalizer_parse_errors", "Crudos que no son JSON (se descartan)")
+        self.connected = Gauge("normalizer_nats_connected", "1 si hay conexion con NATS")
+        self.last_batch = Gauge("normalizer_last_batch_timestamp_seconds", "Ultimo lote publicado", ["chain"])
+        self.seconds = Histogram("normalizer_clean_seconds", "Duracion de la llamada a la funcion de Fission",
+                                 buckets=(0.1, 0.25, 0.5, 1, 2, 5, 10, 30, 60))
+        start_http_server(port)
+        self.on = True
+
+    def batch(self, chain: str, n: int, txt: str, seconds: float) -> None:
+        if not self.on:
+            return
+        lines = txt.splitlines()
+        self.batches.labels(chain).inc()
+        self.products.labels(chain).inc(n)
+        self.clean_errors.labels(chain).inc(sum(1 for l in lines if l.startswith("ERROR")))
+        self.incomplete.labels(chain).inc(sum(1 for l in lines if " | - (" in l))
+        self.last_batch.labels(chain).set_to_current_time()
+        self.seconds.observe(seconds)
+
+
+def chain_of(subject: str) -> str:
+    """scraper.<cadena>.raw|clean -> <cadena>"""
+    parts = subject.split(".")
+    return parts[1] if len(parts) == 3 and parts[0] == "scraper" else "otra"
 
 
 def subject_out(subject_in: str) -> str:
@@ -55,6 +102,7 @@ async def run() -> None:
     import nats
 
     clean = clean_remote if NORMALIZE_URL else clean_local
+    metrics = Metrics(METRICS_PORT)
     closed = asyncio.Event()
 
     async def on_closed():
@@ -91,7 +139,9 @@ async def run() -> None:
         # Si el publish falla, esos mensajes se quedan sin ack -> los reentrega AckWait.
         buf.clear()
         raws = [e.get("product", e) if isinstance(e, dict) else e for e in envelopes]
+        t0 = time.monotonic()
         txt = await asyncio.to_thread(clean, list(raws))
+        took = time.monotonic() - t0
         out = {
             "source": "normalizer",
             "wh": wh,
@@ -103,6 +153,7 @@ async def run() -> None:
         await js.publish(out_subject, json.dumps(out, ensure_ascii=False).encode("utf-8"))
         for m in msgs:
             await m.ack()
+        metrics.batch(chain_of(out_subject), len(raws), txt, took)
         print(f"batch {len(raws)} wh={wh} cp={postal_code} -> {out_subject}", flush=True)
 
     async def handler(msg):
@@ -110,8 +161,12 @@ async def run() -> None:
             envelope = json.loads(msg.data.decode("utf-8"))
         except Exception as e:
             print(f"parse-error: {e}", flush=True)
+            if metrics.on:
+                metrics.parse_errors.inc()
             await msg.ack()
             return
+        if metrics.on:
+            metrics.raw.labels(chain_of(msg.subject)).inc()
         key = batch_key(msg.subject, envelope)
         bufs.setdefault(key, []).append((msg, envelope))
         if len(bufs[key]) >= BATCH:
@@ -119,6 +174,8 @@ async def run() -> None:
                 await flush(key)
             except Exception as e:
                 print(f"flush-error: {e} (reintentara por AckWait)", flush=True)
+                if metrics.on:
+                    metrics.flush_errors.inc()
 
     await nc.subscribe(DELIVER, cb=handler)
     print(f"listening {DELIVER} -> {NORMALIZE_URL or 'local'} -> scraper.<cadena>.clean", flush=True)
@@ -127,6 +184,8 @@ async def run() -> None:
             await asyncio.sleep(5)
             if closed.is_set() or nc.is_closed:
                 raise SystemExit("ERROR: conexion con NATS cerrada; salgo para que Kubernetes me reinicie")
+            if metrics.on:
+                metrics.connected.set(1 if nc.is_connected else 0)
             if nc.is_connected:
                 with open(HEALTH_FILE, "w") as f:
                     f.write(datetime.now(timezone.utc).isoformat())
@@ -134,6 +193,8 @@ async def run() -> None:
                 await flush()
             except Exception as e:
                 print(f"flush-error: {e} (reintentara por AckWait)", flush=True)
+                if metrics.on:
+                    metrics.flush_errors.inc()
     finally:
         if not nc.is_closed:
             await nc.close()

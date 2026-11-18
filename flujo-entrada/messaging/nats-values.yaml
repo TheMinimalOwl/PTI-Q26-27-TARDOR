@@ -20,5 +20,22 @@ container:
 natsBox:
   enabled: true
 
+# Exportador de Prometheus (sidecar en :7777, incluye JetStream con -jsz=all): stream,
+# consumidores (pendientes, sin ack, reentregas) y servidor. Prometheus lo descubre por las
+# anotaciones del pod.
+promExporter:
+  enabled: true
+  merge:
+    resources:
+      requests: { cpu: 10m, memory: 16Mi }
+      limits: { memory: 64Mi }
+
+podTemplate:
+  merge:
+    metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "7777"
+
 service:
   type: ClusterIP

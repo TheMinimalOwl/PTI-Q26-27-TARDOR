@@ -92,6 +92,7 @@ Es idempotente: si se vuelve a ejecutar, solo se reconstruye lo que haya cambiad
 | `namespaces.tf` | `scrappers`, `messaging` y `fission` (a partir de `cluster/namespace.yaml`) | `kubectl apply -k cluster/` |
 | `nats.tf` | Chart de NATS (con `messaging/nats-values.yaml`), **NACK**, y los CRD `Stream SCRAPERS` y `Consumer normalizer` | `helm install` + `kubectl exec nats-box -- nats request $JS.API...` |
 | `fission.tf` | Chart `fission-all` 1.27, `Environment python` con pydantic, `Package` + `Function normalizer`, `HTTPTrigger` (`fission.yaml`) y `normalizer-consumer` (`consumer.yaml`) | `helm install` + `fission env/fn create` + `deploy.sh` |
+| `monitoring.tf` | Namespace `monitoring`, chart `prometheus` (con kube-state-metrics, node-exporter y Pushgateway) y chart `grafana` con el datasource, el panel `monitoring/dashboards/*.json` y las alertas de `monitoring/alerts.yaml`. Ver [`monitoring/README.md`](../monitoring/README.md) | No existía |
 | `scraper.tf` | `scraper-secrets`, PVC `scraper-out`, CronJobs `scrapper-mercadona`, `scrapper-consum`, `scrapper-caprabo`, `scrapper-condis` y `scrapper-bonarea` (02:00, hora de Madrid) y `scraper-out-cleanup` (01:30, borra los volcados de más de 7 días) | `kubectl apply -k scrappers/...` |
 
 Los YAML de siempre siguen siendo la fuente de verdad: Terraform los lee tal cual y solo
@@ -113,6 +114,7 @@ Todo lo de la ingesta vive en namespaces propios y no toca `default`:
 | `messaging` | NATS (StatefulSet), `nats-box`, NACK, CRDs `Stream SCRAPERS` y `Consumer normalizer` |
 | `fission` | Plano de control de Fission (router, executor…) |
 | `ingesta` | `Environment python`, `Function` y `Package` `normalizer`, `HTTPTrigger`, pods del pool y `normalizer-consumer` |
+| `monitoring` | Prometheus, Grafana, Pushgateway, kube-state-metrics y node-exporter |
 | `api` | **Despliegue aparte** (`api-up.sh`, del equipo de API/BD): PostgreSQL + pgvector, Redis, API (2 réplicas) y `writer` |
 
 Fission se instala con `defaultNamespace: ingesta`, así que solo vigila ese namespace.
@@ -207,7 +209,9 @@ writer y el consumer arrancan antes que NATS o PostgreSQL): es normal.
 Se cambian con `-var` o con un `terraform/terraform.tfvars` (está en `.gitignore`). Las
 principales son: `minikube_profile`, `postal_codes` (códigos postales que recorren los
 scrapers; por defecto `["08016"]`), `fission_namespace_functions` (`ingesta`), las versiones de los charts (`nats_chart_version`,
-`nack_chart_version` y `fission_chart_version`), las de JetStream (`stream_name`,
+`nack_chart_version`, `fission_chart_version`, `prometheus_chart_version` y
+`grafana_chart_version`), el bot de Telegram de las alertas (`alert_telegram_bot_token` y
+`alert_telegram_chat_id`; vacíos = solo en Grafana), las de JetStream (`stream_name`,
 `stream_max_age` y `normalizer_*`) y las de Fission (`fission_env_poolsize` y
 `fission_python_base`). Están todas en `terraform/variables.tf`.
 
@@ -255,7 +259,7 @@ los carga todos.
 
 | Síntoma | Causa | Solución |
 |---|---|---|
-| El nodo se queda `NotReady` y `kube-proxy` cae en CrashLoop con "too many open files" | Hay dos clústeres de minikube a la vez y el límite de inotify es de 128 instancias | `bootstrap.sh` lo sube a 512 de forma persistente. Si no se ha podido, `up.sh` lo detecta y se para antes de crear el clúster |
+| El nodo se queda `NotReady` y `kube-proxy` cae en CrashLoop con "too many open files" | Hay dos clústeres de minikube a la vez y el límite de inotify es de 128 instancias | `bootstrap.sh` lo sube a 512 de forma persistente. Sin terminal y sin `sudo` sin contraseña (p. ej. lanzado por un agente o por cron) no puede pedir la contraseña: avisa y sigue, porque con un solo clúster no hace falta. Si hay dos, `up.sh` lo detecta y se para antes de crear el clúster. En la VM no había quedado persistente (volvió a 128 tras el reinicio del 12/11): `echo fs.inotify.max_user_instances=512 \| sudo tee /etc/sysctl.d/99-ingesta-inotify.conf` |
 | Router y executor de Fission en CrashLoop con "timeout waiting for function CRD access" | Desde la 1.18, el chart `fission-all` no instala los CRDs | `fission.tf` los descarga del repo de Fission (misma versión) y los aplica antes del chart |
 | `helm_release.fission` se queda esperando hasta el timeout | El Service `router` es de tipo LoadBalancer y en minikube nunca recibe IP | `routerServiceType: NodePort` |
 | "Error locating chart … 500" | GitHub falla a ratos | `up.sh` reintenta el apply hasta 3 veces. Las releases son `atomic`, así que un intento fallido no deja nada a medias |

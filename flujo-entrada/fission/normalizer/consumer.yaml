@@ -12,12 +12,20 @@ spec:
     metadata:
       labels:
         app: normalizer-consumer
+      # Prometheus lo descubre por estas anotaciones (job kubernetes-pods): consumer.py sirve
+      # las metricas en :8000/metrics.
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
     spec:
       restartPolicy: Always
       containers:
         - name: consumer
           image: normalizer-consumer:v2
           imagePullPolicy: IfNotPresent
+          ports:
+            - name: metrics
+              containerPort: 8000
           env:
             - name: NATS_URL
               value: "nats://nats.messaging.svc.cluster.local:4222"

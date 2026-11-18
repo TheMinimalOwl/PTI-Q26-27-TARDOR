@@ -8,7 +8,7 @@
 #    kubectl, minikube, helm y terraform (en ~/.local/bin) y sube el limite de inotify.
 # 2. Arranca un perfil de minikube propio (por defecto `ingesta`) si no existe.
 # 3. terraform apply: imagenes, namespaces, NATS + JetStream (NACK), Fission, normalizer,
-#    consumer y CronJob del scraper.
+#    consumer, CronJobs de los scrapers y monitorizacion (Prometheus + Grafana).
 # 4. Prueba de humo contra el router de Fission y estado de NATS.
 # 5. Con API=1, api-up.sh: la API y la BD del equipo de API/BD (api/k8s) en el mismo
 #    cluster, con el writer cargando scraper.*.clean en PostgreSQL.
@@ -126,6 +126,7 @@ step_smoke() {
 
   say "listo"
   terraform -chdir="$TF_DIR" output -raw prueba_manual
+  terraform -chdir="$TF_DIR" output -raw grafana
 }
 
 step_api() {
