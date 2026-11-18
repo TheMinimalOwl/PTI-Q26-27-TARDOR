@@ -41,9 +41,9 @@ from . import config
 from .chain import flujo_qa
 from .embeddings import Embedder
 from .guardrails import aplicar_guardrails, construir_respuesta, validar
-from .indexer import load_index
 from .ingest import Product
 from .llm import NoLLM, build_llm
+from .pgstore import cargar_store
 from .pipelines import catalogo, equivalencia, qa
 from .retriever import Filters, Retriever
 
@@ -72,10 +72,16 @@ def _dec(v):
 
 
 def inicializar(embed_model: str | None = None, llm_provider: str | None = None) -> None:
-    """Carga el indice y el LLM. Se llama al arrancar el servicio."""
+    """Carga el almacen y el LLM. Se llama al arrancar el servicio.
+
+    El almacen lo elige `cargar_store` segun `RAG_STORE`: indice local o
+    PostgreSQL+pgvector, con fallback al local si la base no responde.
+    """
     embedder = Embedder(embed_model or config.DEFAULT_EMBEDDING)
-    store = load_index(embedder)
+    store, origen, error = cargar_store(embedder)
     _ESTADO["retriever"] = Retriever(embedder, store)
+    _ESTADO["store"] = origen
+    _ESTADO["store_error"] = error
     _ESTADO["embeddings"] = embedder.describe()
     try:
         _ESTADO["llm"] = build_llm(llm_provider or config.DEFAULT_LLM)
@@ -156,6 +162,8 @@ def health():
             "ok": retriever is not None,
             "error": _ESTADO.get("error"),
             "n_productos": len(retriever.store) if retriever else 0,
+            "store": _ESTADO.get("store", "local"),
+            "store_error": _ESTADO.get("store_error"),
             "embeddings": _ESTADO.get("embeddings"),
             "llm": llm.describe() if llm else None,
             "llm_error": _ESTADO.get("llm_error"),
@@ -551,6 +559,7 @@ def main(argv: list[str] | None = None) -> int:
 
     inicializar(args.embed, args.llm)
     print(f"embeddings: {_ESTADO.get('embeddings')}")
+    print(f"store: {_ESTADO.get('store')}" + (f" (aviso: {_ESTADO.get('store_error')})" if _ESTADO.get("store_error") else ""))
     print(f"llm: {_ESTADO['llm'].describe() if _ESTADO.get('llm') else 'ninguno'}")
     print(f"productos indexados: {len(_ESTADO['retriever'].store)}")
     app.run(host=args.host, port=args.port, threaded=True)

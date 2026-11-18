@@ -248,7 +248,78 @@ La opcion B es la que menos acopla: el prototipo puede leer el subject
 `scraper.mercadona.clean` directamente con un consumidor NATS y reindexar. Es
 un desarrollo pequeno (el cliente `nats-py` ya lo usa el consumer de ingesta).
 
-## 7. Checklist antes de la demo
+## 7. PostgreSQL + pgvector (integracion con los datos del equipo)
+
+**Decision del equipo (18/11)**: los datos viven en PostgreSQL con pgvector
+(creado por el equipo de BD) y el RAG los lee de ahi. La API y el contrato
+no cambian: solo cambia por donde coge los productos el `Retriever`.
+
+Como en la VM el servicio RAG y la BD corren en la misma maquina, la
+conexion es local (`127.0.0.1:5432`) y **no hay que exponer el puerto 5432**
+para que el servicio funcione.
+
+### Como se integra (checklist)
+
+```bash
+# 1. Instalar psycopg en el venv del servicio (una vez)
+ssh alumne@10.4.41.108 'cd TARDOR-test/flujo-ia && .venv/bin/pip install -r requirements.txt'
+
+# 2. Variables de entorno en la unidad del servicio
+#    ~/.config/systemd/user/flujo-ia.service  (apartado [Service])
+#      Environment=RAG_STORE=pg
+#      Environment=RAG_PG_DSN=postgresql://USUARIO:CLAVE@127.0.0.1:5432/BASE
+#    Si el esquema del equipo tiene otros nombres de tabla/columna:
+#      Environment=RAG_PG_TABLE=productos
+#      Environment=RAG_PG_COL_VECTOR=embedding
+#      Environment=RAG_PG_COL_NAME=nombre        (y asi con cada campo)
+#    Luego: systemctl --user daemon-reload && systemctl --user restart flujo-ia
+
+# 3. Diagnostico: conexion, esquema, dimension de los vectores y busqueda
+cd TARDOR-test/flujo-ia
+.venv/bin/python -m rag.cli pg-check
+
+# 4. Si faltan embeddings en la tabla, se rellenan con nuestro modelo
+.venv/bin/python -m rag.cli pg-sync
+
+# 5. Verificar: /health tiene que decir "store": "pg"
+curl -s localhost:8080/health
+```
+
+Si algo falla en cualquier punto, **el servicio no se cae**: `cargar_store`
+vuelve al indice local y `/health` lo publica como `"store": "local"` con
+el motivo en `store_error`. La demo funciona igual (plan B).
+
+Notas de integracion:
+
+- Los vectores de la BD tienen que ser del **mismo modelo y dimension**
+  que los del servicio (`e5-small`, 384): `pg-check` lo comprueba antes de
+  dejarte activar `RAG_STORE=pg`.
+- El esquema no hace falta que coincida al 100%: al arrancar se mira
+  `information_schema` y solo se usan las columnas que existen. Los filtros
+  sobre una columna que falta dan un error claro (mejor que devolver
+  resultados sin filtrar).
+- `pg-check` y `pg-sync` aceptan `--dsn` para probar otra conexion sin
+  tocar el entorno.
+
+### Server MCP
+
+`rag/mcp_server.py` expone el RAG por el protocolo MCP (transporte stdio):
+lo lanza el cliente (Claude Code, otro agente) como subproceso y habla por
+stdin/stdout. No carga modelos: consume la API que ya esta en marcha.
+
+```bash
+# arrancarlo a mano (en la VM)
+cd TARDOR-test/flujo-ia && .venv/bin/python -m rag.mcp_server
+
+# desde el portatil, como "command" de un cliente MCP:
+ssh alumne@10.4.41.108 "cd TARDOR-test/flujo-ia && .venv/bin/python -m rag.mcp_server"
+```
+
+Tools: `estado`, `buscar`, `preguntar`, `equivalencia` (API `:8080`) y
+`consulta_productos`, `productos_similares` (pgvector; sin `RAG_PG_DSN`
+explican que falta configurarla en vez de fallar).
+
+## 8. Checklist antes de la demo
 
 - [ ] `bash setup.sh --verify` dice que el indice existe
 - [ ] `python -m rag.cli eval --llm none` da las metricas esperadas

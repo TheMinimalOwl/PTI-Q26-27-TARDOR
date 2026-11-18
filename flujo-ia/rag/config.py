@@ -153,3 +153,41 @@ TEMPERATURE = float(os.environ.get("RAG_TEMPERATURE", "0"))
 # Cuota que se manda al LLM como contexto. Es un LLM pequeno en local: pasarle
 # 20 productos cuesta tiempo sin aportar (el recall@k ya se mide aparte).
 MAX_CONTEXT_ITEMS = int(os.environ.get("RAG_MAX_CONTEXT_ITEMS", "6"))
+
+# ---------------------------------------------------------------------------
+# Almacen: indice local (numpy) o PostgreSQL + pgvector
+# ---------------------------------------------------------------------------
+# El backend se elige con RAG_STORE:
+#   local (defecto) - el indice numpy de siempre (demo, plan B)
+#   pg              - PostgreSQL + pgvector (los datos del equipo)
+# Con `pg`, si la base no responde el servicio cae al indice local: la demo
+# nunca se cae por un problema de base de datos (ver pgstore.cargar_store).
+STORE_BACKEND = os.environ.get("RAG_STORE", "local")
+
+# Conexion a PostgreSQL. En la VM el servicio y la BD corren en la misma
+# maquina, asi que basta con 127.0.0.1:5432.
+PG_DSN = os.environ.get("RAG_PG_DSN", "")
+
+# Tabla y columnas: se ajustan al esquema del equipo sin tocar codigo
+# (RAG_PG_TABLE, RAG_PG_COL_<CAMPO>). Los valores por defecto son los
+# nombres de nuestros documentos (id, name, chain, total...).
+PG_TABLE = os.environ.get("RAG_PG_TABLE", "productos")
+PG_COL_VECTOR = os.environ.get("RAG_PG_COL_VECTOR", "embedding")
+PG_COLUMNAS: dict[str, str] = {
+    campo: os.environ.get(f"RAG_PG_COL_{campo.upper()}", campo)
+    for campo in (
+        "id",
+        "name",
+        "chain",
+        "category",
+        "total",
+        "unit_price",
+        "unit",
+        "size",
+        "size_format",
+        "url",
+    )
+}
+
+# URL de la API del RAG que consume el server MCP (y cualquier cliente HTTP).
+API_URL = os.environ.get("RAG_API_URL", "http://127.0.0.1:8080")

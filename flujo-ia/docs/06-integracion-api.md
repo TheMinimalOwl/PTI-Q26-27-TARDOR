@@ -34,13 +34,16 @@ cualquier origen en el navegador. No hay que tocar nada en el proxy.
 ### `GET /health`
 
 ```json
-{"ok": true, "n_productos": 257,
+{"ok": true, "n_productos": 257, "store": "local",
  "embeddings": {"key": "e5-small", "dim": 384},
  "llm": {"provider": "ollama", "model": "qwen3:8b"}, "llm_error": null}
 ```
 
 Sirve para el arranque de la app: si `ok` es `false`, el indice no esta
 cargado; si `llm` es `null`, el asistente solo devolvera retrieval.
+`store` dice de donde leen los productos: `"local"` (indice numpy) o
+`"pg"` (PostgreSQL + pgvector); con `"pg"` el campo `store_error` explica
+un eventual vuelco al indice local.
 
 ### `POST /search` — busqueda de catalogo
 

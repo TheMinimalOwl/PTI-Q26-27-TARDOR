@@ -97,7 +97,11 @@ class Retriever:
     ) -> list[Hit]:
         qv = self.embedder.encode_one(query, is_query=True)
         return self.store.search(
-            qv, k=k, where=filters.matches if filters else None, exclude_ids=exclude_ids
+            qv,
+            k=k,
+            where=filters.matches if filters else None,
+            exclude_ids=exclude_ids,
+            filters=filters,
         )
 
     def search_product(
@@ -114,7 +118,11 @@ class Retriever:
         """
         qv = self.embedder.encode_one(product.embed_text, is_query=True)
         return self.store.search(
-            qv, k=k, where=filters.matches if filters else None, exclude_ids=exclude_ids
+            qv,
+            k=k,
+            where=filters.matches if filters else None,
+            exclude_ids=exclude_ids,
+            filters=filters,
         )
 
     def search_vectors(
@@ -132,7 +140,11 @@ class Retriever:
         """
         return [
             self.store.search(
-                v, k=k, where=filters.matches if filters else None, exclude_ids=exclude_ids
+                v,
+                k=k,
+                where=filters.matches if filters else None,
+                exclude_ids=exclude_ids,
+                filters=filters,
             )
             for v in vectors
         ]

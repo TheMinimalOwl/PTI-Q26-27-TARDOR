@@ -10,3 +10,8 @@ flask>=3.0
 langchain-core>=1.0
 jsonschema>=4.20
 pytest>=8.0
+# PostgreSQL + pgvector (RAG_STORE=pg) y server MCP (rag.mcp_server).
+# Solo hacen falta para la integracion con la BD del equipo; el servicio
+# funciona en modo local sin ellas.
+psycopg[binary]>=3.1
+mcp>=2.0

@@ -204,6 +204,88 @@ def cmd_compare(args) -> int:
     return 0
 
 
+def _dsn_seguro(dsn: str) -> str:
+    """Enmascara la clave de la conexion para imprimirla sin secretos."""
+    import re
+
+    return re.sub(r"://([^:/@]+):[^@]*@", r"://\1:***@", dsn or "")
+
+
+def cmd_pg_check(args) -> int:
+    """Diagnostico de PostgreSQL + pgvector: conexion, esquema, embeddings
+    y una busqueda de prueba de extremo a extremo."""
+    from .pgstore import PgError, PgStore
+
+    dsn = args.dsn or config.PG_DSN or None
+    print(f"DSN: {_dsn_seguro(dsn) or '(sin RAG_PG_DSN)'}")
+    try:
+        store = PgStore(dsn=dsn)
+        info = store.ping()
+    except PgError as e:
+        print(f"  ERROR: {e}", file=sys.stderr)
+        return 1
+    print(f"  tabla: {info['tabla']} · columnas: {', '.join(info['columnas'])}")
+    print(f"  productos: {info['n']}")
+    if info["dim"] is None:
+        print("  embeddings: NINGUNO en la tabla (o falta la columna vector)")
+        print("  -> rellenalos con: python -m rag.cli pg-sync")
+        return 1
+
+    embedder = Embedder(args.embed)
+    if info["dim"] != embedder.spec.dim:
+        print(
+            f"  ERROR: los vectores tienen dim {info['dim']} y el modelo "
+            f"{embedder.spec.key} usa {embedder.spec.dim}: no son compatibles",
+            file=sys.stderr,
+        )
+        return 1
+    print(f"  embeddings: dim {info['dim']} (compatible con {embedder.spec.key})")
+
+    filas = store.filtrar(Filters(), limite=2)
+    for f in filas:
+        print(f"  muestra: {f.get('id')} {f.get('name')} | {f.get('chain')} | {f.get('total')} EUR")
+
+    qv = embedder.encode_one("aceite de oliva", is_query=True)
+    try:
+        hits = store.search(qv, k=3)
+    except PgError as e:
+        print(f"  ERROR en la busqueda de prueba: {e}", file=sys.stderr)
+        return 1
+    if not hits:
+        print("  busqueda de prueba: sin resultados (¿sin embeddings?)", file=sys.stderr)
+        return 1
+    for h in hits:
+        print(f"  busqueda: [{h.rank}] {h.doc.get('name')} | score {h.score:.3f}")
+    print("PG OK: la base esta lista para RAG_STORE=pg")
+    return 0
+
+
+def cmd_pg_sync(args) -> int:
+    """Rellena con el modelo de embeddings los que falten en la tabla."""
+    from .pgstore import PgError, PgStore, vector_texto
+
+    dsn = args.dsn or config.PG_DSN or None
+    try:
+        store = PgStore(dsn=dsn)
+        store.ping()
+        pendientes = store.pendientes(limite=args.limite)
+    except PgError as e:
+        print(f"  ERROR: {e}", file=sys.stderr)
+        return 1
+    if not pendientes:
+        print("Todo al dia: todos los productos de la tabla ya tienen embedding.")
+        return 0
+    embedder = Embedder(args.embed)
+    print(f"Embebiendo {len(pendientes)} productos con {embedder.spec.key}...")
+    textos = [Product.from_dict(d).embed_text for d in pendientes]
+    vectores = embedder.encode(textos, is_query=False)
+    pares = [(str(d["id"]), vector_texto(v)) for d, v in zip(pendientes, vectores)]
+    n = store.guardar_embeddings(pares)
+    print(f"Guardados {n} embeddings en '{store.tabla}'.")
+    print("Comprueba todo con: python -m rag.cli pg-check")
+    return 0
+
+
 # ---------------------------------------------------------------------------
 # argparse
 # ---------------------------------------------------------------------------
@@ -250,6 +332,19 @@ def build_parser() -> argparse.ArgumentParser:
     pc.add_argument("--models", nargs="*", help="claves de embeddings a comparar")
     pc.add_argument("--json", help="guarda la comparativa en este fichero")
     pc.set_defaults(func=cmd_compare)
+
+    pchk = sub.add_parser(
+        "pg-check", help="diagnostico de PostgreSQL + pgvector (conexion, esquema, busqueda)"
+    )
+    pchk.add_argument("--dsn", help="cadena de conexion (por defecto RAG_PG_DSN)")
+    pchk.set_defaults(func=cmd_pg_check)
+
+    psync = sub.add_parser(
+        "pg-sync", help="rellena con el modelo los embeddings que falten en la tabla"
+    )
+    psync.add_argument("--dsn", help="cadena de conexion (por defecto RAG_PG_DSN)")
+    psync.add_argument("--limite", type=int, default=10000, help="maximo de filas a embeber")
+    psync.set_defaults(func=cmd_pg_sync)
 
     return p
 

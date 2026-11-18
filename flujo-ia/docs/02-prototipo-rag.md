@@ -47,9 +47,11 @@ que el prototipo consume el dato real sin adaptadores: se copia el `.txt` a
 | `rag/schemas/` | JSON Schema de la respuesta (`respuesta-asistente.schema.json`) |
 | `rag/evaluate.py` | Las tres evaluaciones y el informe |
 | `rag/serve.py` | API Flask: `/health`, `/search`, `/equiv`, `/ask`, `/ask/stream` |
-| `rag/cli.py` | Interfaz de linea de comandos |
+| `rag/pgstore.py` | Backend PostgreSQL + pgvector (misma interfaz que el indice local) |
+| `rag/mcp_server.py` | Server MCP por stdio: tools sobre la API y sobre la BD |
+| `rag/cli.py` | Interfaz de linea de comandos (incluye `pg-check` y `pg-sync`) |
 | `scripts/verificar.sh` | Checklist de verificacion: entorno -> tests -> servicios -> API -> CLI |
-| `tests/` | 75 tests (`pytest`): store, guardrails, chain, serve, pipelines... |
+| `tests/` | 116 tests (`pytest`): store, pgstore, mcp, guardrails, chain, serve... |
 | `data/generate_dataset.py` | Genera el dataset de prueba y el ground truth |
 
 ## Decisiones del pipeline

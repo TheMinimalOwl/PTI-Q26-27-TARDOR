@@ -33,6 +33,7 @@ def test_health(cliente):
     d = r.get_json()
     assert d["ok"] is True
     assert d["n_productos"] > 0
+    assert d["store"] == "local"  # sin RAG_STORE=pg usa el indice local
     assert d["llm"]["provider"] == "none"
 
 

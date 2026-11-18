@@ -70,13 +70,20 @@ class VectorStore:
         k: int = 5,
         where: Callable[[dict], bool] | None = None,
         exclude_ids: set[str] | None = None,
+        filters=None,
     ) -> list[Hit]:
         """Top-k por similitud coseno, con filtro de metadatos opcional.
 
         `where` filtra por metadatos (cadena, categoria, precio...) y se aplica
         *antes* de calcular el top-k, no despues: filtrar despues cambiaria el
         resultado de la consulta.
+
+        `filters` (objeto `Filters`) es el puente para el backend SQL:
+        `PgStore` lo traduce a WHERE, aqui se ignora porque el `where`
+        ya lleva la misma informacion (si llega solo `filters`, se usa).
         """
+        if where is None and filters is not None:
+            where = filters.matches
         if self.vectors.shape[0] == 0:
             return []
         q = l2_normalize(np.asarray(query, dtype=np.float32).reshape(1, -1))[0]
