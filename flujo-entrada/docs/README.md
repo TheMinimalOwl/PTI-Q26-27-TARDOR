@@ -82,6 +82,7 @@ flowchart LR
 | [`04-estados-y-errores.md`](04-estados-y-errores.md) | Estados, tipos de fallo, reintentos y escenarios límite |
 | [`05-pendientes.md`](05-pendientes.md) | Huecos detectados, lo que queda para el equipo de API/BD y siguiente trabajo previsto |
 | [`../infra/README.md`](../infra/README.md) | Despliegue con un comando (`up.sh` + Terraform), API/BD en la misma VM (`api-up.sh`), versiones fijadas y problemas conocidos |
+| [`../monitoring/README.md`](../monitoring/README.md) | Prometheus + Grafana: qué se mide, panel, alertas y cómo entrar |
 | [`../scrappers/README.md`](../scrappers/README.md) | Qué supermercados tienen API y cuáles bloquean |
 
 ## Relación con el plan de tareas

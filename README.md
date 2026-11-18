@@ -102,7 +102,8 @@ respuestas inventadas.
 
 La **ingesta** se despliega con un solo comando ([`infra/up.sh`](flujo-entrada/infra/up.sh),
 Terraform sobre un perfil de minikube propio): namespaces, NATS con JetStream, Fission, la
-función normalizadora y los CronJobs de los scrapers. Con `API=1` despliega también la parte de
+función normalizadora, los CronJobs de los scrapers y la monitorización (Prometheus +
+Grafana). Con `API=1` despliega también la parte de
 API/BD tal cual en el mismo clúster, y lo que publica la ingesta acaba cada noche en
 PostgreSQL. El **RAG** se monta con
 [`setup.sh`](flujo-ia/setup.sh), que crea el entorno, descarga el modelo de embeddings y
@@ -118,6 +119,7 @@ construye el índice; el LLM es opcional y se puede trabajar en modo *solo recup
 | Normalización | Fission (FaaS), Python, Pydantic |
 | Base de datos | PostgreSQL + pgvector |
 | Caché | Redis |
+| Monitorización | Prometheus, Grafana (panel y alertas de la ingesta) |
 | API | FastAPI, REST/JSON |
 | App móvil | React Native, TypeScript *(pendiente)* |
 | RAG | Embeddings de HuggingFace (`e5-small`), LangChain, LLM local (Ollama) o remoto (Gemini), JSON Schema y guardrails |

@@ -1,0 +1,57 @@
+# Chart grafana-community/grafana (version en variables.tf). Las alertas (alerts.yaml) y el
+# panel (dashboards/) los anade monitoring.tf; aqui solo lo fijo.
+#
+# Acceso: ClusterIP + port-forward (ver `terraform output grafana`). Usuario admin; la
+# contrasena la genera el chart en el secreto `grafana`.
+
+fullnameOverride: grafana
+
+testFramework:
+  enabled: false
+
+# Con disco: lo que se cree a mano (paneles, silencios) sobrevive a reinicios.
+persistence:
+  enabled: true
+  size: 1Gi
+  storageClassName: standard
+# El provisionador de minikube crea los volumenes con permisos 0777: no hace falta el
+# initContainer que hace chown (y asi no se descarga otra imagen).
+initChownData:
+  enabled: false
+
+resources:
+  requests: { cpu: 50m, memory: 128Mi }
+  limits: { memory: 384Mi }
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        uid: prometheus
+        type: prometheus
+        access: proxy
+        url: http://prometheus.monitoring.svc.cluster.local
+        isDefault: true
+        jsonData:
+          timeInterval: 1m
+
+dashboardProviders:
+  dashboardproviders.yaml:
+    apiVersion: 1
+    providers:
+      - name: ingesta
+        orgId: 1
+        folder: Ingesta
+        type: file
+        disableDeletion: true
+        options:
+          path: /var/lib/grafana/dashboards/ingesta
+
+grafana.ini:
+  analytics:
+    check_for_updates: false
+    check_for_plugin_updates: false
+    reporting_enabled: false
+  date_formats:
+    default_timezone: Europe/Madrid

@@ -129,6 +129,13 @@ step_inotify() {
     echo "   max_user_instances=$cur"
     return
   fi
+  # Solo hace falta con dos minikube a la vez (up.sh lo vuelve a comprobar y avisa). Sin
+  # terminal y sin sudo sin contrasena no se puede pedir: se avisa y se sigue.
+  if [ "$(id -u)" != 0 ] && ! sudo -n true 2>/dev/null && ! [ -t 0 ]; then
+    echo "   AVISO: max_user_instances=$cur (< $INOTIFY_INSTANCES) y no puedo usar sudo sin terminal; sigo." >&2
+    echo "   Para dejarlo fijo: echo fs.inotify.max_user_instances=$INOTIFY_INSTANCES | sudo tee /etc/sysctl.d/99-ingesta-inotify.conf && sudo sysctl --system" >&2
+    return
+  fi
   echo "   max_user_instances=$cur -> $INOTIFY_INSTANCES (persistente en /etc/sysctl.d)"
   echo "fs.inotify.max_user_instances=$INOTIFY_INSTANCES" \
     | as_root tee /etc/sysctl.d/99-ingesta-inotify.conf >/dev/null

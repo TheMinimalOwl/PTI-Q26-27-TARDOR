@@ -110,3 +110,30 @@ variable "fission_python_base" {
   type        = string
   default     = "ghcr.io/fission/python-env@sha256:446f2cd7c2a8c835deb925586d8f761aed288e0eba4437230996573612bab266"
 }
+
+# --- Monitorizacion (Prometheus + Grafana, ver monitoring/) ---
+
+variable "prometheus_chart_version" {
+  description = "prometheus-community/prometheus: Prometheus, kube-state-metrics, node-exporter y Pushgateway."
+  type        = string
+  default     = "29.38.2"
+}
+
+variable "grafana_chart_version" {
+  description = "grafana-community/grafana (el chart de grafana/helm-charts esta deprecado desde 2026)."
+  type        = string
+  default     = "14.2.0"
+}
+
+variable "alert_telegram_bot_token" {
+  description = "Token del bot de Telegram al que Grafana manda las alertas. Vacio: las alertas solo se ven en Grafana (Alerting)."
+  type        = string
+  default     = ""
+  sensitive   = true
+}
+
+variable "alert_telegram_chat_id" {
+  description = "Chat (o grupo) de Telegram que recibe las alertas."
+  type        = string
+  default     = ""
+}

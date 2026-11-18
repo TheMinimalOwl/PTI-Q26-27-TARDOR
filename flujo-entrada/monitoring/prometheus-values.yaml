@@ -1,0 +1,59 @@
+# Chart prometheus-community/prometheus (version en variables.tf): Prometheus sin operator,
+# con kube-state-metrics, node-exporter y Pushgateway. Sin Alertmanager: las alertas las
+# lanza Grafana (ver alerts.yaml). Todo recortado para que quepa en el nodo de 4 GiB.
+#
+# Que recoge (descubrimiento por anotaciones, los jobs por defecto del chart):
+# - kubernetes-pods: pods con prometheus.io/scrape="true" -> exportador de NATS (7777) y
+#   normalizer-consumer (8000). Los de API/BD pueden anadirse igual (ver docs/05).
+# - kubernetes-service-endpoints: kube-state-metrics (estado de CronJobs, Jobs y pods).
+# - prometheus-pushgateway: metricas que dejan los scrapers al acabar (metrics.py).
+# - kubernetes-nodes(-cadvisor): kubelet y CPU/memoria por contenedor.
+
+alertmanager:
+  enabled: false
+
+server:
+  fullnameOverride: prometheus
+  retention: 15d
+  retentionSize: 1800MB  # el PVC es de 2Gi
+  persistentVolume:
+    enabled: true
+    size: 2Gi
+    storageClass: standard
+  resources:
+    requests: { cpu: 100m, memory: 256Mi }
+    limits: { memory: 1Gi }
+  global:
+    scrape_interval: 1m
+    evaluation_interval: 1m
+
+scrapeConfigs:
+  # No hay blackbox exporter ni servicios "lentos": se quitan para no dejar targets caidos.
+  kubernetes-services:
+    enabled: false
+  kubernetes-service-endpoints-slow:
+    enabled: false
+
+kube-state-metrics:
+  fullnameOverride: kube-state-metrics
+  resources:
+    requests: { cpu: 10m, memory: 32Mi }
+    limits: { memory: 128Mi }
+
+prometheus-node-exporter:
+  fullnameOverride: node-exporter
+  resources:
+    requests: { cpu: 10m, memory: 16Mi }
+    limits: { memory: 64Mi }
+
+prometheus-pushgateway:
+  # Nombre fijo: los scrapers lo llaman en pushgateway.monitoring.svc.cluster.local:9091.
+  fullnameOverride: pushgateway
+  # Con disco, lo que dejaron los scrapers sobrevive a un reinicio del pod o de la VM.
+  persistentVolume:
+    enabled: true
+    size: 256Mi
+    storageClass: standard
+  resources:
+    requests: { cpu: 10m, memory: 16Mi }
+    limits: { memory: 64Mi }

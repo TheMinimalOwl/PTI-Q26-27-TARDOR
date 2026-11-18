@@ -1,0 +1,124 @@
+# Alertas de la ingesta. monitoring.tf convierte cada una en una regla de Grafana.
+#
+# Convencion: `expr` es PromQL y solo devuelve series (con valor > 0) cuando algo va mal; la
+# regla salta si alguna supera 0 durante `for`. Sin datos = OK (p. ej. antes de la primera
+# pasada). Las ve Grafana en Alerting; con el bot de Telegram configurado, llegan tambien ahi.
+#
+#   uid, title, expr, for (0m), severity (warning|critical), summary
+
+# --- Scrapers (02:00) ---
+
+- uid: scraper-sin-pasada
+  title: Scraper sin pasada correcta en 26 h
+  severity: critical
+  expr: >-
+    (time() - kube_cronjob_status_last_successful_time{namespace="scrappers"}) / 3600 > 26
+  summary: >-
+    {{ $labels.cronjob }} lleva {{ printf "%.0f" $values.A.Value }} h sin terminar bien. Revisa
+    `kubectl -n scrappers get jobs` y el log del ultimo Job.
+
+- uid: scraper-job-fallido
+  title: Job de scraper fallido
+  severity: warning
+  # Solo Jobs de las ultimas 24 h (los fallidos se quedan en el historial del CronJob).
+  expr: >-
+    kube_job_status_failed{namespace="scrappers"} > 0
+    and on (job_name) (time() - kube_job_created{namespace="scrappers"}) < 86400
+  summary: >-
+    El Job {{ $labels.job_name }} ha fallado. Log: `kubectl -n scrappers logs job/{{ $labels.job_name }}`.
+
+- uid: scraper-caida-productos
+  title: Caida de productos publicados
+  severity: warning
+  # Menos del 80 % que en la pasada del dia anterior, por cadena y tienda.
+  expr: >-
+    1 - scraper_products_published / (scraper_products_published offset 1d) > 0.2
+  summary: >-
+    {{ $labels.chain }} ({{ $labels.store }}) ha publicado un {{ humanizePercentage $values.A.Value }}
+    menos productos que ayer.
+
+- uid: scraper-publicacion-incompleta
+  title: Scraper no ha publicado todo en NATS
+  severity: warning
+  expr: >-
+    1 - scraper_publish_ok > 0
+  summary: >-
+    {{ $labels.chain }} ({{ $labels.store }}) no ha podido publicar todos sus productos en NATS.
+
+# --- NATS y normalizador ---
+
+- uid: normalizer-cola
+  title: El normalizador no vacia la cola
+  severity: warning
+  for: 1h
+  expr: >-
+    nats_consumer_num_pending{consumer_name="normalizer"}
+    + nats_consumer_num_ack_pending{consumer_name="normalizer"} > 0
+  summary: >-
+    El consumidor normalizer lleva 1 h con {{ $values.A.Value }} crudos sin procesar.
+    Revisa `kubectl -n ingesta logs deploy/normalizer-consumer`.
+
+- uid: normalizer-errores
+  title: Lineas ERROR en los lotes limpios
+  severity: warning
+  expr: >-
+    increase(normalizer_clean_errors_total[1h]) > 0
+  summary: >-
+    {{ $labels.chain }}: {{ printf "%.0f" $values.A.Value }} productos no validan en el normalizador
+    en la ultima hora.
+
+- uid: normalizer-fallos
+  title: Fallos al publicar lotes o crudos ilegibles
+  severity: warning
+  expr: >-
+    increase(normalizer_flush_errors_total[1h]) + increase(normalizer_parse_errors_total[1h]) > 0
+  summary: >-
+    El consumer ha tenido {{ printf "%.0f" $values.A.Value }} flush-error/parse-error en la ultima hora.
+
+- uid: normalizer-desconectado
+  title: Normalizador sin conexion con NATS
+  severity: critical
+  for: 5m
+  expr: >-
+    1 - normalizer_nats_connected > 0 or absent(normalizer_nats_connected)
+  summary: >-
+    El consumer no esta conectado a NATS (o no responde) desde hace 5 min.
+
+- uid: writer-cola
+  title: El writer de API/BD no vacia la cola
+  severity: warning
+  for: 2h
+  expr: >-
+    nats_consumer_num_pending{consumer_name="api-writer"} > 0
+  summary: >-
+    El durable api-writer lleva 2 h con {{ $values.A.Value }} lotes sin leer: no llegan a la BD.
+    (Writer del equipo de API/BD.)
+
+- uid: stream-lleno
+  title: Stream SCRAPERS cerca del limite
+  severity: warning
+  # El fileStore de JetStream es de 1 GiB (messaging/nats-values.yaml).
+  expr: >-
+    nats_stream_total_bytes{stream_name="SCRAPERS"} / 1073741824 > 0.8
+  summary: >-
+    El stream ocupa el {{ humanizePercentage $values.A.Value }} de 1 GiB. Baja maxAge o
+    sube el PVC de NATS.
+
+# --- Cluster ---
+
+- uid: pod-reinicios
+  title: Reinicios de pods
+  severity: warning
+  expr: >-
+    increase(kube_pod_container_status_restarts_total{namespace=~"ingesta|messaging|monitoring|api"}[1h]) > 0
+  summary: >-
+    {{ $labels.namespace }}/{{ $labels.pod }} se ha reiniciado {{ printf "%.0f" $values.A.Value }}
+    veces en la ultima hora.
+
+- uid: disco-vm
+  title: Disco de la VM casi lleno
+  severity: critical
+  expr: >-
+    1 - node_filesystem_avail_bytes{mountpoint="/"} / node_filesystem_size_bytes{mountpoint="/"} > 0.85
+  summary: >-
+    El disco esta al {{ humanizePercentage $values.A.Value }}.

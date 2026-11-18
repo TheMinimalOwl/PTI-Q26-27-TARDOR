@@ -24,3 +24,13 @@ output "prueba_manual" {
     kubectl --context ${var.minikube_profile} -n scrappers delete job prueba-manual
   TXT
 }
+
+output "grafana" {
+  value = <<-TXT
+    # Grafana (usuario admin) en http://localhost:3000 mientras este abierto el port-forward:
+    kubectl --context ${var.minikube_profile} -n monitoring get secret grafana -o jsonpath='{.data.admin-password}' | base64 -d; echo
+    kubectl --context ${var.minikube_profile} -n monitoring port-forward svc/grafana 3000:80
+    # Prometheus en http://localhost:9090:
+    kubectl --context ${var.minikube_profile} -n monitoring port-forward svc/prometheus 9090:80
+  TXT
+}
