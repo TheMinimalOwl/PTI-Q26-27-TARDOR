@@ -4,18 +4,22 @@ Flux de consulta: app → API → Redis (L1) → PostgreSQL (L2).
 Documentació interactiva a /docs; contracte a /openapi.json.
 """
 from contextlib import asynccontextmanager
+import hashlib
+import json
 from datetime import date
 
-from fastapi import Depends, FastAPI, HTTPException, Query, Response
+from fastapi import Body, Depends, FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from . import repository
+from . import repository, shopping
 from .cache import Cache, get_cache
 from .config import settings
 from .db import get_session, init_db
-from .schemas import ChainOut, Health, PriceHistory, ProductDetail, SearchPage
+from .schemas import (
+    ChainOut, Health, OptimizedList, PriceHistory, ProductDetail, SearchPage, ShoppingListIn,
+)
 
 
 @asynccontextmanager
@@ -31,7 +35,7 @@ app = FastAPI(
     lifespan=lifespan,
 )
 # L'app mòbil en desenvolupament (Expo web) crida des d'un altre origen.
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"], allow_headers=["*"])
 
 
 @app.get("/health", response_model=Health, tags=["sistema"])  # Comprova si la BD i Redis responen. Kubernetes el fa servir per saber si el contenidor està bé.
@@ -119,3 +123,69 @@ def get_price_history(
         raise HTTPException(status_code=404, detail="Producto no encontrado")
     points = repository.price_history(session, product_id, since, until)
     return PriceHistory(product_id=product_id, unit=product.unit, points=points)
+
+
+# Exemples que surten al desplegable de Swagger (/docs). Fan servir les dades de demo.
+LIST_EXAMPLES = {
+    "con_cantidades": {
+        "summary": "Con cantidades (recomendado)",
+        "description": "Cada artículo dice cuánto quieres; la API elige el tamaño de envase más barato.",
+        "value": {"items": [
+            {"q": "aceite oliva", "amount": 3, "unit": "l"},
+            {"q": "macarrones", "amount": 2, "unit": "kg"},
+            {"q": "arroz redondo", "amount": 2, "unit": "kg"},
+            {"q": "pechuga pollo", "amount": 1, "unit": "kg"},
+            {"q": "huevos", "amount": 12, "unit": "ud"},
+        ]},
+    },
+    "sin_cantidades": {
+        "summary": "Sin cantidades (envases)",
+        "description": "Sin `amount`: el envase más barato × `quantity`.",
+        "value": {"items": [
+            {"q": "aceite oliva virgen extra"},
+            {"q": "leche entera"},
+            {"q": "arroz redondo", "quantity": 2},
+            {"q": "huevos"},
+        ]},
+    },
+    "algunas_cadenas": {
+        "summary": "Solo algunos súpers",
+        "description": "`chains` limita la comparación a estas cadenas.",
+        "value": {
+            "items": [{"q": "arroz redondo", "amount": 2, "unit": "kg"}, {"q": "huevos"}],
+            "chains": ["mercadona", "alcampo"],
+        },
+    },
+}
+
+
+@app.post(
+    "/shopping-list/optimize",
+    response_model=OptimizedList,
+    tags=["lista"],
+    summary="Lista de la compra optimizada",
+)
+def optimize_shopping_list(
+    response: Response,
+    body: ShoppingListIn = Body(openapi_examples=LIST_EXAMPLES),
+    session: Session = Depends(get_session),
+    cache: Cache = Depends(get_cache),
+):
+    """Cuánto cuesta la lista entera en cada súper y cuánto comprando cada artículo donde es más barato.
+
+    **Cómo probarlo:** *Try it out* → elige un ejemplo en el desplegable → *Execute*.
+    El precio final está **al principio de la respuesta**: `best_chain` y `best_total`
+    (mejor súper si vas a uno solo), `combined_total` (combinando súpers) y `savings` (ahorro).
+
+    Con `amount` (p. ej. 3 litros) se calcula cuántos envases hacen falta y se elige el que
+    sale más barato, así todos los súpers se comparan por la misma cantidad."""
+    raw = json.dumps(body.model_dump(mode="json"), sort_keys=True)
+    key = "list:" + hashlib.sha1(raw.encode()).hexdigest()
+    if (cached := cache.get(key)) is not None:
+        response.headers["X-Cache"] = "HIT"
+        return cached
+
+    result = shopping.optimize(session, body)
+    cache.set(key, result.model_dump(mode="json"))
+    response.headers["X-Cache"] = "MISS"
+    return result
