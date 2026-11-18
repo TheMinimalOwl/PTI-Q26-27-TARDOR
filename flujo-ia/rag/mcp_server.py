@@ -47,8 +47,9 @@ mcp = MCPServer(
     ),
 )
 
-# /ask con LLM local puede tardar bastante (qwen3:8b en CPU); el resto es
-# retrieval, que es rapido.
+# /ask, /search y /equiv pasan por el LLM local, que en CPU con un modelo
+# de 8B puede tardar un minuto (o mas, si hay otras peticiones encoladas);
+# estado y las tools de la BD son rapidas.
 _TIMEOUT_LARGO = 180
 _TIMEOUT_CORTO = 60
 
@@ -129,7 +130,8 @@ def buscar(
         "min_total": min_total,
         "max_total": max_total,
     }
-    return _llamar("POST", "/search", body)
+    # /search redacta la respuesta con el LLM: timeout largo.
+    return _llamar("POST", "/search", body, timeout=_TIMEOUT_LARGO)
 
 
 @mcp.tool()
@@ -160,7 +162,8 @@ def equivalencia(
     el elegido y la confianza. 404 como `error` si el origen no existe.
     """
     body = {"id": id, "nombre": nombre, "chain": chain, "k": k}
-    return _llamar("POST", "/equiv", body)
+    # /equiv decide con el LLM: timeout largo.
+    return _llamar("POST", "/equiv", body, timeout=_TIMEOUT_LARGO)
 
 
 # ---------------------------------------------------------------------------
