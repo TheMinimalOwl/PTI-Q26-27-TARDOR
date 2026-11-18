@@ -18,7 +18,8 @@ API, la BD y el RAG son de otros equipos y su código no se toca. La frontera co
 cola de salida: el stream `SCRAPERS` y el subject `scraper.<cadena>.clean`, que el writer de
 API/BD lee con su durable `api-writer` (ver [`docs/03-contratos-datos.md`](../docs/03-contratos-datos.md#cola-de-salida-frontera-con-apibd)).
 Para tener la cadena entera en la VM, `api-up.sh` despliega su parte tal cual en el mismo
-clúster (ver [API y BD en la misma VM](#api-y-bd-en-la-misma-vm-api-upsh)).
+clúster (ver [API y BD en la misma VM](#api-y-bd-en-la-misma-vm-api-upsh)), y `tunnel-up.sh`
+la publica en internet para desarrollo (ver [API pública](#api-pública-para-desarrollo-tunnel-upsh)).
 
 ## En una VM recién instalada
 
@@ -151,6 +152,33 @@ no perderlo:
 - El volumen de la BD se borra con `down.sh`, `minikube delete` o `kubectl delete -k api/k8s/`.
   No hay copia: es el único dato que no se puede recuperar (NATS solo guarda 7 días). Un
   `pg_dump` nocturno es decisión del equipo de API/BD (ver `docs/05-pendientes.md`).
+
+## API pública para desarrollo (`tunnel-up.sh`)
+
+A la VM solo se llega por la VPN de la FIB, y por SSH. La API se publica con un **Cloudflare
+quick tunnel**: gratis, sin cuenta y sin dominio. El túnel *sale* de la VM hacia Cloudflare,
+así que no hace falta abrir puertos de entrada.
+
+```bash
+bash flujo-entrada/infra/tunnel-up.sh          # despliega (idempotente) y da la URL
+bash flujo-entrada/infra/tunnel-up.sh --url    # la URL actual
+bash flujo-entrada/infra/tunnel-up.sh --down   # quitarlo
+```
+
+- Un Deployment `cloudflared` (`cloudflare/cloudflared:2026.10.7`, 1 réplica) en el namespace
+  `api` apunta a `http://api.api.svc.cluster.local:80` ([`tunnel/cloudflared.yaml`](tunnel/cloudflared.yaml)).
+  No toca `api/`.
+- La URL es `https://<aleatorio>.trycloudflare.com` y **cambia cada vez que el pod se
+  reinicia** (reinicio de la VM, rollout o crash). Hay que mirarla con `--url`. La app no puede
+  llevarla fijada: que sea configurable.
+- Sin SLA, con un límite de ~200 peticiones simultáneas y sin autenticación (la API solo tiene
+  `GET`). Es para desarrollo.
+- Para producción, con el dominio del equipo: un túnel con nombre (cuenta de Cloudflare,
+  `cloudflared tunnel create`, un registro DNS y el token en un Secret), cambiando los `args`
+  por `tunnel run --token ...`. El resto del manifiesto vale igual.
+
+Probado el 18/11/2026: `/health`, `/chains` y `/docs` responden 200 desde internet, y `POST`
+devuelve 405.
 
 ## Si la VM se reinicia (`autostart.sh`)
 

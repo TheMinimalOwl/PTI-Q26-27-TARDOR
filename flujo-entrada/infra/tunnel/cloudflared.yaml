@@ -1,0 +1,61 @@
+# Cloudflare "quick tunnel" (gratis, sin cuenta ni dominio) que publica la API en una URL
+# https://<aleatorio>.trycloudflare.com. Solo para desarrollo:
+#   - la URL cambia cada vez que el pod se reinicia (reinicio de la VM, rollout, crash);
+#   - sin SLA, limite de ~200 peticiones simultaneas;
+#   - una sola replica: cada replica abriria su propio tunel con otra URL.
+# El tunel sale de la VM hacia Cloudflare (no abre puertos de entrada), por eso funciona
+# aunque a la VM solo se llegue por la VPN.
+#
+# Lo aplica tunnel-up.sh. Para pasar a un tunel con nombre y dominio propio basta cambiar
+# los args por `tunnel run` + un token en un Secret (ver infra/README.md).
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cloudflared
+  namespace: api
+  labels:
+    app: cloudflared
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: cloudflared
+  template:
+    metadata:
+      labels:
+        app: cloudflared
+    spec:
+      containers:
+        - name: cloudflared
+          image: cloudflare/cloudflared:2026.10.7
+          args:
+            - tunnel
+            - --no-autoupdate
+            - --metrics
+            - 0.0.0.0:2000
+            - --url
+            - http://api.api.svc.cluster.local:80
+          ports:
+            - name: metrics
+              containerPort: 2000
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: metrics
+            initialDelaySeconds: 30
+            periodSeconds: 30
+            failureThreshold: 5
+          resources:
+            requests:
+              cpu: 10m
+              memory: 32Mi
+            limits:
+              memory: 128Mi
