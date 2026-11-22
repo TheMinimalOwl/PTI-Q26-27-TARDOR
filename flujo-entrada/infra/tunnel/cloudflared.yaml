@@ -1,13 +1,22 @@
-# Cloudflare "quick tunnel" (gratis, sin cuenta ni dominio) que publica la API en una URL
-# https://<aleatorio>.trycloudflare.com. Solo para desarrollo:
-#   - la URL cambia cada vez que el pod se reinicia (reinicio de la VM, rollout, crash);
-#   - sin SLA, limite de ~200 peticiones simultaneas;
-#   - una sola replica: cada replica abriria su propio tunel con otra URL.
+# Cloudflare Tunnel con nombre (cuenta del equipo) que publica la API con el dominio propio.
+#
+# Dos valores salen del panel de Cloudflare (Zero Trust > Networks > Tunnels > el tunel):
+#   - el token del tunel: va en el Secret `cloudflared-token` (clave TUNNEL_TOKEN), que
+#     crea tunnel-up.sh con `TUNNEL_TOKEN=<token> bash tunnel-up.sh`. NO lo pongas en este
+#     fichero: el repositorio es publico y con el token cualquiera puede conectar
+#     conectores al tunel y quedarse con su trafico;
+#   - superahorro/hostname: el hostname publico del tunel (anotacion, mas abajo).
+# En el panel, ese hostname debe apuntar a http://api.api.svc.cluster.local:80: es Cloudflare
+# quien enruta; la anotacion solo la usa tunnel-up.sh para dar la URL y probar /health.
+#
+# A diferencia del quick tunnel:
+#   - la URL es fija: no cambia al reiniciar el pod o la VM;
+#   - admite varias replicas: todas se registran en el mismo tunel y Cloudflare reparte
+#     entre ellas, asi que un pod caido no deja la API sin servicio.
 # El tunel sale de la VM hacia Cloudflare (no abre puertos de entrada), por eso funciona
 # aunque a la VM solo se llegue por la VPN.
 #
-# Lo aplica tunnel-up.sh. Para pasar a un tunel con nombre y dominio propio basta cambiar
-# los args por `tunnel run` + un token en un Secret (ver infra/README.md).
+# Lo aplica tunnel-up.sh.
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -15,10 +24,15 @@ metadata:
   namespace: api
   labels:
     app: cloudflared
+  annotations:
+    superahorro/hostname: "api.superahorro.app"
 spec:
-  replicas: 1
+  replicas: 2
   strategy:
-    type: Recreate
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
   selector:
     matchLabels:
       app: cloudflared
@@ -35,8 +49,12 @@ spec:
             - --no-autoupdate
             - --metrics
             - 0.0.0.0:2000
-            - --url
-            - http://api.api.svc.cluster.local:80
+            - run
+          env:
+            # cloudflared lee el token de TUNNEL_TOKEN (Secret creado por tunnel-up.sh).
+            - name: TUNNEL_TOKEN
+              valueFrom:
+                secretKeyRef: {name: cloudflared-token, key: TUNNEL_TOKEN}
           ports:
             - name: metrics
               containerPort: 2000

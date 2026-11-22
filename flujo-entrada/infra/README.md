@@ -19,7 +19,7 @@ cola de salida: el stream `SCRAPERS` y el subject `scraper.<cadena>.clean`, que 
 API/BD lee con su durable `api-writer` (ver [`docs/03-contratos-datos.md`](../docs/03-contratos-datos.md#cola-de-salida-frontera-con-apibd)).
 Para tener la cadena entera en la VM, `api-up.sh` despliega su parte tal cual en el mismo
 clúster (ver [API y BD en la misma VM](#api-y-bd-en-la-misma-vm-api-upsh)), y `tunnel-up.sh`
-la publica en internet para desarrollo (ver [API pública](#api-pública-para-desarrollo-tunnel-upsh)).
+la publica en `https://api.superahorro.app` (ver [API pública](#api-pública-tunnel-upsh)).
 
 ## En una VM recién instalada
 
@@ -155,32 +155,45 @@ no perderlo:
   No hay copia: es el único dato que no se puede recuperar (NATS solo guarda 7 días). Un
   `pg_dump` nocturno es decisión del equipo de API/BD (ver `docs/05-pendientes.md`).
 
-## API pública para desarrollo (`tunnel-up.sh`)
+## API pública (`tunnel-up.sh`)
 
-A la VM solo se llega por la VPN de la FIB, y por SSH. La API se publica con un **Cloudflare
-quick tunnel**: gratis, sin cuenta y sin dominio. El túnel *sale* de la VM hacia Cloudflare,
-así que no hace falta abrir puertos de entrada.
+A la VM solo se llega por la VPN de la FIB, y por SSH. La API se publica en
+**`https://api.superahorro.app`** con un **Cloudflare Tunnel con nombre** de la cuenta del
+equipo. El túnel *sale* de la VM hacia Cloudflare, así que no hace falta abrir puertos de
+entrada.
 
 ```bash
-bash flujo-entrada/infra/tunnel-up.sh          # despliega (idempotente) y da la URL
-bash flujo-entrada/infra/tunnel-up.sh --url    # la URL actual
+TUNNEL_TOKEN=<token> bash flujo-entrada/infra/tunnel-up.sh   # la 1a vez: guarda el token
+bash flujo-entrada/infra/tunnel-up.sh          # despliega (idempotente) y comprueba /health
+bash flujo-entrada/infra/tunnel-up.sh --url    # la URL pública
 bash flujo-entrada/infra/tunnel-up.sh --down   # quitarlo
 ```
 
-- Un Deployment `cloudflared` (`cloudflare/cloudflared:2026.10.7`, 1 réplica) en el namespace
-  `api` apunta a `http://api.api.svc.cluster.local:80` ([`tunnel/cloudflared.yaml`](tunnel/cloudflared.yaml)).
-  No toca `api/`.
-- La URL es `https://<aleatorio>.trycloudflare.com` y **cambia cada vez que el pod se
-  reinicia** (reinicio de la VM, rollout o crash). Hay que mirarla con `--url`. La app no puede
-  llevarla fijada: que sea configurable.
-- Sin SLA, con un límite de ~200 peticiones simultáneas y sin autenticación (la API solo tiene
-  `GET`). Es para desarrollo.
-- Para producción, con el dominio del equipo: un túnel con nombre (cuenta de Cloudflare,
-  `cloudflared tunnel create`, un registro DNS y el token en un Secret), cambiando los `args`
-  por `tunnel run --token ...`. El resto del manifiesto vale igual.
+- Un Deployment `cloudflared` (`cloudflare/cloudflared:2026.10.7`, 2 réplicas, `RollingUpdate`
+  con `maxUnavailable: 0`) en el namespace `api` hace `tunnel run`
+  ([`tunnel/cloudflared.yaml`](tunnel/cloudflared.yaml)). No toca `api/`.
+- Dos valores salen del panel de Cloudflare (Zero Trust > Networks > Tunnels): el token del
+  túnel y el hostname. El token va en el Secret `api/cloudflared-token` (clave
+  `TUNNEL_TOKEN`), que crea `tunnel-up.sh` si se le pasa `TUNNEL_TOKEN`; el hostname, en la
+  anotación `superahorro/hostname` del manifiesto. La anotación solo la usa `tunnel-up.sh` para dar la URL y probar
+  `/health`: quien enruta es Cloudflare, y en el panel ese hostname debe apuntar a
+  `http://api.api.svc.cluster.local:80`.
+- **El token da acceso al túnel**: quien lo tenga puede conectar conectores y recibir el
+  tráfico de `api.superahorro.app`. Por eso no está en el repositorio (que es público): no lo
+  pongáis en el manifiesto. Para cambiarlo, se rota en el panel y se vuelve a lanzar con
+  `TUNNEL_TOKEN=<nuevo>`.
+- La URL es **fija**: no cambia al reiniciar el pod o la VM. La app y el frontend pueden
+  usarla directamente.
+- Las dos réplicas se registran en el mismo túnel (4 conexiones con el edge cada una) y
+  Cloudflare reparte entre ellas: un pod caído o un corte de una conexión no deja la API sin
+  servicio.
+- Sin autenticación: cualquiera puede leer la API y `/docs`. La API ya tiene rutas `POST`
+  (`/products/search-vector`, `/shopping-list/optimize`), así que conviene valorar un límite de
+  peticiones (ver `docs/05-pendientes.md`).
 
-Probado el 18/11/2026: `/health`, `/chains` y `/docs` responden 200 desde internet, y `POST`
-devuelve 405.
+Probado el 22/11/2026: `/health` y `/docs` responden 200 en `https://api.superahorro.app`, el
+`openapi.json` incluye `/products/search-vector`, `/products/semantic-search` y
+`/shopping-list/optimize`, y `semantic-search` devuelve resultados.
 
 ## Si la VM se reinicia (`autostart.sh`)
 
