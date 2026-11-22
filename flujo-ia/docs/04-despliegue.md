@@ -301,6 +301,36 @@ Notas de integracion:
 - `pg-check` y `pg-sync` aceptan `--dsn` para probar otra conexion sin
   tocar el entorno.
 
+### POST /embed (embeddings para la BD)
+
+El equipo de API/BD genera los vectores de `products.embedding` (`vector(384)`)
+llamando al servicio, para que sean del mismo modelo que usa el RAG:
+
+```bash
+curl -s -X POST http://10.4.41.108:8080/embed \
+  -H "X-API-Key: $RAG_EMBED_API_KEY" -H 'Content-Type: application/json' \
+  -d '{"texts": ["leche entera 1 l", "agua mineral 1,5 l"], "kind": "passage"}'
+# -> {"embeddings": [[384 floats], [384 floats]]}
+```
+
+- **Clave**: `X-API-Key` se compara con `RAG_EMBED_API_KEY`. 401 si falta o
+  no coincide; 503 si el servicio no tiene clave (nunca queda abierto).
+  En la VM va en `~/.config/flujo-ia.env` (permisos 600), que la unidad carga
+  con `EnvironmentFile`; en Kubernetes, en el Secret `ia-secrets`.
+  ```bash
+  umask 077; echo "RAG_EMBED_API_KEY=$(openssl rand -hex 32)" >> ~/.config/flujo-ia.env
+  systemctl --user daemon-reload && systemctl --user restart flujo-ia
+  ```
+- **kind**: `passage` (por defecto) para indexar productos, `query` para la
+  busqueda del usuario. El prefijo de e5 lo pone el servicio y no se duplica
+  si el cliente ya lo trae.
+- **Modelo fijo** `e5-small` (384) aunque `RAG_EMBED_MODEL` diga otro; si el
+  indice ya usa e5-small se reutiliza el modelo cargado.
+- **Norma 1**: en pgvector, coseno (`<=>`) y producto escalar (`<#>`) ordenan igual.
+- **Limites**: 400 cuerpo invalido, 413 con mas de 256 textos o algun texto de
+  mas de 2000 caracteres; lista vacia -> `{"embeddings": []}`.
+- `/health` publica `embed: {model, dim, key_configured}`.
+
 ### Server MCP
 
 `rag/mcp_server.py` expone el RAG por el protocolo MCP (transporte stdio):

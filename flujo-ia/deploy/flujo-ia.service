@@ -26,8 +26,13 @@ Environment=RAG_LLM=ollama
 Environment=RAG_OLLAMA_MODEL=qwen3:8b
 Environment=RAG_OLLAMA_THINK=false
 Environment=OLLAMA_HOST=http://127.0.0.1:11434
+# Secretos fuera de la unidad (permisos 600): RAG_EMBED_API_KEY (clave de
+# POST /embed, compartida con el equipo de API/BD) y, si se usa, GEMINI_API_KEY.
+#   umask 077; echo "RAG_EMBED_API_KEY=$(openssl rand -hex 32)" >> ~/.config/flujo-ia.env
+# El "-" hace que el servicio arranque aunque el fichero no exista (/embed da 503).
+EnvironmentFile=-%h/.config/flujo-ia.env
 # Para usar Gemini en vez del LLM local:
-#   RAG_LLM=gemini  y  GEMINI_API_KEY=... (mejor en un EnvironmentFile)
+#   RAG_LLM=gemini  y  GEMINI_API_KEY=... (en ~/.config/flujo-ia.env)
 ExecStart=%h/TARDOR-test/flujo-ia/.venv/bin/python -m rag.serve --host 0.0.0.0 --port 8080
 Restart=on-failure
 RestartSec=5

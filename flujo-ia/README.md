@@ -67,6 +67,7 @@ Todo se cambia por variable de entorno, sin tocar codigo:
 | `RAG_OLLAMA_HOST` | `http://localhost:11434` | Endpoint de Ollama |
 | `RAG_GEMINI_MODEL` | `gemini-2.5-flash` | Modelo de la API de Gemini |
 | `GEMINI_API_KEY` | — | Clave de AI Studio (la cuenta de la uni da mas cuota) |
+| `RAG_EMBED_API_KEY` | — | Clave de `POST /embed` (cabecera `X-API-Key`), compartida con API/BD. Sin ella `/embed` da 503 |
 | `RAG_TOP_K` | `5` | Productos recuperados por consulta |
 | `RAG_CACHE_DIR` | `./.cache` | Donde van el indice y los modelos |
 
@@ -90,6 +91,7 @@ la app:
 | `POST /ask` | Pregunta en lenguaje natural. Devuelve **JSON validado contra un JSON Schema**, con guardrails (citas validas, cifras del contexto, abstension) |
 | `POST /ask/stream` | Lo mismo en **streaming por SSE** (`fuentes`, `token`, `fin`) |
 | `POST /equiv` | Equivalencia entre cadenas: el equivalente de un producto en otra cadena |
+| `POST /embed` | Embeddings para la BD (`products.embedding`, 384 dim, e5-small, norma 1). Pide `X-API-Key`; cuerpo `{"texts": [...], "kind": "passage"\|"query"}` |
 
 ```bash
 curl -s localhost:8080/ask -H 'Content-Type: application/json' \

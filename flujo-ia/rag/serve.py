@@ -11,6 +11,7 @@ Endpoints:
     POST /equiv               equivalencia entre cadenas
     POST /ask                 pregunta en lenguaje natural (JSON validado)
     POST /ask/stream          respuesta token a token (SSE)
+    POST /embed               embeddings e5-small (384) para la BD; pide X-API-Key
     GET  /docs                documentacion de los endpoints (HTML)
     GET  /probar              cliente de prueba en vivo: demo + streaming (HTML)
 
@@ -31,6 +32,7 @@ cambia entre peticiones, asi que **no** se recalcula en caliente.
 from __future__ import annotations
 
 import argparse
+import hmac
 import json
 import os
 from decimal import Decimal, InvalidOperation
@@ -54,12 +56,46 @@ app = Flask(__name__)
 def _cors(resp: Response) -> Response:
     """CORS abierto: la app (otro origen) puede llamar desde el navegador."""
     resp.headers["Access-Control-Allow-Origin"] = "*"
-    resp.headers["Access-Control-Allow-Headers"] = "Content-Type"
+    resp.headers["Access-Control-Allow-Headers"] = "Content-Type, X-API-Key"
     resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     return resp
 
 # Estado global del servicio: se carga una vez al arrancar.
-_ESTADO: dict = {"retriever": None, "llm": None, "error": None}
+_ESTADO: dict = {"retriever": None, "llm": None, "error": None, "embed": None}
+
+# --- /embed -----------------------------------------------------------------
+# El modelo de /embed es fijo: la columna `products.embedding` de la BD es
+# vector(384), asi que aunque RAG_EMBED_MODEL apunte a otro modelo, aqui se usa
+# siempre e5-small.
+EMBED_MODEL = "e5-small"
+EMBED_MAX_TEXTS = 256
+EMBED_MAX_CHARS = 2000
+EMBED_KINDS = ("passage", "query")
+
+
+def _embed_api_key() -> str | None:
+    """Clave compartida con el equipo de API/BD (`RAG_EMBED_API_KEY`)."""
+    return (os.environ.get("RAG_EMBED_API_KEY") or "").strip() or None
+
+
+def _embedder_embed() -> Embedder:
+    """Embedder de /embed: reutiliza el del indice si ya es e5-small."""
+    if _ESTADO.get("embed") is None:
+        retriever = _ESTADO.get("retriever")
+        emb = getattr(retriever, "embedder", None) if retriever else None
+        if emb is not None and getattr(emb, "spec", None) is not None and emb.spec.key == EMBED_MODEL:
+            _ESTADO["embed"] = emb
+        else:
+            _ESTADO["embed"] = Embedder(EMBED_MODEL)
+    return _ESTADO["embed"]
+
+
+def _quitar_prefijo(texto: str, spec) -> str:
+    """Si el cliente ya trae "passage: "/"query: ", no se duplica."""
+    for pref in (spec.passage_prefix, spec.query_prefix):
+        if pref and texto.startswith(pref):
+            return texto[len(pref):]
+    return texto
 
 
 def _dec(v):
@@ -83,6 +119,7 @@ def inicializar(embed_model: str | None = None, llm_provider: str | None = None)
     _ESTADO["store"] = origen
     _ESTADO["store_error"] = error
     _ESTADO["embeddings"] = embedder.describe()
+    _ESTADO["embed"] = None  # /embed lo resuelve (y reutiliza) en la primera llamada
     try:
         _ESTADO["llm"] = build_llm(llm_provider or config.DEFAULT_LLM)
     except Exception as e:  # noqa: BLE001 - sin LLM el servicio sigue sirviendo retrieval
@@ -167,8 +204,52 @@ def health():
             "embeddings": _ESTADO.get("embeddings"),
             "llm": llm.describe() if llm else None,
             "llm_error": _ESTADO.get("llm_error"),
+            "embed": {
+                "model": EMBED_MODEL,
+                "dim": config.embedding_spec(EMBED_MODEL).dim,
+                "key_configured": _embed_api_key() is not None,
+            },
         }
     )
+
+
+@app.post("/embed")
+def embed():
+    """Embeddings para la BD (`products.embedding`, vector(384)).
+
+    Pide la cabecera `X-API-Key` igual a `RAG_EMBED_API_KEY`. Si el servicio
+    no tiene clave configurada devuelve 503: el endpoint nunca queda abierto
+    por descuido. Cuerpo: `{"texts": [...], "kind": "passage"|"query"}`.
+    Devuelve `{"embeddings": [[384 floats], ...]}` en el mismo orden, con
+    norma 1 (coseno == producto escalar en pgvector).
+    """
+    clave = _embed_api_key()
+    if clave is None:
+        return jsonify({"error": "RAG_EMBED_API_KEY no configurada en el servicio"}), 503
+    recibida = request.headers.get("X-API-Key") or ""
+    if not hmac.compare_digest(recibida.encode(), clave.encode()):
+        return jsonify({"error": "X-API-Key ausente o incorrecta"}), 401
+
+    payload = request.get_json(silent=True)
+    if not isinstance(payload, dict):
+        return jsonify({"error": "el cuerpo tiene que ser un objeto JSON"}), 400
+    texts = payload.get("texts")
+    if not isinstance(texts, list) or not all(isinstance(t, str) for t in texts):
+        return jsonify({"error": "'texts' tiene que ser una lista de strings"}), 400
+    kind = payload.get("kind", "passage")
+    if kind not in EMBED_KINDS:
+        return jsonify({"error": "'kind' tiene que ser 'passage' o 'query'"}), 400
+    if len(texts) > EMBED_MAX_TEXTS:
+        return jsonify({"error": f"maximo {EMBED_MAX_TEXTS} textos por peticion"}), 413
+    if any(len(t) > EMBED_MAX_CHARS for t in texts):
+        return jsonify({"error": f"maximo {EMBED_MAX_CHARS} caracteres por texto"}), 413
+    if not texts:
+        return jsonify({"embeddings": []})
+
+    emb = _embedder_embed()
+    limpios = [_quitar_prefijo(t, emb.spec) for t in texts]
+    vecs = emb.encode(limpios, is_query=(kind == "query"), normalize=True)
+    return jsonify({"embeddings": [[float(x) for x in v] for v in vecs]})
 
 
 @app.post("/search")
@@ -322,6 +403,7 @@ Prueba en vivo con las preguntas de demo y streaming: <a href="/probar" style="c
 <tr><td>POST</td><td><code>/equiv</code></td><td><code>{"id"|"nombre", "chain"}</code></td><td>candidatos + elegido</td></tr>
 <tr><td>POST</td><td><code>/ask</code></td><td><code>{"question", "k", "estricto"}</code></td><td>JSON validado (answer, sources, guardrails...)</td></tr>
 <tr><td>POST</td><td><code>/ask/stream</code></td><td><code>{"question"}</code></td><td>SSE: <code>fuentes</code>, <code>token</code>, <code>fin</code></td></tr>
+<tr><td>POST</td><td><code>/embed</code></td><td><code>{"texts", "kind"}</code> + cabecera <code>X-API-Key</code></td><td><code>{"embeddings": [[384 floats]...]}</code> (e5-small, norma 1)</td></tr>
 </table>
 <h2>Ejemplo</h2>
 <pre>curl -s -X POST http://localhost:8080/ask \\
