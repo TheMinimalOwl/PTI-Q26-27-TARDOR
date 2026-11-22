@@ -157,6 +157,48 @@
         }
       }
     },
+    "/products/search-vector": {
+      "post": {
+        "tags": [
+          "catálogo"
+        ],
+        "summary": "Búsqueda semántica (para el asistente de IA)",
+        "description": "Los productos más parecidos a un embedding, del más al menos parecido, con su último precio.\n\nLa llama el servidor MCP del asistente (VM 2): convierte la pregunta en un vector con su\nmodelo de embeddings y lo envía aquí junto con los filtros. Sin caché: cada vector es distinto.",
+        "operationId": "search_products_by_vector_products_search_vector_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/VectorSearchIn"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VectorSearchResult"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/products/{product_id}": {
       "get": {
         "tags": [
@@ -1017,6 +1059,167 @@
           "type"
         ],
         "title": "ValidationError"
+      },
+      "VectorHit": {
+        "properties": {
+          "id": {
+            "type": "integer",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "chain": {
+            "$ref": "#/components/schemas/ChainOut"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit"
+          },
+          "url": {
+            "type": "string",
+            "title": "Url"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PriceOut"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "similarity": {
+            "type": "number",
+            "title": "Similarity"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "chain",
+          "category",
+          "unit",
+          "url",
+          "price",
+          "similarity"
+        ],
+        "title": "VectorHit"
+      },
+      "VectorSearchIn": {
+        "properties": {
+          "embedding": {
+            "items": {
+              "type": "number"
+            },
+            "type": "array",
+            "title": "Embedding",
+            "description": "Embedding de la pregunta (384 dimensiones)"
+          },
+          "top_k": {
+            "type": "integer",
+            "maximum": 50.0,
+            "minimum": 1.0,
+            "title": "Top K",
+            "description": "Cuántos productos devolver",
+            "default": 10
+          },
+          "chains": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Chains",
+            "description": "Opcional: solo estas cadenas (slugs)"
+          },
+          "unit": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Unit",
+            "description": "Opcional: kg, l, ud, m o lavado"
+          },
+          "max_price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Price",
+            "description": "Opcional: precio máximo del envase (€)"
+          },
+          "max_unit_price": {
+            "anyOf": [
+              {
+                "type": "number",
+                "exclusiveMinimum": 0.0
+              },
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Unit Price",
+            "description": "Opcional: precio unitario máximo (€/kg, €/l…)"
+          }
+        },
+        "type": "object",
+        "required": [
+          "embedding"
+        ],
+        "title": "VectorSearchIn",
+        "description": "Cerca semàntica: el vector el calcula l'equip d'IA (VM 2) amb el mateix model que els\nembeddings dels productes. Amb e5 la pregunta porta el prefix \"query: \" i els productes\n\"passage: \"; l'API no en sap res, només compara vectors."
+      },
+      "VectorSearchResult": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/VectorHit"
+            },
+            "type": "array",
+            "title": "Items"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items"
+        ],
+        "title": "VectorSearchResult"
       }
     }
   }

@@ -27,6 +27,8 @@ services:
       DATABASE_URL: postgresql+psycopg://pti:pti@db:5432/precios
       REDIS_URL: redis://redis:6379/0
       NATS_URL: ${NATS_URL:-nats://host.docker.internal:4222}
+      EMBED_URL: ${EMBED_URL:-}            # servei /embed de la IA (VM 2)
+      EMBED_API_KEY: ${EMBED_API_KEY:-}
     ports: ["8000:8000"]
     depends_on:
       db: {condition: service_healthy}

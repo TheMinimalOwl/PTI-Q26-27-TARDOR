@@ -103,6 +103,7 @@ Contrato completo: [`api/openapi.json`](../openapi.json) (generado desde el cód
 | `GET /products/{id}` | Detalle del producto con su precio actual |
 | `GET /products/{id}/prices?from=&to=` | Historial de precios (para la gráfica de tendencias) |
 | `POST /shopping-list/optimize` | **Lista de la compra optimizada:** cuánto cuesta la lista entera en cada cadena y cuánto comprando cada artículo donde es más barato (ver abajo) |
+| `POST /products/search-vector` | **Búsqueda semántica** para el asistente de IA: los productos más parecidos a un embedding, con su último precio (ver abajo) |
 
 Ejemplo de `GET /products/search?q=aceite&limit=1`:
 
@@ -158,6 +159,59 @@ Cuerpo de `POST /shopping-list/optimize` (`amount`, `quantity` y `unit` son opci
 Con los datos de demo, leche + arroz ×2 + huevos + aceite virgen extra: Alcampo 15,36 €;
 combinando 15,28 € (el arroz en Ahorramás), ahorro 0,08 €.
 
+## Integración con la IA (VM 1 ↔ VM 2)
+
+La API (VM 1) guarda los embeddings de los productos en `products.embedding`
+(pgvector, `EMBEDDING_DIM` = 384, `intfloat/multilingual-e5-small`). Los calcula el
+servicio de la IA (VM 2); la API nunca carga el modelo.
+
+### Búsqueda: VM 2 → VM 1
+
+El servidor MCP convierte la pregunta en un vector (con e5, prefijo `"query: "`) y llama a
+`POST /products/search-vector`:
+
+```json
+{"embedding": [0.012, -0.45, ...], "top_k": 10,
+ "chains": ["mercadona"], "unit": "l", "max_price": 10, "max_unit_price": 4}
+```
+
+Solo `embedding` es obligatorio (exactamente `EMBEDDING_DIM` valores; si no, 422). Responde
+`{"items": [...]}`: productos con el mismo formato que `/products/search` más `similarity`
+(coseno, 1 = idéntico), del más al menos parecido. Los filtros de precio usan el último
+precio. Los productos sin embedding todavía no salen. Sin caché ni índice vectorial: con
+decenas de miles de productos la búsqueda exacta tarda milisegundos y siempre devuelve
+`top_k` aunque haya filtros.
+
+### Sincronización: VM 1 → VM 2
+
+1. El upsert de la ingesta pone `embedding = NULL` en los productos nuevos y en los que
+   cambian de nombre, categoría o tamaño (un cambio de precio no lo toca).
+2. El writer, cuando la cola de NATS queda vacía (y al arrancar), envía esos productos a
+   `EMBED_URL` en lotes de `EMBED_BATCH_SIZE` y guarda los vectores. Si la VM 2 no responde,
+   no se pierde nada: siguen a NULL y se reintenta a los 10 minutos. La ingesta nunca espera
+   a la IA.
+3. Carga inicial o manual: `python -m app.embeddings` (`--reset` para recalcularlos todos,
+   p. ej. si cambia el modelo).
+
+Contrato del servicio `/embed` de la VM 2:
+
+```
+POST {EMBED_URL}          cabecera X-API-Key: {EMBED_API_KEY}
+{"texts": ["Aceite de oliva 0,4º Hacendado | categoria Aceite, especias y salsas | tamano 5 l", ...],
+ "kind": "passage"}
+→ {"embeddings": [[384 floats], ...]}     (mismo orden que texts)
+```
+
+El texto es el mismo que `Product.embed_text` de `flujo-ia` (nombre, categoría y tamaño). El
+prefijo del modelo (`"passage: "` / `"query: "`) lo pone la VM 2 según `kind`.
+
+| Variable | Por defecto | Para qué |
+|---|---|---|
+| `EMBED_URL` | vacía (no sincroniza) | `http://ip-vm2:8001/embed` |
+| `EMBED_API_KEY` | vacía | Clave compartida con la VM 2 |
+| `EMBED_BATCH_SIZE` | 64 | Textos por petición |
+| `EMBED_TIMEOUT` | 60 | Segundos por petición |
+
 ## Caché (Redis)
 
 - Se cachean `search`, `products/{id}` y la lista optimizada (clave = hash del cuerpo) durante `CACHE_TTL` (300 s).
@@ -168,5 +222,4 @@ combinando 15,28 € (el arroz en Ahorramás), ahorro 0,08 €.
 ## Próximo (no incluido aún)
 
 Autenticación y usuarios, listas de la compra guardadas por usuario, alertas de bajada de
-precio, supermercados cercanos (las columnas `stores.latitude/longitude` ya existen) y el
-endpoint del asistente de IA.
+precio y supermercados cercanos (las columnas `stores.latitude/longitude` ya existen).

@@ -3,7 +3,9 @@ from datetime import date, datetime
 from decimal import Decimal
 from typing import Annotated
 
-from pydantic import BaseModel, ConfigDict, Field, PlainSerializer
+from pydantic import BaseModel, ConfigDict, Field, PlainSerializer, field_validator
+
+from .config import settings
 
 # A la BD els imports són Decimal; en JSON viatgen com a número (Pydantic els passaria a string).
 Money = Annotated[Decimal, PlainSerializer(float, return_type=float, when_used="json")]
@@ -48,6 +50,37 @@ class SearchPage(BaseModel):
     limit: int
     offset: int
     items: list[ProductSummary]
+
+
+class VectorSearchIn(BaseModel):
+    """Cerca semàntica: el vector el calcula l'equip d'IA (VM 2) amb el mateix model que els
+    embeddings dels productes. Amb e5 la pregunta porta el prefix "query: " i els productes
+    "passage: "; l'API no en sap res, només compara vectors."""
+    embedding: list[float] = Field(
+        description=f"Embedding de la pregunta ({settings.embedding_dim} dimensiones)"
+    )
+    top_k: int = Field(10, ge=1, le=50, description="Cuántos productos devolver")
+    chains: list[str] | None = Field(None, description="Opcional: solo estas cadenas (slugs)")
+    unit: str | None = Field(None, description="Opcional: kg, l, ud, m o lavado")
+    max_price: Decimal | None = Field(None, gt=0, description="Opcional: precio máximo del envase (€)")
+    max_unit_price: Decimal | None = Field(
+        None, gt=0, description="Opcional: precio unitario máximo (€/kg, €/l…)"
+    )
+
+    @field_validator("embedding")
+    @classmethod
+    def _dimension(cls, v: list[float]) -> list[float]:
+        if len(v) != settings.embedding_dim:
+            raise ValueError(f"se esperaban {settings.embedding_dim} dimensiones y llegan {len(v)}")
+        return v
+
+
+class VectorHit(ProductSummary):
+    similarity: float  # similitud cosinus (1 = idèntic)
+
+
+class VectorSearchResult(BaseModel):
+    items: list[VectorHit]
 
 
 class PriceHistory(BaseModel):

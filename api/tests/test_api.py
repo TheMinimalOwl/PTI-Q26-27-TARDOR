@@ -201,3 +201,88 @@ def test_ejemplos_de_swagger_funcionan(client):
         body = res.json()
         assert body["best_total"] is not None, name
         assert body["combined"]["missing"] == [], name
+
+
+# --- Cerca semàntica (/products/search-vector) ---------------------------------------
+# Els embeddings de veritat els posa la IA. Aquí, vectors "one-hot" (un 1 a la posició i):
+# el més semblant a e(i) és el producte que té e(i), i la resta queden a similitud 0.
+
+def _onehot(i: int, weight: float = 1.0) -> list[float]:
+    from app.config import settings
+
+    v = [0.0] * settings.embedding_dim
+    v[i] = weight
+    return v
+
+
+@pytest.fixture
+def embeddings():
+    """Posa embedding als productes de la demo indicats per nom i els treu en acabar."""
+    from app.db import SessionLocal
+    from app.models import Product
+
+    def put(by_name: dict[str, list[float]]):
+        with SessionLocal() as session, session.begin():
+            for name, vector in by_name.items():
+                products = session.query(Product).filter(Product.name == name).all()
+                assert products, name
+                for p in products:
+                    p.embedding = vector
+
+    yield put
+    with engine.begin() as conn:
+        conn.execute(text("UPDATE products SET embedding = NULL"))
+
+
+def _vsearch(client, embedding, **extra):
+    return client.post("/products/search-vector", json={"embedding": embedding, **extra})
+
+
+def test_vector_ordena_por_similitud(client, embeddings):
+    embeddings({
+        "Arroz redondo 1 kg": _onehot(0),
+        "Macarrones 500 g": [0.8 if i in (0, 1) else 0.0 for i in range(len(_onehot(0)))],
+        "Huevos frescos L 12 unidades": _onehot(2),
+    })
+    res = _vsearch(client, _onehot(0, weight=3.0), top_k=50)  # cosinus: la norma no importa
+    assert res.status_code == 200
+    items = res.json()["items"]
+    names = [i["name"] for i in items]
+    # Tots els arrossos (un per cadena) primer, després els macarrons, i els ous al final.
+    n_arroz = names.count("Arroz redondo 1 kg")
+    assert n_arroz >= 1
+    assert set(names[:n_arroz]) == {"Arroz redondo 1 kg"}
+    assert items[0]["similarity"] == 1.0
+    assert names[n_arroz] == "Macarrones 500 g"
+    assert 0 < items[n_arroz]["similarity"] < 1
+    assert names[-1] == "Huevos frescos L 12 unidades"
+    assert items[0]["price"]["total"] > 0  # porta el darrer preu
+
+
+def test_vector_sin_embedding_no_sale(client, embeddings):
+    embeddings({"Arroz redondo 1 kg": _onehot(0)})
+    names = {i["name"] for i in _vsearch(client, _onehot(0), top_k=50).json()["items"]}
+    assert names == {"Arroz redondo 1 kg"}
+
+
+def test_vector_filtros(client, embeddings):
+    embeddings({
+        "Aceite de oliva virgen extra 1 L": _onehot(0),
+        "Aceite de oliva 0,4º garrafa 5 L": _onehot(0),
+    })
+    items = _vsearch(client, _onehot(0), top_k=50, chains=["mercadona"]).json()["items"]
+    assert items and {i["chain"]["slug"] for i in items} == {"mercadona"}
+
+    items = _vsearch(client, _onehot(0), top_k=50, max_price=10).json()["items"]
+    assert items and all(i["price"]["total"] <= 10 for i in items)
+    assert "Aceite de oliva 0,4º garrafa 5 L" not in {i["name"] for i in items}  # garrafa > 10 €
+
+    items = _vsearch(client, _onehot(0), top_k=50, max_unit_price=4).json()["items"]
+    assert items and all(i["price"]["unit_price"] <= 4 for i in items)
+
+    assert len(_vsearch(client, _onehot(0), top_k=1).json()["items"]) == 1
+
+
+def test_vector_dimension_incorrecta(client):
+    res = _vsearch(client, [0.1, 0.2, 0.3])
+    assert res.status_code == 422

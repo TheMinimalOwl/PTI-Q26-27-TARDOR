@@ -15,7 +15,7 @@ from decimal import Decimal, InvalidOperation
 from typing import Any
 
 from pydantic import BaseModel, ConfigDict, field_validator
-from sqlalchemy import select
+from sqlalchemy import case, or_, select
 from sqlalchemy.dialects.postgresql import insert
 from sqlalchemy.orm import Session
 
@@ -154,12 +154,21 @@ def upsert_batch(session: Session, batch: Batch) -> dict[str, int]:
             size="" if item.size is None else str(item.size),
             size_format=item.size_format, unit=item.unit,
         )
+        stmt = insert(Product).values(chain_id=chain_id, source_id=item.id, **product_values)
+        # L'embedding es calcula del nom, la categoria i la mida (embeddings.embed_text): si
+        # algun canvia, el vector ja no val i es torna a NULL perquè la IA el recalculi.
+        text_changed = or_(*(
+            getattr(Product, col).is_distinct_from(stmt.excluded[col])
+            for col in ("name", "category", "size", "size_format")
+        ))
         product_id = session.scalar(
-            insert(Product)
-            .values(chain_id=chain_id, source_id=item.id, **product_values)
-            .on_conflict_do_update(
+            stmt.on_conflict_do_update(
                 index_elements=[Product.chain_id, Product.source_id],
-                set_={**product_values, "updated_at": datetime.now(timezone.utc)},
+                set_={
+                    **product_values,
+                    "updated_at": datetime.now(timezone.utc),
+                    "embedding": case((text_changed, None), else_=Product.embedding),
+                },
             )
             .returning(Product.id)
         )
