@@ -6,7 +6,7 @@ from sqlalchemy import Integer, Numeric, Select, and_, case, cast, func, literal
 from sqlalchemy.orm import Session, aliased, joinedload
 
 from .models import Chain, Price, Product, Store
-from .schemas import ChainOut, PriceOut, ProductDetail, ProductSummary
+from .schemas import ChainOut, PriceOut, ProductDetail, ProductSummary, VectorHit
 
 
 # Format de la mida de l'etiqueta → (unitat base, factor). La mateixa taula que la ingesta
@@ -141,6 +141,51 @@ def search_products(
     ).all()
 
     return total, main_unit, [ProductSummary(**_summary(p, price, code)) for p, price, code in rows]
+
+
+def search_by_vector(
+    session: Session,
+    embedding: list[float],
+    top_k: int,
+    chains: list[str] | None,
+    unit: str | None,
+    max_price: Decimal | None,
+    max_unit_price: Decimal | None,
+) -> list[VectorHit]:
+    """Els `top_k` productes més semblants a `embedding` (distància cosinus de pgvector)
+    que compleixen els filtres. Els preus són els més recents, no els de quan es va calcular
+    l'embedding. Els productes sense embedding (pendents de la IA) no hi surten.
+
+    Sense índex vectorial a propòsit: amb desenes de milers de productes la cerca exacta
+    triga mil·lisegons, i un índex HNSW amb filtres de preu pot tornar menys de `top_k`."""
+    latest = aliased(Price, _latest_prices().subquery())
+    distance = Product.embedding.cosine_distance(embedding).label("distance")
+
+    conditions = [Product.embedding.is_not(None)]
+    if chains:
+        conditions.append(Chain.slug.in_(chains))
+    if unit:
+        conditions.append(Product.unit == unit)
+    if max_price is not None:
+        conditions.append(latest.total <= max_price)
+    if max_unit_price is not None:
+        conditions.append(latest.unit_price <= max_unit_price)
+
+    rows = session.execute(
+        select(Product, latest, Store.code, distance)
+        .join(Product.chain)
+        .outerjoin(latest, latest.product_id == Product.id)
+        .outerjoin(Store, Store.id == latest.store_id)
+        .where(and_(*conditions))
+        .options(joinedload(Product.chain))
+        .order_by(distance, Product.id)
+        .limit(top_k)
+    ).all()
+
+    return [
+        VectorHit(**_summary(p, price, code), similarity=round(1 - float(d), 4))
+        for p, price, code, d in rows
+    ]
 
 
 def get_product(session: Session, product_id: int) -> ProductDetail | None:

@@ -80,6 +80,7 @@ python scripts/export_openapi.py
 | `app/main.py` | Endpoints REST |
 | `app/cache.py` | Caché Redis con invalidación por versión |
 | `app/ingest.py` | Parseo de mensajes `clean` (JSON o texto) y upsert en BD |
-| `app/writer.py` | Servicio NATS → BD |
+| `app/writer.py` | Servicio NATS → BD (y sincroniza los embeddings cuando no hay mensajes) |
+| `app/embeddings.py` | Pide a la IA (VM 2) los embeddings de los productos que no tienen (`python -m app.embeddings`) |
 | `app/seed.py` | Datos de demo |
 | `app/config.py` | Configuración por variables de entorno |

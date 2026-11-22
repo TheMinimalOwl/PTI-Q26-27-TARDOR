@@ -19,6 +19,7 @@ from .config import settings
 from .db import get_session, init_db
 from .schemas import (
     ChainOut, Health, OptimizedList, PriceHistory, ProductDetail, SearchPage, ShoppingListIn,
+    VectorSearchIn, VectorSearchResult,
 )
 
 
@@ -78,6 +79,24 @@ def search_products(
     cache.set(key, page.model_dump(mode="json"))
     response.headers["X-Cache"] = "MISS"
     return page
+
+
+@app.post(
+    "/products/search-vector",
+    response_model=VectorSearchResult,
+    tags=["catálogo"],
+    summary="Búsqueda semántica (para el asistente de IA)",
+)
+def search_products_by_vector(body: VectorSearchIn, session: Session = Depends(get_session)):
+    """Los productos más parecidos a un embedding, del más al menos parecido, con su último precio.
+
+    La llama el servidor MCP del asistente (VM 2): convierte la pregunta en un vector con su
+    modelo de embeddings y lo envía aquí junto con los filtros. Sin caché: cada vector es distinto."""
+    items = repository.search_by_vector(
+        session, body.embedding, body.top_k, body.chains, body.unit,
+        body.max_price, body.max_unit_price,
+    )
+    return VectorSearchResult(items=items)
 
 
 @app.get(

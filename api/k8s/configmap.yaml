@@ -7,3 +7,5 @@ data:
   NATS_URL: nats://nats.messaging.svc.cluster.local:4222
   CACHE_TTL: "300"
   EMBEDDING_DIM: "384"
+  # Servei /embed de la IA (VM 2). Buit = el writer no calcula embeddings.
+  EMBED_URL: ""
