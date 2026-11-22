@@ -37,7 +37,10 @@ spec:
 
         spec:
 
-          restartPolicy: OnFailure
+          # Never (no OnFailure): cada intento es un pod nuevo y los fallidos se quedan
+          # (failedJobsHistoryLimit), con sus logs. Con OnFailure el Job borraba el pod al
+          # agotar backoffLimit y no habia forma de saber por que habia fallado.
+          restartPolicy: Never
 
           volumes:
 

@@ -6,11 +6,16 @@ traduce a su almacen (08016 -> bcn1) y cada almacen se recorre una sola vez.
 
 Cada envelope lleva `wh` = almacen de Mercadona y `postal_code`.
 
+Si Mercadona no resuelve un codigo postal (ni tras los reintentos de client.py), se usa el
+ultimo almacen conocido para ese codigo, guardado en out/mercadona_wh.json (el volumen
+persistente) en cada resolucion correcta. Los almacenes casi nunca cambian.
+
 Sale con codigo != 0 si no consigue productos, si falla mas de un MAX_FAILED de las
 subcategorias (pasada a medias) o si no los puede publicar (antes acababa con 0 y el Job
 parecia correcto aunque no hubiera datos).
 """
 from pathlib import Path
+import json
 import os
 import sys
 import time
@@ -25,28 +30,47 @@ POSTAL_CODES = [c.strip() for c in os.getenv("SCRAPER_POSTAL_CODES", "08016").sp
 MAX_FAILED = float(os.getenv("SCRAPER_MAX_FAILED", "0.05"))  # fraccion de subcategorias
 
 
-def warehouses(postal_codes: list[str]) -> list[tuple[str, str]]:
+def _load_cache(path: Path) -> dict[str, str]:
+    try:
+        data = json.loads(path.read_text(encoding="utf-8"))
+        return {str(k): str(v) for k, v in data.items()} if isinstance(data, dict) else {}
+    except (OSError, ValueError):
+        return {}
+
+
+def warehouses(postal_codes: list[str], cache_path: Path) -> list[tuple[str, str]]:
     """(almacen, codigo postal) por almacen distinto. Si un codigo no se puede resolver, se
-    avisa y se salta."""
+    usa el ultimo almacen conocido; si tampoco lo hay, se avisa y se salta."""
+    cache = _load_cache(cache_path)
     by_wh: dict[str, str] = {}
     for pc in postal_codes:
         wh = resolve_wh(pc)
-        if not wh:
+        if wh:
+            print(f"   {pc}: almacen {wh}", flush=True)
+            cache[pc] = wh
+        elif pc in cache:
+            wh = cache[pc]
+            print(f"   {pc}: Mercadona no responde; uso el ultimo almacen conocido ({wh})", flush=True)
+        else:
             print(f"   {pc}: Mercadona no devuelve almacen para este codigo postal; se salta", flush=True)
             continue
-        print(f"   {pc}: almacen {wh}", flush=True)
         by_wh.setdefault(wh, pc)
+    try:
+        cache_path.parent.mkdir(parents=True, exist_ok=True)
+        cache_path.write_text(json.dumps(cache, indent=1, sort_keys=True), encoding="utf-8")
+    except OSError as e:
+        print(f"   no he podido guardar {cache_path} ({e})", flush=True)
     return [(wh, pc) for wh, pc in by_wh.items()]
 
 
 def scrape(wh: str) -> tuple[int | None, list[dict], int, int]:
     params = {"lang": "es", "wh": wh}
     status_top, top = fetch_json(CATEGORIES_URL, params)
-    results = top.get("results", []) if status_top == 200 else []
+    results = (top.get("results") or []) if status_top == 200 else []
     sub_ids = [
-        (c["id"], c["name"])
-        for fam in results
-        for c in fam.get("categories", [])
+        (c["id"], c.get("name", ""))
+        for fam in results if isinstance(fam, dict)
+        for c in (fam.get("categories") or []) if isinstance(c, dict) and "id" in c
     ]
     items: list[dict] = []
     errors: list[str] = []
@@ -65,7 +89,7 @@ def scrape(wh: str) -> tuple[int | None, list[dict], int, int]:
 
 if __name__ == "__main__":
     base = Path(__file__).resolve().parents[1]
-    whs = warehouses(POSTAL_CODES)
+    whs = warehouses(POSTAL_CODES, base / "out" / "mercadona_wh.json")
     failures = [] if whs else ["ningun codigo postal se ha podido resolver a un almacen"]
     for wh, pc in whs:
         status, items, tops, subs = scrape(wh)
