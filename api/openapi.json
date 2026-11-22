@@ -199,6 +199,153 @@
         }
       }
     },
+    "/products/semantic-search": {
+      "get": {
+        "tags": [
+          "catálogo"
+        ],
+        "summary": "Búsqueda semántica por texto",
+        "description": "Como `/products/search-vector`, pero con texto: la API pide el vector de `q` al servicio\nde IA (`/embed`, `kind: \"query\"`) y devuelve los productos más parecidos con su último precio.\nEncuentra productos aunque no compartan palabras con la consulta.",
+        "operationId": "semantic_search_products_semantic_search_get",
+        "parameters": [
+          {
+            "name": "q",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 2,
+              "maxLength": 200,
+              "description": "Lo que busca el usuario, p. ej. 'algo para desayunar'",
+              "title": "Q"
+            },
+            "description": "Lo que busca el usuario, p. ej. 'algo para desayunar'"
+          },
+          {
+            "name": "top_k",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 50,
+              "minimum": 1,
+              "description": "Cuántos productos devolver",
+              "default": 10,
+              "title": "Top K"
+            },
+            "description": "Cuántos productos devolver"
+          },
+          {
+            "name": "chain",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filtra por cadena (slug)",
+              "title": "Chain"
+            },
+            "description": "Filtra por cadena (slug)"
+          },
+          {
+            "name": "unit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Solo productos con esta unidad: kg, l, ud, m o lavado",
+              "title": "Unit"
+            },
+            "description": "Solo productos con esta unidad: kg, l, ud, m o lavado"
+          },
+          {
+            "name": "max_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "exclusiveMinimum": 0.0
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Precio máximo del envase (€)",
+              "title": "Max Price"
+            },
+            "description": "Precio máximo del envase (€)"
+          },
+          {
+            "name": "max_unit_price",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "number",
+                  "exclusiveMinimum": 0.0
+                },
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Precio unitario máximo (€/kg, €/l…)",
+              "title": "Max Unit Price"
+            },
+            "description": "Precio unitario máximo (€/kg, €/l…)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/VectorSearchResult"
+                }
+              }
+            }
+          },
+          "502": {
+            "description": "El servicio de embeddings de la IA ha fallado"
+          },
+          "503": {
+            "description": "Búsqueda semántica no configurada (falta RAG_EMBED_URL)"
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/products/{product_id}": {
       "get": {
         "tags": [

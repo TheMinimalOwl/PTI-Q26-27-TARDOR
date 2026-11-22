@@ -1,20 +1,23 @@
-"""Sincronització dels embeddings dels productes amb el servei d'IA (VM 1 → VM 2).
+"""Embeddings dels productes amb el servei d'IA (flujo-ia, VM 2): client de `POST /embed`
+i sincronització de `products.embedding`.
 
 Els productes nous, o els que han canviat de nom, categoria o mida, queden amb
-`embedding = NULL` (ho fa l'upsert d'ingest.py). Aquí es busquen, s'envia el seu text al
-servei `/embed` de la VM 2 en lots i es guarda el vector que torna.
+`embedding = NULL` (ho fa l'upsert d'ingest.py). `sync_embeddings` els busca, envia el seu
+text a `/embed` amb `kind: "passage"` i desa el vector. El writer la crida just després de
+cada ingesta (quan la cua de NATS queda buida), i no dins de l'upsert: així una VM 2 caiguda
+mai bloqueja la ingesta. Si falla, els productes continuen a NULL i s'omplen més tard.
 
-Si la VM 2 no respon, no es perd res: els productes continuen a NULL i s'omplen a la propera
-sincronització. Per això la ingesta no depèn mai de la IA.
-
-Contracte de `/embed` (POST, JSON):
-    petició:  {"texts": ["...", ...], "kind": "passage"}
-    resposta: {"embeddings": [[<embedding_dim floats>], ...]}   (mateix ordre que `texts`)
-El prefix del model (amb e5, "passage: " / "query: ") el posa la VM 2 segons `kind`.
+Contracte de `/embed` (vegeu docs/CONTRATO.md):
+    POST {RAG_EMBED_URL}/embed      capçalera X-API-Key: {RAG_EMBED_API_KEY}
+    {"texts": ["...", ...], "kind": "passage" | "query"}
+    → 200 {"embeddings": [[384 floats amb norma 1], ...]}   (mateix ordre que `texts`)
+    400 cos invàlid · 401 clau incorrecta · 413 >256 textos o text >2000 caràcters
+    503 el servei no té la clau configurada (no té sentit reintentar)
+Els prefixos del model ("passage: " / "query: ") els posa el servei.
 
 Executar (càrrega inicial o manual):
     python -m app.embeddings           # omple els que falten
-    python -m app.embeddings --reset   # els torna a calcular tots (p. ex. si canvia el model)
+    python -m app.embeddings --reset   # els torna a calcular tots (p. ej. si canvia el model)
 """
 import argparse
 import logging
@@ -29,6 +32,86 @@ from .models import Product
 
 log = logging.getLogger("embeddings")
 
+MAX_BATCH = 256       # textos per petició que accepta /embed
+MAX_TEXT_CHARS = 2000  # caràcters per text que accepta /embed
+
+
+class EmbedError(RuntimeError):
+    """El servei d'embeddings ha fallat (no respon, clau incorrecta, resposta estranya…)."""
+
+
+class EmbedUnavailable(EmbedError):
+    """503: el servei no té la clau configurada. Cal avisar l'equip d'IA; no té sentit reintentar."""
+
+
+def enabled() -> bool:
+    return bool(settings.rag_embed_url)
+
+
+def _new_client() -> httpx.Client:
+    return httpx.Client(timeout=settings.embed_timeout)
+
+
+def _check(res: httpx.Response) -> None:
+    """Converteix els errors de /embed en missatges clars (sense mostrar mai la clau)."""
+    if res.status_code == 200:
+        return
+    detail = res.text[:200]
+    if res.status_code == 401:
+        raise EmbedError("/embed: 401, falta la clave o es incorrecta (revisad RAG_EMBED_API_KEY)")
+    if res.status_code == 413:
+        raise EmbedError(f"/embed: 413, lote de más de {MAX_BATCH} textos o texto de más de "
+                         f"{MAX_TEXT_CHARS} caracteres ({detail})")
+    if res.status_code == 503:
+        raise EmbedUnavailable("/embed: 503, el servicio de IA no tiene la clave configurada: "
+                               "avisad al equipo de IA")
+    raise EmbedError(f"/embed: {res.status_code} ({detail})")
+
+
+def embed_texts(texts: list[str], kind: str = "passage", client: httpx.Client | None = None) -> list[list[float]]:
+    """Vectors de `texts` (mateix ordre), en lots de `embed_batch_size` (256 com a màxim).
+
+    `kind`: "passage" per als productes i "query" per al que escriu l'usuari."""
+    if not enabled():
+        raise EmbedError("RAG_EMBED_URL no configurada")
+    if not texts:
+        return []
+    url = settings.rag_embed_url.rstrip("/") + "/embed"
+    headers = {"X-API-Key": settings.rag_embed_api_key} if settings.rag_embed_api_key else {}
+    size = max(1, min(settings.embed_batch_size, MAX_BATCH))
+    own_client = client is None
+    client = client or _new_client()
+    vectors: list[list[float]] = []
+    try:
+        for i in range(0, len(texts), size):
+            chunk = [t[:MAX_TEXT_CHARS] for t in texts[i:i + size]]
+            try:
+                res = client.post(url, json={"texts": chunk, "kind": kind}, headers=headers)
+            except httpx.HTTPError as exc:
+                raise EmbedError(f"/embed no responde ({type(exc).__name__}: {exc})") from exc
+            _check(res)
+            got = res.json().get("embeddings")
+            if not isinstance(got, list) or len(got) != len(chunk):
+                raise EmbedError(f"/embed ha devuelto {len(got or [])} vectores para {len(chunk)} textos")
+            for v in got:
+                if len(v) != settings.embedding_dim:
+                    raise EmbedError(
+                        f"/embed ha devuelto vectores de {len(v)} dimensiones y la BD espera "
+                        f"{settings.embedding_dim} (EMBEDDING_DIM)"
+                    )
+            vectors.extend(got)
+    finally:
+        if own_client:
+            client.close()
+    return vectors
+
+
+def embed_query(text: str, client: httpx.Client | None = None) -> list[float]:
+    """Vector d'una consulta de l'usuari (`kind: "query"`)."""
+    return embed_texts([text], kind="query", client=client)[0]
+
+
+# ---------------------------------------------------------------- text dels productes
 
 def _size_label(size: str, size_format: str) -> str:
     """Mida llegible: `1 l`, `500 g`, `3 ud`. Igual que `Product.size_label` de flujo-ia."""
@@ -57,21 +140,7 @@ def embed_text(name: str, category: str, size: str, size_format: str) -> str:
     return " | ".join(bits)
 
 
-def _embed(client: httpx.Client, texts: list[str]) -> list[list[float]]:
-    headers = {"X-API-Key": settings.embed_api_key} if settings.embed_api_key else {}
-    res = client.post(settings.embed_url, json={"texts": texts, "kind": "passage"}, headers=headers)
-    res.raise_for_status()
-    vectors = res.json()["embeddings"]
-    if len(vectors) != len(texts):
-        raise ValueError(f"/embed ha tornat {len(vectors)} vectors per a {len(texts)} textos")
-    for v in vectors:
-        if len(v) != settings.embedding_dim:
-            raise ValueError(
-                f"/embed ha tornat vectors de {len(v)} dimensions i la BD n'espera "
-                f"{settings.embedding_dim} (EMBEDDING_DIM)"
-            )
-    return vectors
-
+# ---------------------------------------------------------------- sincronització
 
 def sync_embeddings(client: httpx.Client | None = None) -> int:
     """Calcula l'embedding de tots els productes que no en tenen. Retorna quants n'ha omplert.
@@ -79,11 +148,12 @@ def sync_embeddings(client: httpx.Client | None = None) -> int:
     Cada lot es desa en una transacció pròpia: si falla a mig camí, el que ja s'ha fet queda
     fet. Si un producte canvia mentre la VM 2 calcula el seu vector, el vector (que és del
     text antic) no es desa i el producte es queda pendent per a la propera vegada."""
-    if not settings.embed_url:
-        log.info("EMBED_URL no configurada: no se sincronizan embeddings")
+    if not enabled():
+        log.info("RAG_EMBED_URL no configurada: no se sincronizan embeddings")
         return 0
     own_client = client is None
-    client = client or httpx.Client(timeout=settings.embed_timeout)
+    client = client or _new_client()
+    size = max(1, min(settings.embed_batch_size, MAX_BATCH))
     done, last_id = 0, 0
     try:
         while True:
@@ -92,12 +162,12 @@ def sync_embeddings(client: httpx.Client | None = None) -> int:
                     select(Product.id, Product.name, Product.category, Product.size, Product.size_format)
                     .where(Product.embedding.is_(None), Product.id > last_id)
                     .order_by(Product.id)
-                    .limit(settings.embed_batch_size)
+                    .limit(size)
                 ).all()
             if not rows:
                 break
             last_id = rows[-1].id
-            vectors = _embed(client, [embed_text(*r[1:]) for r in rows])
+            vectors = embed_texts([embed_text(*r[1:]) for r in rows], kind="passage", client=client)
 
             with SessionLocal() as session, session.begin():
                 for r, vector in zip(rows, vectors):
@@ -132,8 +202,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Calcula los embeddings de los productos que no tienen")
     parser.add_argument("--reset", action="store_true", help="recalcularlos todos (p. ej. si cambia el modelo)")
     args = parser.parse_args()
-    if not settings.embed_url:
-        parser.error("falta EMBED_URL (p. ej. EMBED_URL=http://ip-vm2:8001/embed)")
+    if not enabled():
+        parser.error("falta RAG_EMBED_URL (p. ej. RAG_EMBED_URL=http://10.4.41.108:8080)")
     if args.reset:
         log.info("embeddings borrados: %d", reset_embeddings())
-    log.info("listo: %d productos con embedding nuevo", sync_embeddings())
+    try:
+        log.info("listo: %d productos con embedding nuevo", sync_embeddings())
+    except EmbedError as exc:
+        raise SystemExit(f"error: {exc}")

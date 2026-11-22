@@ -25,7 +25,7 @@ flowchart LR
 | 2 | ¿Quién escribe en BD? | **Un servicio del equipo de API/BD: `api-writer`** (`api/app/writer.py`). Consume `scraper.*.clean` con un consumidor durable *pull* (`api-writer`, stream `SCRAPERS`). El consumer de ingesta no toca la BD. |
 | 3 | ¿Deduplicar? | **Sí, por upsert.** Producto único por `(cadena, id de la fuente)`; precio único por `(producto, tienda, día)`. Reprocesar un mensaje no duplica nada (los `clean` retenidos 7 días se pueden reproducir sin miedo). |
 | 4 | Subjects | **Se mantiene `scraper.<cadena>.raw` / `scraper.<cadena>.clean`.** El writer se suscribe con comodín y saca la cadena del subject, así que una cadena nueva no requiere cambios en la API. |
-| 5 | ¿Quién genera los embeddings? | **El equipo de IA, fuera del normalizador.** La columna `products.embedding` (pgvector) empieza a `NULL`; un proceso de IA calcula los que falten. La dimensión depende del modelo elegido (`EMBEDDING_DIM`, por defecto 384): **pendiente de confirmar con IA**. |
+| 5 | ¿Quién genera los embeddings? | **El equipo de IA, fuera del normalizador.** La columna `products.embedding` (pgvector) empieza a `NULL`; un proceso de IA calcula los que falten. **Confirmada: 384 dimensiones, modelo e5-small (`intfloat/multilingual-e5-small`), vectores con norma 1** (`EMBEDDING_DIM=384`). Los calcula el servicio `/embed` de `flujo-ia` (VM 2); ver *Integración con la IA*. |
 
 ### Lo que se pide a ingesta
 - Publicar `scraper.<cadena>.clean` con `ts` en UTC (ya se hace) y el `wh` real cuando haya multi-tienda.
@@ -162,59 +162,74 @@ combinando 15,28 € (el arroz en Ahorramás), ahorro 0,08 €.
 ## Integración con la IA (VM 1 ↔ VM 2)
 
 La API (VM 1) guarda los embeddings de los productos en `products.embedding`
-(pgvector, `EMBEDDING_DIM` = 384, `intfloat/multilingual-e5-small`). Los calcula el
-servicio de la IA (VM 2); la API nunca carga el modelo.
+(`vector(384)`). Los calcula el servicio `/embed` de `flujo-ia` (VM 2,
+`http://10.4.41.108:8080`) con el mismo modelo que el RAG: **e5-small
+(`intfloat/multilingual-e5-small`), 384 dimensiones, norma 1**. Con norma 1, `<=>` (coseno)
+y `<#>` (producto escalar) ordenan igual; la API usa `<=>`. La API nunca carga el modelo.
 
-### Búsqueda: VM 2 → VM 1
+### Servicio `/embed` (VM 2)
 
-El servidor MCP convierte la pregunta en un vector (con e5, prefijo `"query: "`) y llama a
-`POST /products/search-vector`:
+```
+POST {RAG_EMBED_URL}/embed        cabecera X-API-Key: {RAG_EMBED_API_KEY}
+{"texts": ["Aceite de oliva 0,4º Hacendado | categoria Aceite, especias y salsas | tamano 5 l"],
+ "kind": "passage"}
+→ 200 {"embeddings": [[384 floats], ...]}     (mismo orden que texts; [] si texts está vacía)
+```
+
+- `kind`: `"passage"` para los productos y `"query"` para lo que escribe el usuario. Los
+  prefijos de e5 (`passage: ` / `query: `) los pone el servicio.
+- Máximo 256 textos por petición y 2000 caracteres por texto: el cliente (`app/embeddings.py`)
+  parte en lotes y recorta los textos.
+- Errores: `400` cuerpo inválido · `401` falta la clave o es incorrecta · `413` lote o texto
+  demasiado grande · `503` el servicio no tiene la clave configurada (avisar al equipo de IA; no
+  se reintenta).
+- El texto de cada producto es el mismo que `Product.embed_text` de `flujo-ia`: nombre,
+  categoría y tamaño. El precio y la URL no se embeben.
+
+### Embeddings de los productos (VM 1 → VM 2)
+
+1. El upsert de la ingesta pone `embedding = NULL` en los productos nuevos y en los que
+   cambian de nombre, categoría o tamaño (un cambio de precio no lo toca).
+2. El writer, justo después de cada ingesta (cuando la cola de NATS queda vacía) y al
+   arrancar, envía esos productos a `/embed` con `kind: "passage"` y guarda los vectores. No se
+   hace dentro del upsert para que una VM 2 caída nunca bloquee la ingesta: si falla, siguen a
+   NULL y se reintenta a los 10 minutos (con un `503`, en la próxima ingesta).
+3. Carga inicial o manual: `python -m app.embeddings` (`--reset` para recalcularlos todos,
+   p. ej. si cambia el modelo).
+
+### Búsqueda semántica
+
+| Método y ruta | Quién la usa | Qué hace |
+|---|---|---|
+| `GET /products/semantic-search?q=&top_k=&chain=&unit=&max_price=&max_unit_price=` | App | La API pide el vector de `q` a `/embed` con `kind: "query"` y busca con `ORDER BY embedding <=> vector` |
+| `POST /products/search-vector` | Servidor MCP (VM 2) | Igual, pero recibe el vector ya calculado |
+
+Cuerpo de `search-vector` (solo `embedding` es obligatorio; exactamente 384 valores, si no 422):
 
 ```json
 {"embedding": [0.012, -0.45, ...], "top_k": 10,
  "chains": ["mercadona"], "unit": "l", "max_price": 10, "max_unit_price": 4}
 ```
 
-Solo `embedding` es obligatorio (exactamente `EMBEDDING_DIM` valores; si no, 422). Responde
-`{"items": [...]}`: productos con el mismo formato que `/products/search` más `similarity`
-(coseno, 1 = idéntico), del más al menos parecido. Los filtros de precio usan el último
-precio. Los productos sin embedding todavía no salen. Sin caché ni índice vectorial: con
-decenas de miles de productos la búsqueda exacta tarda milisegundos y siempre devuelve
-`top_k` aunque haya filtros.
+Las dos responden `{"items": [...]}`: productos con el mismo formato que `/products/search`
+más `similarity` (coseno, 1 = idéntico), del más al menos parecido. Los filtros de precio usan
+el último precio. Los productos sin embedding todavía no salen. Sin índice vectorial: con
+decenas de miles de productos la búsqueda exacta tarda milisegundos y siempre devuelve `top_k`
+aunque haya filtros. `semantic-search` responde `503` si falta `RAG_EMBED_URL` y `502` si
+`/embed` falla, y se cachea como `search`.
 
-### Sincronización: VM 1 → VM 2
-
-1. El upsert de la ingesta pone `embedding = NULL` en los productos nuevos y en los que
-   cambian de nombre, categoría o tamaño (un cambio de precio no lo toca).
-2. El writer, cuando la cola de NATS queda vacía (y al arrancar), envía esos productos a
-   `EMBED_URL` en lotes de `EMBED_BATCH_SIZE` y guarda los vectores. Si la VM 2 no responde,
-   no se pierde nada: siguen a NULL y se reintenta a los 10 minutos. La ingesta nunca espera
-   a la IA.
-3. Carga inicial o manual: `python -m app.embeddings` (`--reset` para recalcularlos todos,
-   p. ej. si cambia el modelo).
-
-Contrato del servicio `/embed` de la VM 2:
-
-```
-POST {EMBED_URL}          cabecera X-API-Key: {EMBED_API_KEY}
-{"texts": ["Aceite de oliva 0,4º Hacendado | categoria Aceite, especias y salsas | tamano 5 l", ...],
- "kind": "passage"}
-→ {"embeddings": [[384 floats], ...]}     (mismo orden que texts)
-```
-
-El texto es el mismo que `Product.embed_text` de `flujo-ia` (nombre, categoría y tamaño). El
-prefijo del modelo (`"passage: "` / `"query: "`) lo pone la VM 2 según `kind`.
+### Configuración
 
 | Variable | Por defecto | Para qué |
 |---|---|---|
-| `EMBED_URL` | vacía (no sincroniza) | `http://ip-vm2:8001/embed` |
-| `EMBED_API_KEY` | vacía | Clave compartida con la VM 2 |
-| `EMBED_BATCH_SIZE` | 64 | Textos por petición |
-| `EMBED_TIMEOUT` | 60 | Segundos por petición |
+| `RAG_EMBED_URL` | vacía (sin embeddings) | URL base del servicio, `http://10.4.41.108:8080` |
+| `RAG_EMBED_API_KEY` | vacía | Clave de `X-API-Key`. **Solo en el entorno**: `.env` fuera del repo o el Secret del clúster (`kubectl -n api patch secret api-secrets ...`). Nunca en el código, los logs ni un commit |
+| `EMBED_BATCH_SIZE` | 256 | Textos por petición (máximo 256) |
+| `EMBED_TIMEOUT` | 60 | Segundos por petición (el modelo va en CPU) |
 
 ## Caché (Redis)
 
-- Se cachean `search`, `products/{id}` y la lista optimizada (clave = hash del cuerpo) durante `CACHE_TTL` (300 s).
+- Se cachean `search`, `semantic-search`, `products/{id}` y la lista optimizada (clave = hash del cuerpo) durante `CACHE_TTL` (300 s).
 - Invalidación por **versión**: las claves van prefijadas con `catalog:version`; el writer la
   incrementa tras cada lote, así que los datos nuevos se ven al momento.
 - Si Redis cae, la API sigue respondiendo desde PostgreSQL.
