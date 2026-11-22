@@ -45,7 +45,8 @@ from .embeddings import Embedder
 from .guardrails import aplicar_guardrails, construir_respuesta, validar
 from .ingest import Product
 from .llm import NoLLM, build_llm
-from .pgstore import cargar_store
+from .apistore import ApiError
+from .pgstore import PgError, cargar_store
 from .pipelines import catalogo, equivalencia, qa
 from .retriever import Filters, Retriever
 
@@ -59,6 +60,13 @@ def _cors(resp: Response) -> Response:
     resp.headers["Access-Control-Allow-Headers"] = "Content-Type, X-API-Key"
     resp.headers["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
     return resp
+
+
+@app.errorhandler(ApiError)
+@app.errorhandler(PgError)
+def _bd_no_disponible(e):
+    """La BD real no responde: 503 claro, nunca datos de prueba."""
+    return jsonify({"error": f"la base de datos de productos no esta disponible: {e}"}), 503
 
 # Estado global del servicio: se carga una vez al arrancar.
 _ESTADO: dict = {"retriever": None, "llm": None, "error": None, "embed": None}
@@ -413,6 +421,7 @@ Prueba en vivo con las preguntas de demo y streaming: <a href="/probar" style="c
 <table>
 <tr><td>400</td><td>falta <code>query</code>/<code>question</code>; o <code>/ask/stream</code> sin LLM</td></tr>
 <tr><td>404</td><td><code>/equiv</code>: producto origen no encontrado</td></tr>
+<tr><td>503</td><td>la base de datos de productos no responde (en <code>/ask/stream</code> llega como evento <code>error</code>)</td></tr>
 </table>
 </body></html>"""
 

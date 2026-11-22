@@ -41,9 +41,11 @@ cualquier origen en el navegador. No hay que tocar nada en el proxy.
 
 Sirve para el arranque de la app: si `ok` es `false`, el indice no esta
 cargado; si `llm` es `null`, el asistente solo devolvera retrieval.
-`store` dice de donde leen los productos: `"local"` (indice numpy) o
-`"pg"` (PostgreSQL + pgvector); con `"pg"` el campo `store_error` explica
-un eventual vuelco al indice local.
+`store` dice de donde leen los productos: `"api"` (la BD real por su API,
+el valor por defecto), `"pg"` (PostgreSQL directo) o `"local"` (datos de
+prueba, solo tests). Si `store_error` no es `null`, la BD no respondio al
+arrancar: las consultas dan **503** hasta que vuelva (nunca datos de prueba).
+Con `"api"`, `n_productos` es 0: la API no expone un recuento.
 
 ### `POST /search` — busqueda de catalogo
 

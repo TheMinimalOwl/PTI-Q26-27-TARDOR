@@ -22,6 +22,7 @@ RAIZ = Path(__file__).resolve().parent.parent
 
 TOOLS_ESPERADAS = {
     "estado",
+    "precios_bd",
     "buscar",
     "preguntar",
     "equivalencia",

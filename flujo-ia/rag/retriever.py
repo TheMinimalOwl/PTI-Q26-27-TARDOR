@@ -96,6 +96,10 @@ class Retriever:
         exclude_ids: set[str] | None = None,
     ) -> list[Hit]:
         qv = self.embedder.encode_one(query, is_query=True)
+        if hasattr(self.store, "search_query"):  # ApiStore: necesita el texto
+            return self.store.search_query(
+                query, qv, k=k, exclude_ids=exclude_ids, filters=filters
+            )
         return self.store.search(
             qv,
             k=k,
@@ -117,6 +121,10 @@ class Retriever:
         frase escrita por una persona.
         """
         qv = self.embedder.encode_one(product.embed_text, is_query=True)
+        if hasattr(self.store, "search_query"):  # ApiStore: busca por el nombre
+            return self.store.search_query(
+                product.name, qv, k=k, exclude_ids=exclude_ids, filters=filters
+            )
         return self.store.search(
             qv,
             k=k,

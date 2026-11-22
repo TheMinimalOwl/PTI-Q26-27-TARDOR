@@ -18,8 +18,9 @@ Decisiones de diseno (ver docs/04-despliegue.md):
   entorno (`RAG_PG_TABLE`, `RAG_PG_COL_<CAMPO>`). Al usarlo se comprueba
   contra `information_schema` que existen: integrar la base del equipo es
   fijar variables, no reescribir codigo.
-- **Fallback**: si la base no responde, `cargar_store` vuelve al indice
-  local y el servicio sigue en pie (la demo nunca depende de la BD).
+- **Sin fallback a datos de prueba**: si la base no responde, el servicio
+  sigue en pie pero las consultas fallan con un error claro (503 en la
+  API); nunca se contesta con el indice local de prueba como si fuera real.
 - **score** = `1 - distancia_coseno`, la misma semantica que el indice
   local (producto escalar de vectores normalizados).
 """
@@ -394,19 +395,59 @@ class PgStore:
         return {"tabla": self.tabla, "columnas": sorted(cols.values()), "n": n, "dim": dim}
 
 
-def cargar_store(embedder) -> tuple[VectorStore | PgStore, str, str | None]:
+class StoreNoDisponible:
+    """Store que falla en cada consulta: la BD no estaba al arrancar.
+
+    Mantiene el servicio en pie (y `/health` explica el motivo) sin caer
+    nunca a los datos de prueba.
+    """
+
+    def __init__(self, motivo: str):
+        self.motivo = motivo
+        self.docs: list[dict] = []
+
+    def _fallar(self, *_a, **_k):
+        raise PgError(f"base de datos no disponible: {self.motivo}")
+
+    search = get = filter = _fallar
+
+    def __len__(self) -> int:
+        return 0
+
+
+def cargar_store(embedder):
     """Elige el backend segun `RAG_STORE` y nunca tumba el servicio.
 
-    Devuelve `(store, origen, error)`: `origen` es `"pg"` o `"local"`;
-    con `RAG_STORE=pg` si algo falla se vuelve al indice local y el
-    motivo queda en `error` (se publica en `/health`).
+    Devuelve `(store, origen, error)`. `origen` es `"api"`, `"pg"` o
+    `"local"`. Con `api` o `pg` no se vuelve nunca al indice local de
+    prueba: si la BD no responde al arrancar, `error` lleva el motivo (se
+    publica en `/health`) y las consultas fallan con un error claro.
+    `ApiStore` reintenta en cada consulta, asi que se recupera solo cuando
+    la API vuelve; con `pg` hay que reiniciar el servicio.
     """
-    if config.STORE_BACKEND != "pg":
+    backend = config.STORE_BACKEND
+    if backend == "local":
         return load_index(embedder), "local", None
-    try:
-        store = PgStore()
-        store.ping(dim_esperada=embedder.spec.dim)
-        return store, "pg", None
-    except Exception as e:  # noqa: BLE001 - cualquier fallo: plan B local
-        print(f"aviso: RAG_STORE=pg no disponible ({e}); se usa el indice local")
-        return load_index(embedder), "local", str(e)
+    if backend == "api":
+        from .apistore import ApiStore
+
+        try:
+            store = ApiStore(embedder)
+        except Exception as e:  # noqa: BLE001 - sin URL: no hay store posible
+            return StoreNoDisponible(str(e)), "api", str(e)
+        try:
+            store.ping()
+            return store, "api", None
+        except Exception as e:  # noqa: BLE001 - la API se reintenta en cada consulta
+            print(f"aviso: la API de la BD no responde al arrancar ({e}); se reintenta en cada consulta")
+            return store, "api", str(e)
+    if backend == "pg":
+        try:
+            store = PgStore()
+            store.ping(dim_esperada=embedder.spec.dim)
+            return store, "pg", None
+        except Exception as e:  # noqa: BLE001 - sin plan B con datos de prueba
+            print(f"aviso: RAG_STORE=pg no disponible ({e})")
+            return StoreNoDisponible(str(e)), "pg", str(e)
+    motivo = f"RAG_STORE={backend!r} no valido (api, pg o local)"
+    return StoreNoDisponible(motivo), backend, motivo

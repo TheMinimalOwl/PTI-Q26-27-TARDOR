@@ -23,6 +23,7 @@ from . import config
 from .embeddings import Embedder
 from .evaluate import ejecutar_evaluacion, formatear_informe
 from .indexer import build_index, index_dir_for, load_index
+from .pgstore import cargar_store
 from .ingest import Product
 from .llm import build_llm
 from .pipelines import catalogo, equivalencia, qa
@@ -39,9 +40,18 @@ def _ficheros_raw() -> list[Path]:
     return archivos
 
 
-def _retriever(args) -> Retriever:
+def _retriever(args, prueba: bool = False) -> Retriever:
+    """Retriever sobre la BD real (`RAG_STORE`, por defecto la API).
+
+    `prueba=True` usa el indice local de data/raw: solo para la evaluacion,
+    que necesita el gold de esos mismos datos de prueba.
+    """
     embedder = Embedder(args.embed)
-    store = load_index(embedder)
+    if prueba:
+        return Retriever(embedder, load_index(embedder))
+    store, origen, error = cargar_store(embedder)
+    if error:
+        raise SystemExit(f"la BD ({origen}) no esta disponible: {error}")
     return Retriever(embedder, store)
 
 
@@ -142,7 +152,7 @@ def cmd_ask(args) -> int:
 
 
 def cmd_eval(args) -> int:
-    retriever = _retriever(args)
+    retriever = _retriever(args, prueba=True)
     llm = _llm(args)
     print(f"Embeddings: {retriever.embedder.spec.hf_id}")
     print(f"LLM: {llm.describe() if llm else 'ninguno (solo retrieval)'}")

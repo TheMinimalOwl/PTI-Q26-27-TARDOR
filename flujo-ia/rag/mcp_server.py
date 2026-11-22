@@ -9,6 +9,7 @@ Tools:
 
     estado, buscar, preguntar, equivalencia   -> API HTTP del RAG (:8080)
     consulta_productos, productos_similares   -> PostgreSQL + pgvector
+    precios_bd                                -> API de la BD (VM 1) por el tunnel
 
 El server **no carga modelos**: las tools del RAG consumen la API que ya
 esta en marcha (cero RAM duplicada) y las de la BD van a psycopg directo.
@@ -218,6 +219,43 @@ def productos_similares(id_producto: str, k: int = 5) -> dict:
     except Exception as e:  # noqa: BLE001 - error de BD -> mensaje para el agente
         return {"error": f"base de datos no disponible: {e}"}
     return {"n": len(filas), "origen": id_producto, "productos": filas}
+
+
+# ---------------------------------------------------------------------------
+# Tools sobre la API de la BD (VM 1, por el Cloudflare tunnel)
+# ---------------------------------------------------------------------------
+
+
+@mcp.tool()
+def precios_bd(q: str, limite: int = 10, unit: str | None = None) -> dict:
+    """Busca productos y su ultimo precio en la BD real del equipo de API/BD.
+
+    Llama a `GET /products/search` de la API de la VM 1 a traves del
+    Cloudflare tunnel (RAG_BD_API_URL). Devuelve cada producto con su
+    cadena, categoria, unidad y `price` (total, unit_price, observed_on).
+    `unit` ('l', 'kg', 'ud') fuerza la unidad; si no, la API elige la mas
+    frecuente para la consulta. Usala para precios actuales.
+    """
+    if not config.BD_API_URL:
+        return {
+            "error": (
+                "API de la BD no configurada: define RAG_BD_API_URL "
+                "(la URL del tunel, infra/tunnel-up.sh --url)"
+            )
+        }
+    params = {"q": q, "limit": max(1, min(limite, 100))}
+    if unit:
+        params["unit"] = unit
+    try:
+        resp = requests.get(
+            config.BD_API_URL + "/products/search", params=params, timeout=_TIMEOUT_CORTO
+        )
+        datos = resp.json()
+    except (requests.RequestException, ValueError) as e:
+        return {"error": f"no responde la API de la BD en {config.BD_API_URL} ({e.__class__.__name__})"}
+    if resp.status_code >= 400:
+        return {"error": datos.get("detail") or f"HTTP {resp.status_code}"}
+    return datos
 
 
 def main() -> int:

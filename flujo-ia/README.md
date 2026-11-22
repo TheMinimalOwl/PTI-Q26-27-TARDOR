@@ -70,6 +70,8 @@ Todo se cambia por variable de entorno, sin tocar codigo:
 | `RAG_EMBED_API_KEY` | — | Clave de `POST /embed` (cabecera `X-API-Key`), compartida con API/BD. Sin ella `/embed` da 503 |
 | `RAG_TOP_K` | `5` | Productos recuperados por consulta |
 | `RAG_CACHE_DIR` | `./.cache` | Donde van el indice y los modelos |
+| `RAG_STORE` | `api` | De donde salen los productos: `api` (BD real por su API), `pg` (PostgreSQL directo) o `local` (datos de prueba de `data/raw`, solo para tests y `eval`) |
+| `RAG_BD_API_URL` | `https://api.superahorro.app` | API del equipo de API/BD (`RAG_STORE=api`) |
 
 ## El LLM es opcional
 

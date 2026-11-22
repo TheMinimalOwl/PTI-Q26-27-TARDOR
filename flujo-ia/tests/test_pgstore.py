@@ -302,21 +302,54 @@ class EmbedderFalso:
         return np.array([1.0, 0.0], dtype=np.float32)
 
 
-def test_cargar_store_por_defecto_es_local(monkeypatch):
+def test_cargar_store_local_solo_si_se_pide(monkeypatch):
     monkeypatch.setattr(config, "STORE_BACKEND", "local")
     monkeypatch.setattr(pgstore, "load_index", lambda emb: "INDICE")
     store, origen, error = cargar_store(EmbedderFalso())
     assert (store, origen, error) == ("INDICE", "local", None)
 
 
-def test_cargar_store_pg_con_fallback_si_falla(monkeypatch):
-    """RAG_STORE=pg sin base disponible: vuelve al indice local (plan B)."""
+def test_el_defecto_de_config_es_la_api_real(monkeypatch):
+    import importlib
+
+    monkeypatch.delenv("RAG_STORE", raising=False)
+    monkeypatch.delenv("RAG_BD_API_URL", raising=False)
+    cfg = importlib.reload(config)
+    try:
+        assert cfg.STORE_BACKEND == "api"
+        assert cfg.BD_API_URL == "https://api.superahorro.app"
+    finally:
+        importlib.reload(config)
+
+
+def test_cargar_store_pg_sin_base_no_usa_datos_de_prueba(monkeypatch):
+    """RAG_STORE=pg sin base: NO vuelve al indice local; las consultas fallan."""
     monkeypatch.setattr(config, "STORE_BACKEND", "pg")
     monkeypatch.setattr(config, "PG_DSN", "")  # sin conexion: ping falla
-    monkeypatch.setattr(pgstore, "load_index", lambda emb: "INDICE")
+    monkeypatch.setattr(pgstore, "load_index", lambda emb: pytest.fail("uso el indice de prueba"))
     store, origen, error = cargar_store(EmbedderFalso())
-    assert (store, origen) == ("INDICE", "local")
+    assert origen == "pg"
     assert error and "RAG_PG_DSN" in error
+    assert len(store) == 0
+    with pytest.raises(PgError):
+        store.search(np.array([1.0, 0.0]), k=3)
+
+
+def test_cargar_store_api_caida_no_usa_datos_de_prueba(monkeypatch):
+    """RAG_STORE=api con la API caida: sigue siendo ApiStore (reintenta)."""
+    from rag.apistore import ApiError, ApiStore
+
+    monkeypatch.setattr(config, "STORE_BACKEND", "api")
+    monkeypatch.setattr(config, "BD_API_URL", "https://bd.invalid")
+    monkeypatch.setattr(pgstore, "load_index", lambda emb: pytest.fail("uso el indice de prueba"))
+
+    def caida(self):
+        raise ApiError("GET /health: HTTP 530")
+
+    monkeypatch.setattr(ApiStore, "ping", caida)
+    store, origen, error = cargar_store(EmbedderFalso())
+    assert isinstance(store, ApiStore)
+    assert origen == "api" and "530" in error
 
 
 def test_cargar_store_pg_ok(monkeypatch):

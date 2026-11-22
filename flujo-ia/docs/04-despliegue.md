@@ -285,9 +285,24 @@ cd TARDOR-test/flujo-ia
 curl -s localhost:8080/health
 ```
 
-Si algo falla en cualquier punto, **el servicio no se cae**: `cargar_store`
-vuelve al indice local y `/health` lo publica como `"store": "local"` con
-el motivo en `store_error`. La demo funciona igual (plan B).
+Si algo falla en cualquier punto, **el servicio no se cae**, pero tampoco
+contesta con datos de prueba: `/health` publica el motivo en `store_error`
+y las consultas dan **503** (en `/ask/stream`, un evento `error`).
+
+### Por defecto: la BD real por su API (`RAG_STORE=api`)
+
+Desde el 22/11 el servicio lee los productos de la API del equipo de API/BD
+(`https://api.superahorro.app`, tunel de Cloudflare con nombre hacia la VM 1),
+sin acceso directo a PostgreSQL:
+
+- Recupera con `POST /products/search-vector` (pgvector, mismo modelo e5-small).
+  Si la API no lo tuviera (404/405), busca por palabras con
+  `GET /products/search` y re-ordena con los embeddings locales.
+- Si la API no responde al arrancar, el servicio arranca igual y lo reintenta
+  en cada consulta: se recupera solo cuando la API vuelve.
+- **No hay vuelta al indice local**: los datos de `data/raw/` son de prueba y
+  solo se usan con `RAG_STORE=local` (tests y `rag.cli eval`, que necesita el
+  gold de esos mismos datos).
 
 Notas de integracion:
 

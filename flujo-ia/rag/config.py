@@ -158,11 +158,14 @@ MAX_CONTEXT_ITEMS = int(os.environ.get("RAG_MAX_CONTEXT_ITEMS", "6"))
 # Almacen: indice local (numpy) o PostgreSQL + pgvector
 # ---------------------------------------------------------------------------
 # El backend se elige con RAG_STORE:
-#   local (defecto) - el indice numpy de siempre (demo, plan B)
-#   pg              - PostgreSQL + pgvector (los datos del equipo)
-# Con `pg`, si la base no responde el servicio cae al indice local: la demo
-# nunca se cae por un problema de base de datos (ver pgstore.cargar_store).
-STORE_BACKEND = os.environ.get("RAG_STORE", "local")
+#   api (defecto) - la BD real del equipo por su API (RAG_BD_API_URL)
+#   pg            - PostgreSQL + pgvector directo (RAG_PG_DSN)
+#   local         - el indice numpy de data/raw (datos de PRUEBA): solo para
+#                   tests y la evaluacion (`rag.cli eval`), nunca para servir
+# Con `api` o `pg` NO hay vuelta al indice local: si la BD no responde, las
+# peticiones dan 503 en vez de contestar con datos de prueba como si fueran
+# reales (ver pgstore.cargar_store).
+STORE_BACKEND = os.environ.get("RAG_STORE", "api")
 
 # Conexion a PostgreSQL. En la VM el servicio y la BD corren en la misma
 # maquina, asi que basta con 127.0.0.1:5432.
@@ -191,3 +194,7 @@ PG_COLUMNAS: dict[str, str] = {
 
 # URL de la API del RAG que consume el server MCP (y cualquier cliente HTTP).
 API_URL = os.environ.get("RAG_API_URL", "http://127.0.0.1:8080")
+
+# URL de la API del equipo de API/BD (VM 1), publicada con un tunel de
+# Cloudflare con nombre en el dominio del equipo.
+BD_API_URL = os.environ.get("RAG_BD_API_URL", "https://api.superahorro.app").rstrip("/")
