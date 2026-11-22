@@ -20,7 +20,7 @@ from nats.errors import TimeoutError as NatsTimeout
 from .cache import cache
 from .config import settings
 from .db import SessionLocal, init_db
-from .embeddings import sync_embeddings
+from .embeddings import EmbedUnavailable, sync_embeddings
 from .ingest import parse_message, upsert_batch
 
 log = logging.getLogger("writer")
@@ -41,6 +41,10 @@ async def _sync() -> float | None:
     """Sincronitza els embeddings. Retorna quan s'ha de tornar a provar (None = no cal)."""
     try:
         n = await asyncio.to_thread(sync_embeddings)
+    except EmbedUnavailable as exc:
+        # 503: reintentar no ho arreglarà. Es torna a provar a la propera ingesta.
+        log.error("embeddings: %s", exc)
+        return None
     except Exception as exc:
         log.warning("embeddings: la IA no responde (%s), se reintentará en %d s", exc, SYNC_RETRY)
         return time.monotonic() + SYNC_RETRY

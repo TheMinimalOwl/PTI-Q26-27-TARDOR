@@ -7,13 +7,14 @@ from contextlib import asynccontextmanager
 import hashlib
 import json
 from datetime import date
+from decimal import Decimal
 
 from fastapi import Body, Depends, FastAPI, HTTPException, Query, Response
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from . import repository, shopping
+from . import embeddings, repository, shopping
 from .cache import Cache, get_cache
 from .config import settings
 from .db import get_session, init_db
@@ -97,6 +98,51 @@ def search_products_by_vector(body: VectorSearchIn, session: Session = Depends(g
         body.max_price, body.max_unit_price,
     )
     return VectorSearchResult(items=items)
+
+
+@app.get(
+    "/products/semantic-search",
+    response_model=VectorSearchResult,
+    responses={
+        502: {"description": "El servicio de embeddings de la IA ha fallado"},
+        503: {"description": "Búsqueda semántica no configurada (falta RAG_EMBED_URL)"},
+    },
+    tags=["catálogo"],
+    summary="Búsqueda semántica por texto",
+)
+def semantic_search(
+    response: Response,
+    q: str = Query(min_length=2, max_length=200, description="Lo que busca el usuario, p. ej. 'algo para desayunar'"),
+    top_k: int = Query(10, ge=1, le=50, description="Cuántos productos devolver"),
+    chain: str | None = Query(None, description="Filtra por cadena (slug)"),
+    unit: str | None = Query(None, description="Solo productos con esta unidad: kg, l, ud, m o lavado"),
+    max_price: Decimal | None = Query(None, gt=0, description="Precio máximo del envase (€)"),
+    max_unit_price: Decimal | None = Query(None, gt=0, description="Precio unitario máximo (€/kg, €/l…)"),
+    session: Session = Depends(get_session),
+    cache: Cache = Depends(get_cache),
+):
+    """Como `/products/search-vector`, pero con texto: la API pide el vector de `q` al servicio
+    de IA (`/embed`, `kind: "query"`) y devuelve los productos más parecidos con su último precio.
+    Encuentra productos aunque no compartan palabras con la consulta."""
+    if not embeddings.enabled():
+        raise HTTPException(status_code=503, detail="Búsqueda semántica no configurada (RAG_EMBED_URL)")
+    q = " ".join(q.split())
+    key = f"semantic:{q.lower()}:{top_k}:{chain or ''}:{unit or ''}:{max_price or ''}:{max_unit_price or ''}"
+    if (cached := cache.get(key)) is not None:
+        response.headers["X-Cache"] = "HIT"
+        return cached
+
+    try:
+        vector = embeddings.embed_query(q)
+    except embeddings.EmbedError as exc:
+        raise HTTPException(status_code=502, detail=str(exc)) from exc
+    items = repository.search_by_vector(
+        session, vector, top_k, [chain] if chain else None, unit, max_price, max_unit_price,
+    )
+    result = VectorSearchResult(items=items)
+    cache.set(key, result.model_dump(mode="json"))
+    response.headers["X-Cache"] = "MISS"
+    return result
 
 
 @app.get(

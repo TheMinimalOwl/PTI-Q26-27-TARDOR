@@ -17,12 +17,15 @@ class Settings(BaseSettings):
     # 384 (multilingual-e5-small, MiniLM) o 1536 (OpenAI text-embedding-3-small).
     embedding_dim: int = 384
 
-    # Servei d'embeddings de l'equip d'IA (VM 2), p. ex. http://ip-vm2:8001/embed.
-    # Buit = no se sincronitza (els productes es queden amb embedding NULL).
-    embed_url: str = ""
-    embed_api_key: str = ""     # s'envia a la capçalera X-API-Key
-    embed_batch_size: int = 64  # textos per petició
-    embed_timeout: float = 60   # segons per petició (el model va en CPU)
+    # Servei d'embeddings de l'equip d'IA (flujo-ia, VM 2): URL base, p. ex.
+    # http://10.4.41.108:8080 (s'hi afegeix /embed). Buit = sense embeddings: els productes
+    # es queden a NULL i la cerca semàntica per text respon 503.
+    rag_embed_url: str = ""
+    # Clau de la capçalera X-API-Key. Només per entorn (.env fora del repo o Secret de k8s):
+    # mai al codi, als logs ni en un commit.
+    rag_embed_api_key: str = ""
+    embed_batch_size: int = 256  # textos per petició (el servei n'accepta 256 com a màxim)
+    embed_timeout: float = 60    # segons per petició (el model va en CPU)
 
     # Crea les extensions i les taules en arrencar si no existeixen.
     auto_create_schema: bool = True
