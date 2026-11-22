@@ -116,7 +116,7 @@ def embedding_spec(model: str | None = None) -> EmbeddingSpec:
 # LLM
 # ---------------------------------------------------------------------------
 
-LLM_PROVIDERS = ("ollama", "gemini", "none")
+LLM_PROVIDERS = ("ollama", "gemini", "cerebras", "none")
 DEFAULT_LLM = os.environ.get("RAG_LLM", "ollama")
 
 OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
@@ -130,6 +130,20 @@ GEMINI_API_BASE = os.environ.get(
     "RAG_GEMINI_API_BASE", "https://generativelanguage.googleapis.com/v1beta"
 )
 GEMINI_TIMEOUT = float(os.environ.get("RAG_GEMINI_TIMEOUT", "60"))
+
+# Cerebras Inference (cloud.cerebras.ai): API compatible con OpenAI. Modelos
+# disponibles con la clave del equipo (22/11): gpt-oss-120b y qwen-3.8-27b.
+CEREBRAS_MODEL = os.environ.get("RAG_CEREBRAS_MODEL", "gpt-oss-120b")
+CEREBRAS_API_BASE = os.environ.get("RAG_CEREBRAS_API_BASE", "https://api.cerebras.ai/v1")
+CEREBRAS_TIMEOUT = float(os.environ.get("RAG_CEREBRAS_TIMEOUT", "60"))
+# Esfuerzo de razonamiento (low | medium | high). Ambos modelos razonan antes
+# de responder; en low la respuesta tarda menos y gasta menos tokens.
+CEREBRAS_REASONING = os.environ.get("RAG_CEREBRAS_REASONING", "low")
+
+
+def cerebras_api_key() -> str | None:
+    """Clave de Cerebras (`CEREBRAS_API_KEY`). Va en un .env fuera del repo."""
+    return os.environ.get("CEREBRAS_API_KEY")
 
 
 def gemini_api_key() -> str | None:

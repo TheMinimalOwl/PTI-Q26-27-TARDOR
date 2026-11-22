@@ -1,4 +1,4 @@
-"""Clientes de LLM: hibrido local (Ollama) / API (Gemini) / sin LLM.
+"""Clientes de LLM: hibrido local (Ollama) / API (Gemini, Cerebras) / sin LLM.
 
 Por que hibrido y no solo uno:
 - **Ollama (local)** es el modo por defecto porque no necesita claves, no cuesta
@@ -6,6 +6,9 @@ Por que hibrido y no solo uno:
   prompt tiene que ser cerrado y la respuesta corta.
 - **Gemini (API)** da mas calidad con la cuenta de la universidad (mas cuota
   que el tier gratuito) y es la opcion a comparar en la evaluacion.
+- **Cerebras (API)** sirve modelos grandes (gpt-oss-120b, qwen-3.8-27b) en
+  hardware propio: respuestas en menos de un segundo, frente al minuto que
+  tarda qwen3:8b en la CPU de la VM.
 - **none** deja el pipeline en modo solo-recuperacion. Sirve para medir la
   calidad del retrieval (que es lo que decide el modelo de embeddings) sin
   depender de ninguna API.
@@ -276,6 +279,97 @@ class GeminiLLM(BaseLLM):
             raise LLMError(f"Gemini no responde: {e}") from e
 
 
+class CerebrasLLM(BaseLLM):
+    """LLM remoto con Cerebras Inference (API compatible con OpenAI).
+
+    La clave se lee de `CEREBRAS_API_KEY`. Los modelos razonan en un campo
+    aparte (`reasoning`), asi que `content` llega ya limpio con el formato
+    `RESPUESTA: ... / FUENTES: ...` que pide el prompt.
+    """
+
+    provider = "cerebras"
+
+    def __init__(self, model: str | None = None, api_key: str | None = None, timeout: float | None = None):
+        self.model = model or config.CEREBRAS_MODEL
+        self.api_key = api_key or config.cerebras_api_key()
+        self.timeout = timeout or config.CEREBRAS_TIMEOUT
+        if not self.api_key:
+            raise LLMError(
+                "Falta CEREBRAS_API_KEY. La clave se saca de https://cloud.cerebras.ai"
+            )
+
+    def _body(self, system: str, user: str, stream: bool) -> dict:
+        body: dict = {
+            "model": self.model,
+            "messages": [
+                {"role": "system", "content": system},
+                {"role": "user", "content": user},
+            ],
+            "temperature": config.TEMPERATURE,
+            # Holgado: los tokens de razonamiento cuentan dentro del limite.
+            "max_completion_tokens": 2048,
+            "stream": stream,
+        }
+        if config.CEREBRAS_REASONING:
+            body["reasoning_effort"] = config.CEREBRAS_REASONING
+        return body
+
+    def _post(self, body: dict, stream: bool = False) -> requests.Response:
+        headers = {"Authorization": f"Bearer {self.api_key}", "Content-Type": "application/json"}
+        url = f"{config.CEREBRAS_API_BASE}/chat/completions"
+        try:
+            resp = requests.post(url, json=body, headers=headers, timeout=self.timeout, stream=stream)
+            # Un modelo que no acepte `reasoning_effort` da 400: se reintenta sin el.
+            if resp.status_code == 400 and "reasoning_effort" in body and "reasoning" in resp.text:
+                body = {k: v for k, v in body.items() if k != "reasoning_effort"}
+                resp = requests.post(url, json=body, headers=headers, timeout=self.timeout, stream=stream)
+        except requests.RequestException as e:
+            raise LLMError(f"Cerebras no responde: {e}") from e
+        if resp.status_code != 200:
+            raise LLMError(f"Cerebras {resp.status_code}: {resp.text[:300]}")
+        return resp
+
+    def chat(self, system: str, user: str) -> LLMResponse:
+        data = self._post(self._body(system, user, stream=False)).json()
+        choice = (data.get("choices") or [{}])[0]
+        text = ((choice.get("message") or {}).get("content") or "").strip()
+        usage = data.get("usage") or {}
+        return LLMResponse(
+            text=text,
+            provider=self.provider,
+            model=self.model,
+            latency_s=float((data.get("time_info") or {}).get("total_time") or 0.0),
+            tokens=usage.get("total_tokens"),
+            raw={"finish_reason": choice.get("finish_reason")},
+        )
+
+    def chat_stream(self, system: str, user: str):
+        """Genera la respuesta token a token (SSE estilo OpenAI)."""
+        resp = self._post(self._body(system, user, stream=True), stream=True)
+        empezado = False
+        try:
+            with resp:
+                for linea in resp.iter_lines(decode_unicode=True):
+                    if not linea or not linea.startswith("data:"):
+                        continue
+                    carga = linea[5:].strip()
+                    if not carga or carga == "[DONE]":
+                        continue
+                    try:
+                        dato = json.loads(carga)
+                    except json.JSONDecodeError:
+                        continue
+                    for choice in dato.get("choices", []):
+                        texto = (choice.get("delta") or {}).get("content") or ""
+                        if not empezado:
+                            texto = texto.lstrip()
+                        if texto:
+                            empezado = True
+                            yield texto
+        except requests.RequestException as e:
+            raise LLMError(f"Cerebras no responde: {e}") from e
+
+
 def _thinking_budget() -> int | None:
     """Presupuesto de razonamiento: `RAG_GEMINI_THINKING` (0 = sin razonar)."""
     import os
@@ -290,7 +384,7 @@ def _thinking_budget() -> int | None:
 
 
 def build_llm(provider: str | None = None, model: str | None = None) -> BaseLLM:
-    """Construye el cliente segun el proveedor (`ollama` | `gemini` | `none`)."""
+    """Construye el cliente segun el proveedor (`ollama` | `gemini` | `cerebras` | `none`)."""
     provider = (provider or config.DEFAULT_LLM).lower()
     if provider in ("none", "off", "sin-llm"):
         return NoLLM()
@@ -298,6 +392,8 @@ def build_llm(provider: str | None = None, model: str | None = None) -> BaseLLM:
         return OllamaLLM(model=model)
     if provider == "gemini":
         return GeminiLLM(model=model)
+    if provider == "cerebras":
+        return CerebrasLLM(model=model)
     raise LLMError(f"Proveedor de LLM desconocido: {provider!r} (usa {config.LLM_PROVIDERS})")
 
 

@@ -61,12 +61,15 @@ Todo se cambia por variable de entorno, sin tocar codigo:
 | Variable | Por defecto | Para que sirve |
 |---|---|---|
 | `RAG_EMBED_MODEL` | `e5-small` | Modelo de embeddings (`e5-small`, `bge-m3`, `qwen3-embed-0.6b` o un id de HF) |
-| `RAG_LLM` | `ollama` | Backend de LLM: `ollama`, `gemini` o `none` |
+| `RAG_LLM` | `ollama` | Backend de LLM: `ollama`, `gemini`, `cerebras` o `none` |
 | `RAG_OLLAMA_MODEL` | `qwen3:4b` | Modelo local de Ollama |
 | `RAG_OLLAMA_THINK` | `false` | Si el modelo razona antes de responder. En CPU la diferencia es de **15 s a 0,7 s** por respuesta |
 | `RAG_OLLAMA_HOST` | `http://localhost:11434` | Endpoint de Ollama |
 | `RAG_GEMINI_MODEL` | `gemini-2.5-flash` | Modelo de la API de Gemini |
 | `GEMINI_API_KEY` | — | Clave de AI Studio (la cuenta de la uni da mas cuota) |
+| `CEREBRAS_API_KEY` | — | Clave de cloud.cerebras.ai (`RAG_LLM=cerebras`). En `~/.config/flujo-ia.env`, nunca en el repo |
+| `RAG_CEREBRAS_MODEL` | `gpt-oss-120b` | Modelo de Cerebras: `gpt-oss-120b` o `qwen-3.8-27b` |
+| `RAG_CEREBRAS_REASONING` | `low` | Esfuerzo de razonamiento de Cerebras (`low`, `medium`, `high`) |
 | `RAG_EMBED_API_KEY` | — | Clave de `POST /embed` (cabecera `X-API-Key`), compartida con API/BD. Sin ella `/embed` da 503 |
 | `RAG_TOP_K` | `5` | Productos recuperados por consulta |
 | `RAG_CACHE_DIR` | `./.cache` | Donde van el indice y los modelos |
