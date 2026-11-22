@@ -130,7 +130,7 @@ construye el índice; el LLM es opcional y se puede trabajar en modo *solo recup
 # Ingesta (+ API y BD con API=1): monta y verifica el clúster completo
 API=1 bash flujo-entrada/infra/up.sh    # todo con Terraform en un perfil de minikube propio
 bash flujo-entrada/infra/autostart.sh   # que vuelva solo si la VM se reinicia
-bash flujo-entrada/infra/tunnel-up.sh   # API pública (desarrollo) por Cloudflare quick tunnel; --url da la URL
+bash flujo-entrada/infra/tunnel-up.sh   # API pública en https://api.superahorro.app (Cloudflare Tunnel)
 
 # RAG: entorno + dataset + índice
 cd flujo-ia && bash setup.sh
