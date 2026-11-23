@@ -1,0 +1,5 @@
+/* Solo web: fuentes de respaldo mientras cargan las de assets/fonts. */
+:root {
+  --font-serif: 'SourceSerif4-Medium', 'Source Serif 4', Georgia, serif;
+  --font-sans: 'SourceSans3-Regular', 'Source Sans 3', ui-sans-serif, system-ui, sans-serif;
+}
